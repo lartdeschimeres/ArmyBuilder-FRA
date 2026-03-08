@@ -220,7 +220,7 @@
         {
           "group": "Remplacement d’arme",
           "type": "weapon",
-          "description": "Remplacez l'Epée et le sceptre par :"
+          "description": "Remplacez l'Epée et le sceptre par :",
           "options": [
             {"name": "Arme à une main lourde", "cost": 0, "weapon": {"name": "Arme à une main lourde", "attacks": 4, "armor_piercing": 1, "special_rules": []}},
             {"name": "Grand sceptre", "cost": 10, "weapon": {"name": "Grand sceptre", "attacks": 4, "armor_piercing": 1, "special_rules": ["Fléau"]}},
