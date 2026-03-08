@@ -256,7 +256,8 @@
               "mount": {
                 "name": "Ailes",
                 "special_rules": ["Embuscade", "Volant"]
-              }              
+              }
+            }
           ]
         },
         {
