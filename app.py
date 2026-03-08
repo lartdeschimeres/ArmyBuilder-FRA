@@ -821,7 +821,7 @@ body {{
         special_rules = get_special_rules(unit)
 
         # Récupération des options et montures
-        options = unit.get("options", {})
+        options = unit.get("options", {}) if "options" in unit else {}
         mount = unit.get("mount", None)
 
         html += f'''
@@ -937,13 +937,13 @@ body {{
     </div>
 '''
 
-        # Section des améliorations sélectionnées (avec vérifications)
-        if "options" in unit and isinstance(unit["options"], dict):
+       # Section des améliorations sélectionnées (CORRIGÉE)
+        if options and isinstance(options, dict) and options:
             html += '''
   <div class="upgrades-section">
     <div class="rules-title">Améliorations sélectionnées:</div>
 '''
-            for group_name, opts in unit["options"].items():
+            for group_name, opts in options.items():
                 if isinstance(opts, list) and opts:
                     for opt in opts:
                         if isinstance(opt, dict):
