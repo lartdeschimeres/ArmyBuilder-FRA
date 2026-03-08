@@ -125,7 +125,7 @@
                     "name": "Griffes perforantes",
                     "range": "Mêlée",
                     "attacks": 1,
-                    "armor-piercing": 0,
+                    "armor_piercing": 0,
                     "special_rules": ["Perforant"]
                   }
                 ],
@@ -143,7 +143,7 @@
                     "name": "Griffes lourdes",
                     "range": "Mêlée",
                     "attacks": 2,
-                    "armor-piercing": 1
+                    "armor_piercing": 1
                   }
                 ],
                 "special_rules": ["Attaque de souffle", "Effrayant (1)", "Volant"]
@@ -160,7 +160,7 @@
                     "name": "Griffes lourdes",
                     "range": "Mêlée",
                     "attacks": 6,
-                    "armor-piercing": 1
+                    "armor_piercing": 1
                   },
                   {
                     "name": "Piétinement",
@@ -240,7 +240,7 @@
         },
         {
           "group": "Montures",
-          "type": "Mount",
+          "type": "mount",
           "options": [
             {
               "name": "Drake-Lion", 
@@ -321,7 +321,7 @@
         {
           "group": "Améliorations d’unité",
           "type": "upgrades",
-          "description": "Améliorer le héros avec :"
+          "description": "Améliorer le héros avec :",
           "options": [
             {"name": "Fanal de foudre", "cost": 35, "special_rules": ["Perforation de la cible (1)"]},
             {"name": "Compagnon Limier", "cost": 10, "special_rules": ["Chasse à l’Embuscade"]}
@@ -502,6 +502,7 @@
         {
           "group": "Amélioration d'un seul Javelot",
           "type": "weapon_upgrades",
+          "description": "Améliorer un seul Javelot par :",
           "options": [
             {"name": "Javelot des Tempêtes", "cost": 5, "weapon": {"name": "Javelot des Tempêtes", "range": 12, "attacks": 1, "armor_piercing": 2, "special_rules": ["Mortel (3)"]}}
           ]
