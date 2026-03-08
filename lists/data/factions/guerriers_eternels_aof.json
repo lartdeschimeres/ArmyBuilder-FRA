@@ -232,7 +232,7 @@
         {
           "group": "Ajout d’une arme de tir",
           "type": "weapon",
-          "description": "Améliorer le héros avec une arme à distance (un seul choix possible) :"
+          "description": "Améliorer le héros avec une arme à distance (un seul choix possible) :",
           "options": [
             {"name": "Arc de chevalier", "cost": 45, "weapon": {"name": "Arc de chevalier", "range": 24, "attacks": 4, "armor_piercing": 1, "special_rules": []}},
             {"name": "Grand arc", "cost": 50, "weapon": {"name": "Grand arc", "range": 30, "attacks": 1, "armor_piercing": 3, "special_rules": ["Mortel (3)"]}}
@@ -262,6 +262,7 @@
         {
           "group": "Améliorations d’unité",
           "type": "upgrades",
+          "description": "Améliorer le héros avec :",
           "options": [
             {"name": "Paladin", "cost": 5, "special_rules": ["Combattant imprévisible"]}
           ]
@@ -289,7 +290,7 @@
         {
           "group": "Améliorations de rôle",
           "type": "role",
-          "description": "Choisissez un rôle spécial pour ce héros (un seul choix possible)"
+          "description": "Choisissez un rôle spécial pour ce héros (un seul choix possible)",
           "options": [
             {"name": "Gardien des Reliques", "cost": 10, "special_rules": ["Aura de Boost de Gardien"]},
             {"name": "Artilleur", "cost": 15, "special_rules": ["Repositionnement de l'artillerie"]},
@@ -311,7 +312,7 @@
         {
           "group": "Améliorations d’arme à distance",
           "type": "weapon",
-          "description": "Améliorer le héros avec une arme à distance :"
+          "description": "Améliorer le héros avec une arme à distance :",
           "options": [
             {"name": "Arc d’élite", "cost": 20, "weapon": {"name": "Arc d’élite", "range": 24, "attacks": 3, "armor_piercing": 0, "special_rules": []}}
           ]
@@ -348,7 +349,7 @@
         {
           "group": "Remplacement d’arme",
           "type": "weapon",
-          "description": "Remplacer toutes les Hallebardes lourdes par :"
+          "description": "Remplacer toutes les Hallebardes lourdes par :",
           "options": [
             {"name": "Pique lourde", "cost": 5, "weapon": {"name": "Pique lourde", "attacks": 1, "armor_piercing": 1, "special_rules": ["Contre-charge"]}},
             {"name": "Grande arme lourde", "cost": 10, "weapon": {"name": "Grande arme lourde", "attacks": 1, "armor_piercing": 3, "special_rules": []}}
