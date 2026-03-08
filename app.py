@@ -799,6 +799,7 @@ body {{
 """
 
     for unit in sorted_army_list:
+        # Initialisation sécurisée de toutes les variables
         name = esc(unit.get("name", "Unité"))
         cost = unit.get("cost", 0)
         quality = esc(unit.get("quality", "-"))
@@ -812,16 +813,13 @@ body {{
         # Calcul de la valeur de Coriace
         tough_value = unit.get("coriace", 0)
 
-        # Récupération des armes
+        # Récupération sécurisée des données
         weapons = unit.get("weapon", [])
         if not isinstance(weapons, list):
             weapons = [weapons]
 
-        # Récupération des règles spéciales (sans celles des armes)
         special_rules = get_special_rules(unit)
-
-        # Récupération des options et montures
-        options = unit.get("options", {}) if "options" in unit else {}
+        unit_options = unit.get("options", {})  # Renommé pour éviter la confusion
         mount = unit.get("mount", None)
 
         html += f'''
@@ -855,7 +853,7 @@ body {{
   </div>
 '''
 
-        # Armes (y compris celles des rôles)
+        # Armes
         if weapons:
             html += '<div class="section-title">Armes:</div>'
             for weapon in weapons:
@@ -867,12 +865,12 @@ body {{
     </div>
 '''
 
-        # Rôles (pour les héros et titans)
-        if options:
-            for group_name, opts in options.items():
+        # Rôles
+        if unit_options:
+            for group_name, opts in unit_options.items():
                 if isinstance(opts, list) and opts:
                     for opt in opts:
-                        if "weapon" in opt:  # C'est un rôle avec des armes
+                        if isinstance(opt, dict) and "weapon" in opt:
                             role_name = opt.get("name", "Rôle")
                             role_weapons = opt.get("weapon", [])
                             role_special_rules = opt.get("special_rules", [])
@@ -938,16 +936,16 @@ body {{
 '''
 
        # Section des améliorations sélectionnées (CORRIGÉE)
-        if options and isinstance(options, dict) and options:
+        if unit_options and isinstance(unit_options, dict):
             html += '''
   <div class="upgrades-section">
     <div class="rules-title">Améliorations sélectionnées:</div>
 '''
-            for group_name, opts in options.items():
+            for group_name, opts in unit_options.items():
                 if isinstance(opts, list) and opts:
                     for opt in opts:
                         if isinstance(opt, dict):
-                            # Cas spécial pour les améliorations par figurine (weapon_count)
+                            # Cas spécial pour les améliorations par figurine
                             if "total_cost" in opt:
                                 html += f'''
     <div class="upgrade-item">
@@ -991,7 +989,7 @@ body {{
     </div>
 '''
 
-                            # Cas spécial pour les améliorations variables (variable_weapon_count)
+                            # Cas spécial pour les améliorations variables
                             elif "count" in opt and "cost_per_unit" in opt:
                                 html += f'''
     <div class="upgrade-item">
@@ -1026,8 +1024,8 @@ body {{
             html += '''
   </div>
 '''
-        
-        # Règles spéciales (hors armes et hors règles des rôles déjà affichées)
+
+        # Règles spéciales
         if special_rules:
             html += '''
   <div class="rules-section">
