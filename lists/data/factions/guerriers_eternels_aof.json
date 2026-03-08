@@ -879,7 +879,7 @@
               "special_rules": ["Fléau"],
               "max_count": {
                 "type": "size_based",
-                "value": 1  # 1 par figurine (max = taille de l'unité)
+                "value": 1
                },
                "min_count": 1
             }
