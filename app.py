@@ -478,6 +478,34 @@ def format_weapon_option(weapon):
 
     return f"{name} (A{attacks}/PA{ap}/{range_text})"
 
+def check_weapon_conditions(unit_key, requirements):
+    """Vérifie si les conditions pour une arme sont remplies"""
+    if not requirements:
+        return True
+
+    # Vérifier dans les sélections de l'unité
+    if unit_key in st.session_state.unit_selections:
+        unit_selections = st.session_state.unit_selections[unit_key]
+
+        # Vérifier les tags sélectionnés
+        if "selected_tags" in unit_selections:
+            for req in requirements:
+                if req not in unit_selections["selected_tags"]:
+                    return False
+
+        # Vérifier les armes sélectionnées
+        for group_key, selection in unit_selections.items():
+            if isinstance(selection, str) and selection != "Aucune amélioration":
+                # Vérifier si l'option sélectionnée a le tag requis
+                for opt_group in unit.get("upgrade_groups", []):
+                    if f"group_{unit.get('upgrade_groups', []).index(opt_group)}" == group_key:
+                        for opt in opt_group.get("options", []):
+                            if format_weapon_option(opt.get("weapon", {}), opt.get("cost", 0)) == selection:
+                                if "tags" in opt and any(req in opt["tags"] for req in requirements):
+                                    return True
+
+    return False
+
 # ======================================================
 # EXPORT HTML - VERSION CORRIGÉE
 # ======================================================
@@ -570,6 +598,22 @@ def export_html(army_list, army_name, army_limit):
 
     # Trier la liste pour afficher les héros en premier
     sorted_army_list = sorted(army_list, key=lambda x: 0 if x.get("type") == "hero" else 1)
+
+    # Conditional_weapon
+    elif "replaces" in opt and "requires" in opt:
+        html += f'''
+    <div class="upgrade-item">
+      <div class="upgrade-name">
+        {esc(opt.get("name", ""))}
+        <span style="color: var(--cost-color); font-weight: bold; margin-left: 10px;">
+          +{opt.get("cost", 0)} pts
+        </span>
+      </div>
+      <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">
+        Remplace: {", ".join(opt.get("replaces", []))}<br>
+        Requiert: {", ".join(opt.get("requires", []))}
+      </div>
+    '''
 
     html = f"""
 <!DOCTYPE html>
@@ -1971,9 +2015,17 @@ if st.session_state.page == "army":
                         if opt_label == choice:
                             weapon_cost += opt["cost"]
         
+                            # Ajouter les tags si présents
+                            selected_tags = opt.get("tags", [])
+                            if selected_tags:
+                                if "selected_tags" not in st.session_state.unit_selections[unit_key]:
+                                    st.session_state.unit_selections[unit_key]["selected_tags"] = []
+                                st.session_state.unit_selections[unit_key]["selected_tags"].extend(selected_tags)
+                            
                             # Si c'est une arme simple
                             if not isinstance(opt["weapon"], list):
                                 weapons = [opt["weapon"]]
+                            
                             # Si c'est une arme combinée
                             else:
                                 weapons = opt["weapon"]
