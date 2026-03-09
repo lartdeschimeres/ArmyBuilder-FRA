@@ -559,8 +559,28 @@
           "type": "weapon",
           "description": "Remplacer toutes les Armes à une main lourdes par :",
           "options": [
-            {"name": "Javelot", "cost": 5, "weapon": {"name": "Javelot", "range": 12, "attacks": 2, "armor_piercing": 1, "special_rules": []}},
-            {"name": "Paire d’arme à une main Lourdes", "cost": 45, "weapon": {"name": "Paire d’arme à une main Lourdes", "range": "Mêlée", "attacks": 4, "armor_piercing": 1, "special_rules": []}}
+            {
+              "name": "Javelot", 
+              "cost": 5, 
+              "weapon": {
+                "name": "Javelot", 
+                "range": 12, 
+                "attacks": 2, 
+                "armor_piercing": 1, 
+                "special_rules": []
+              },
+              "tags": ["has_javelot"]
+            },
+            {
+              "name": "Paire d’arme à une main Lourdes", 
+              "cost": 45, 
+              "weapon": {
+                "name": "Paire d’arme à une main Lourdes", 
+                "range": "Mêlée", "attacks": 4, 
+                "armor_piercing": 1, 
+                "special_rules": []
+              }
+            }
           ]
         },            
         {
@@ -574,10 +594,20 @@
         },
         {
           "group": "Amélioration d'un seul Javelot",
-          "type": "weapon_upgrades",
-          "description": "Améliorer un seul Javelot par :",
+          "type": "conditional_weapon",
+          "description": "Améliorer un seul Javelot par  (disponible seulement si Javelots équipés) :",
           "options": [
-            {"name": "Javelot des Tempêtes", "cost": 5, "weapon": {"name": "Javelot des Tempêtes", "range": 12, "attacks": 1, "armor_piercing": 2, "special_rules": ["Mortel (3)"]}}
+            {
+              "name": "Javelot des Tempêtes", 
+              "cost": 5, 
+              "weapon": {
+                "name": "Javelot des Tempêtes", 
+                "range": 12, 
+                "attacks": 1, 
+                "armor_piercing": 2, 
+                "special_rules": ["Mortel (3)"]
+              }
+            }
           ]
         },
         {
