@@ -562,7 +562,7 @@
             {
               "name": "Javelot", 
               "cost": 5,
-              "tags": ["has_javelot"]
+              "tags": ["has_javelot"],
               "weapon": {
                 "name": "Javelot", 
                 "range": 12, 
