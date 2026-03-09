@@ -1987,6 +1987,66 @@ if st.session_state.page == "army":
                                 ] + weapons
                             break
 
+        # NOUVEAU TYPE : REMPLACEMENT D'ARME CONDITIONNEL
+        elif group.get("type") == "conditional_weapon":
+            # Vérifier si les conditions sont remplies
+            conditions_met = True
+            if "options" in group:
+                for option in group["options"]:
+                    if "requires" in option:
+                        for requirement in option["requires"]:
+                            # Vérifier si l'unité a le tag requis
+                            if not any(
+                                selected_opt.get("tags", []).count(requirement) > 0
+                                for selected_group in st.session_state.unit_selections[unit_key].values()
+                                for selected_opt in (selected_group if isinstance(selected_group, list) else [])
+                            ):
+                                conditions_met = False
+                                break
+                        if not conditions_met:
+                            break
+    
+            if not conditions_met:
+                st.markdown(f"""
+                <div style='color: #999; font-size: 0.9em; margin-bottom: 15px;'>
+                    {group.get("description", "")} <em>(Non disponible - conditions non remplies)</em>
+                </div>
+                """, unsafe_allow_html=True)
+                continue
+    
+            # Si les conditions sont remplies, afficher normalement
+            choices = ["Aucune amélioration"]
+            opt_map = {}
+    
+            for o in group.get("options", []):
+                weapon = o.get("weapon", {})
+                if isinstance(weapon, dict):
+                    label = format_weapon_option(weapon, o.get("cost", 0))
+                    choices.append(label)
+                    opt_map[label] = o
+    
+            current = st.session_state.unit_selections[unit_key].get(g_key, choices[0])
+            choice = st.radio(
+                group.get("group", "Amélioration conditionnelle"),
+                choices,
+                index=choices.index(current) if current in choices else 0,
+                key=f"{unit_key}_{g_key}_conditional"
+            )
+    
+            st.session_state.unit_selections[unit_key][g_key] = choice
+    
+            if choice != choices[0]:
+                opt = opt_map[choice]
+                upgrades_cost += opt.get("cost", 0)
+    
+                # Ajouter l'arme d'amélioration
+                if "weapon" in opt:
+                    weapon_upgrades.append(opt["weapon"])
+                    if isinstance(opt["weapon"], dict):
+                        weapons.append(opt["weapon"])
+                    elif isinstance(opt["weapon"], list):
+                        weapons.extend(opt["weapon"])
+        
         # RÔLES - MODIFICATION MINIMALE POUR L'AFFICHAGE EN COLONNE DES TITANS
         elif group.get("type") == "role":
             choices = []
