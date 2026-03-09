@@ -969,14 +969,20 @@
           "description": "Remplacer n'importe quel Epée et sceptre par :",
           "options": [
             {
-              "name": "Grand sceptre", 
+              "name": "Grand sceptre",
               "cost_per_unit": 5,
-              "special_rules": ["A2, PA (1), Fléau"],
+              "weapon": {
+                "name": "Grand sceptre",
+                "range": "Mêlée",
+                "attacks": 2,
+                "armor_piercing": 1,
+                "special_rules": ["Fléau"]
+              },
               "max_count": {
                 "type": "size_based",
                 "value": 1
-               },
-               "min_count": 1
+              },
+              "min_count": 1
             }
           ]
         },
