@@ -49,7 +49,14 @@ def format_count_options(option, unit, current_count=0):
     choices = []
     for count in range(min_count, max_count + 1):
         total_cost = count * cost_per_unit
-        label = f"{count} × {option['name']} (+{total_cost} pts)"
+
+        # Utiliser format_weapon_option pour afficher le profil complet
+        weapon = option.get("weapon", {})
+        weapon_label = option.get("name", "Amélioration")
+        if weapon:
+            weapon_label = format_weapon_option(weapon)
+
+        label = f"{count} × {weapon_label} (+{total_cost} pts)"
         choices.append({
             "label": label,
             "count": count,
@@ -1544,13 +1551,20 @@ def format_weapon_option(weapon, cost=0):
     range_text = weapon.get('range', 'Mêlée')
     special_rules = weapon.get('special_rules', [])
 
+    # Gestion des cas où les valeurs ne sont pas des nombres
+    try:
+        attacks = int(attacks) if str(attacks).isdigit() else attacks
+        ap = int(ap) if str(ap).isdigit() else ap
+    except:
+        pass
+
     profile = f"{name} ({range_text}, A{attacks}"
     if ap not in ("-", 0, "0", None):
         profile += f"/PA{ap}"
     profile += ")"
 
     if special_rules:
-        profile += f" | {', '.join(special_rules)}"
+        profile += f" | {', '.join([str(r) for r in special_rules])}"
 
     if cost > 0:
         profile += f" (+{cost} pts)"
@@ -2016,13 +2030,14 @@ if st.session_state.page == "army":
                     for opt_label, opt in opt_map.items():
                         if opt_label == choice:
                             weapon_cost += opt["cost"]
-        
+            
                             # Ajouter les tags si présents
-                            selected_tags = opt.get("tags", [])
-                            if selected_tags:
+                            if "tags" in opt:
                                 if "selected_tags" not in st.session_state.unit_selections[unit_key]:
                                     st.session_state.unit_selections[unit_key]["selected_tags"] = []
-                                st.session_state.unit_selections[unit_key]["selected_tags"].extend(selected_tags)
+                                for tag in opt["tags"]:
+                                    if tag not in st.session_state.unit_selections[unit_key]["selected_tags"]:
+                                        st.session_state.unit_selections[unit_key]["selected_tags"].append(tag))
                             
                             # Si c'est une arme simple
                             if not isinstance(opt["weapon"], list):
@@ -2372,7 +2387,7 @@ if st.session_state.page == "army":
                     # Stocker l'information pour l'export
                     selected_options[group.get("group", "Remplacements")] = [selected_option]
 
-        # AMÉLIORATIONS VARIABLES (variable_weapon_count - nouveau)
+        # AMÉLIORATIONS VARIABLES (variable_weapon_count)
         elif group.get("type") == "variable_weapon_count":
             st.subheader(group.get("group", "Améliorations variables"))
         
@@ -2381,12 +2396,21 @@ if st.session_state.page == "army":
         
             # Pour chaque option d'amélioration
             for opt_idx, option in enumerate(group.get("options", [])):
-                # st.subheader(f"Option: {option['name']}", divider="gray50")  # À remplacer
                 st.markdown(f"""
                 <div style='margin-top: 15px; margin-bottom: 10px;'>
                   <h4 style='color: #3498db;'>{option['name']}</h4>
                 </div>
                 """, unsafe_allow_html=True)
+        
+                # Vérifier si l'option a des conditions
+                requires = option.get("requires", [])
+                if requires and not check_weapon_conditions(unit_key, requires):
+                    st.markdown(f"""
+                    <div style='color: #999; font-size: 0.9em; margin-bottom: 15px;'>
+                        {option['name']} <em>(Non disponible - nécessite {', '.join(requires)})</em>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    continue
         
                 # Calculer les options de compteur disponibles
                 choices, max_count = format_count_options(option, unit,
@@ -2406,7 +2430,7 @@ if st.session_state.page == "army":
         
                     # Sélecteur du nombre d'améliorations
                     selected = st.select_slider(
-                        f"Nombre de {option['name']} (max: {max_count})",
+                        f"Nombre (max: {max_count})",
                         options=labels,
                         value=labels[current_index],
                         key=f"{unit_key}_{g_key}_{opt_idx}"
@@ -2436,8 +2460,7 @@ if st.session_state.page == "army":
             # Mettre à jour les sélections
             st.session_state.unit_selections[unit_key][g_key] = current_selection
         
-            # Version modifiée : on n'affiche plus le rectangle de total
-            # ou on l'affiche de manière plus discrète
+            # Affichage discret du total
             if current_selection and sum(current_selection.values()) > 0:
                 total_items = sum(current_selection.values())
                 total_cost = sum(choices[i]["cost"] for i, c in enumerate(choices)
