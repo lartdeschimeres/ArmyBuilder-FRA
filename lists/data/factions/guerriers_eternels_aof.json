@@ -127,7 +127,7 @@
       "defense": 3,
       "coriace": 6,
       "special_rules": ["Gardien", "Héros", "Sans peur"],
-      "weapons": [
+      "weapon": [
         {
           "name": "Arme à une main lourde",
           "range": "Mêlée",
@@ -258,7 +258,7 @@
       "defense": 4,
       "coriace_bonus": 6,
       "special_rules": ["Furieux", "Gardien", "Héros", "Sans peur"],
-      "weapons": [
+      "weapon": [
         {
           "name": "Épée et sceptre",
           "range": "Mêlée",
@@ -344,7 +344,7 @@
       "defense": 4,
       "coriace_bonus": 3,
       "special_rules": ["Gardien", "Héros", "Sans peur"],
-      "weapons": [
+      "weapon": [
         {
           "name": "Arme à une main lourde",
           "range": "Mêlée",
@@ -404,7 +404,7 @@
       "quality": 4,
       "defense": 4,
       "special_rules": ["Gardien", "Sans peur"],
-      "weapons": [
+      "weapon": [
         {
           "name": "Hallebarde lourde",
           "range": "Mêlée",
@@ -446,7 +446,7 @@
       "defense": 4,
       "coriace": 3,
       "special_rules": ["Gardien", "Furieux", "Sans peur"],
-      "weapons": [
+      "weapon": [
         {
           "name": "Arme à une main lourde",
           "range": "Mêlée",
@@ -496,7 +496,7 @@
       "defense": 4,
       "coriace": 3,
       "special_rules": ["Gardien", "Combattant imprévisible", "Sans peur"],
-      "weapons": [
+      "weapon": [
         {
           "name": "Épée et sceptre",
           "range": "Mêlée",
@@ -544,7 +544,7 @@
       "defense": 4,
       "coriace": 3,
       "special_rules": ["Gardien", "Furieux", "Sans peur", "Volant"],
-      "weapons": [
+      "weapon": [
         {
           "name": "Arme à une main lourde",
           "range": "Mêlée",
@@ -600,7 +600,7 @@
       "defense": 3,
       "coriace": 3,
       "special_rules": ["Gardien", "Sans peur", "Tueur en mêlée"],
-      "weapons": [
+      "weapon": [
         {
           "name": "Hache-hallebarde",
           "range": "Mêlée",
@@ -620,7 +620,7 @@
       "defense": 3,
       "coriace_bonus": 3,
       "special_rules": ["Gardien", "Sans peur"],
-      "weapons": [
+      "weapon": [
         {
           "name": "Grande vouge",
           "range": "Mêlée",
@@ -660,7 +660,7 @@
       "defense": 2,
       "coriace": 3,
       "special_rules": ["Gardien", "Infiltration", "Lent", "Sans peur"],
-      "weapons": [
+      "weapon": [
         {
           "name": "Marteau-météore",
           "range": "Mêlée",
@@ -690,7 +690,7 @@
       "quality": 4,
       "defense": 4,
       "special_rules": ["Gardien", "Sans peur"],
-      "weapons": [
+      "weapon": [
         {
           "name": "Arc",
           "range": 24,
@@ -727,7 +727,7 @@
       "defense": 4,
       "coriace_bonus": 3,
       "special_rules": ["Gardien", "Sans peur"],
-      "weapons": [
+      "weapon": [
         {
           "name": "Arc",
           "range": 24,
@@ -775,7 +775,7 @@
       "defense": 4,
       "coriace": 3,
       "special_rules": ["Arpenteur", "Éclaireur", "Gardien", "Sans peur"],
-      "weapons": [
+      "weapon": [
         {
           "name": "Pistolet arbalète",
           "range": 12,
@@ -802,7 +802,7 @@
       "defense": 4,
       "coriace": 3,
       "special_rules": ["Gardien", "Sans peur"],
-      "weapons": [
+      "weapon": [
         {
           "name": "Arbalète Cyclone",
           "range": 18,
@@ -847,7 +847,7 @@
       "defense": 5,
       "coriace": 3,
       "special_rules": ["Embuscade", "Gardien", "Rapide", "Volant"],
-      "weapons": [
+      "weapon": [
         {
           "name": "Griffes perforantes",
           "range": "Mêlée",
@@ -867,7 +867,7 @@
       "defense": 5,
       "coriace": 3,
       "special_rules": ["Arpenteur", "Chasse à l’Embuscade", "Gardien", "Rapide"],
-      "weapons": [
+      "weapon": [
         {
           "name": "Morsures vicieuses",
           "range": "Mêlée",
@@ -897,7 +897,7 @@
       "defense": 4,
       "coriace": 3,
       "special_rules": ["Éclaireur", "Gardien", "Impact (2)", "Rapide", "Sans peur"],
-      "weapons": [
+      "weapon": [
         {
           "name": "Arc",
           "range": 24,
@@ -946,7 +946,7 @@
       "defense": 4,
       "coriace": 3,
       "special_rules": ["Arpenteur", "Combattant imprévisible", "Gardien", "Rapide", "Sans peur"],
-      "weapons": [
+      "weapon": [
         {
           "name": "Griffes lourdes",
           "range": "Mêlée",
@@ -1001,7 +1001,7 @@
       "defense": 3,
       "coriace": 6,
       "special_rules": ["Attaque de souffle", "Gardien", "Rapide", "Sans peur"],
-      "weapons": [
+      "weapon": [
         {
           "name": "Griffes perforantes",
           "range": "Mêlée",
@@ -1041,7 +1041,7 @@
       "defense": 3,
       "coriace": 6,
       "special_rules": ["Attaque de souffle", "Effrayant (1)", "Gardien", "Sans peur", "Volant"],
-      "weapons": [
+      "weapon": [
         {
           "name": "Griffes lourdes",
           "range": "Mêlée",
@@ -1087,7 +1087,7 @@
       "defense": 3,
       "coriace": 9,
       "special_rules": ["Gardien", "Impact (6)", "Rapide", "Sans peur"],
-      "weapons": [
+      "weapon": [
         {
           "name": "Griffes lourdes",
           "range": "Mêlée",
@@ -1124,7 +1124,7 @@
       "defense": 4,
       "coriace": 3,
       "special_rules": ["Artillerie", "Gardien", "Sans peur"],
-      "weapons": [
+      "weapon": [
         {
           "name": "Traits Célestes",
           "range": 30,
