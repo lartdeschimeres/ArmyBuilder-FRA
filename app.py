@@ -1492,7 +1492,20 @@ def format_weapon_option(weapon, cost=0):
     if not weapon or not isinstance(weapon, dict):
         return "Aucune arme"
 
-    profile = format_weapon_profile(weapon)
+    name = weapon.get('name', 'Arme')
+    attacks = weapon.get('attacks', '?')
+    ap = weapon.get('armor_piercing', '?')
+    range_text = weapon.get('range', 'Mêlée')
+    special_rules = weapon.get('special_rules', [])
+
+    profile = f"{name} ({range_text}, A{attacks}"
+    if ap not in ("-", 0, "0", None):
+        profile += f"/PA{ap}"
+    profile += ")"
+
+    if special_rules:
+        profile += f" | {', '.join(special_rules)}"
+
     if cost > 0:
         profile += f" (+{cost} pts)"
 
