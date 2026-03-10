@@ -1774,7 +1774,7 @@ if st.session_state.page == "army":
                     <div style='color: #999; font-size: 0.9em; margin-left: 20px;'>
                         • {opt.get('name', 'Option')} (nécessite : {requires})
                     </div>
-                    """, unsafe_allow_html=True))
+                    """, unsafe_allow_html=True)
 
         # RÔLES
         elif group.get("type") == "role":
