@@ -593,13 +593,14 @@
           ]
         },
         {
-          "group": "Amélioration d'un seul Javelot",
+          "group": "Amélioration d'arme",
           "type": "conditional_weapon",
           "description": "Améliorer un seul Javelot par  (disponible seulement si Javelots équipés) :",
           "options": [
             {
               "name": "Javelot des Tempêtes", 
-              "cost": 5, 
+              "cost": 5,
+              "requires": ["Javelot"],
               "weapon": {
                 "name": "Javelot des Tempêtes", 
                 "range": 12, 
