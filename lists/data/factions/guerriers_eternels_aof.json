@@ -995,9 +995,9 @@
       ],
       "upgrade_groups": [
         {
-          "group": "Remplacement d'Épée et sceptre",
+          "group": "Remplacement d'armes",
           "type": "variable_weapon_count",
-          "description": "Remplacer n'importe quel Epée et sceptre par :",
+          "description": "Remplacer les Épée et sceptre par des Grand sceptres",
           "options": [
             {
               "name": "Grand sceptre",
