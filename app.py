@@ -2098,20 +2098,20 @@ if st.session_state.page == "army":
                     </div>
                 """, unsafe_allow_html=True)
 
-    # Afficher les options non disponibles (avec explication)
-    if unavailable_options:
-        st.markdown("""
-        <div style='margin-top: 10px;'>
-            <strong>Options non disponibles (dépendances non satisfaites) :</strong>
-        </div>
-        """, unsafe_allow_html=True)
-        for opt in unavailable_options:
-            requires = ", ".join(opt.get("requires", []))
-            st.markdown(f"""
-            <div style='color: #999; font-size: 0.9em; margin-left: 20px;'>
-                • {opt['name']} (nécessite : {requires})
+        # Afficher les options non disponibles (avec explication)
+        if unavailable_options:
+            st.markdown("""
+            <div style='margin-top: 10px;'>
+                <strong>Options non disponibles (dépendances non satisfaites) :</strong>
             </div>
             """, unsafe_allow_html=True)
+            for opt in unavailable_options:
+                requires = ", ".join(opt.get("requires", []))
+                st.markdown(f"""
+                <div style='color: #999; font-size: 0.9em; margin-left: 20px;'>
+                    • {opt['name']} (nécessite : {requires})
+                </div>
+                """, unsafe_allow_html=True)
         
         # RÔLES - MODIFICATION MINIMALE POUR L'AFFICHAGE EN COLONNE DES TITANS
         elif group.get("type") == "role":
