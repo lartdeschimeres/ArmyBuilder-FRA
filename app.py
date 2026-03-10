@@ -2079,24 +2079,24 @@ if st.session_state.page == "army":
                 else:
                     unavailable_options.append(option)
     
-            # Afficher les options disponibles
-            if available_options:
-                # ... [votre code pour afficher les options disponibles] ...
-    
-            # Afficher les options non disponibles
-            if unavailable_options:
-                st.markdown("""
-                <div style='margin-top: 10px;'>
-                    <strong>Options non disponibles (dépendances non satisfaites) :</strong>
+        # Afficher les options disponibles
+        if available_options:
+            # ... [votre code pour afficher les options disponibles] ...
+
+        # Afficher les options non disponibles
+        if unavailable_options:
+            st.markdown("""
+            <div style='margin-top: 10px;'>
+                <strong>Options non disponibles (dépendances non satisfaites) :</strong>
+            </div>
+            """, unsafe_allow_html=True)
+            for opt in unavailable_options:
+                requires = ", ".join(opt.get("requires", []))
+                st.markdown(f"""
+                <div style='color: #999; font-size: 0.9em; margin-left: 20px;'>
+                    • {opt['name']} (nécessite : {requires})
                 </div>
-                """, unsafe_allow_html=True)
-                for opt in unavailable_options:
-                    requires = ", ".join(opt.get("requires", []))
-                    st.markdown(f"""
-                    <div style='color: #999; font-size: 0.9em; margin-left: 20px;'>
-                        • {opt['name']} (nécessite : {requires})
-                    </div>
-                """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
 
         # Afficher les options non disponibles (avec explication)
         if unavailable_options:
