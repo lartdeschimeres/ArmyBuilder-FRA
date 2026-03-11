@@ -913,19 +913,37 @@ body {{
         if weapons:
             html += '<div class="section-title">Armes:</div>'
             weapon_counts = {}
+
             for weapon in weapons:
                 if weapon and isinstance(weapon, dict):
-                    weapon_name = weapon.get('name', 'Arme')
-                    weapon_counts[weapon_name] = weapon_counts.get(weapon_name, 0) + 1
-        
-            for weapon_name, count in weapon_counts.items():
-                weapon = next(w for w in weapons if w.get('name') == weapon_name)
+            
+                    key = (
+                        weapon.get("name"),
+                        weapon.get("range"),
+                        weapon.get("attacks"),
+                        weapon.get("ap"),
+                        tuple(weapon.get("special_rules", []))
+                    )
+            
+                    if key not in weapon_counts:
+                        weapon_counts[key] = {
+                            "weapon": weapon,
+                            "count": 0
+                        }
+            
+                    weapon_counts[key]["count"] += 1
+            
+            
+            for data in weapon_counts.values():
+                weapon = data["weapon"]
+                count = data["count"]
+            
                 html += f'''
             <div class="weapon-item">
-              <div class="weapon-name">{count}x {esc(weapon_name)}</div>
+              <div class="weapon-name">{count}x {esc(weapon.get("name","Arme"))}</div>
               <div class="weapon-stats">{format_weapon(weapon)}</div>
             </div>
-        '''
+            '''
 
         # Rôles (pour les héros et titans uniquement)
         if options and unit.get("type") in ["hero", "titan"]:
