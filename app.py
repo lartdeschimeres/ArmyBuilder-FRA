@@ -414,48 +414,51 @@ def export_html(army_list, army_name, army_limit):
         """Formate un rôle pour l'affichage HTML"""
         if not role or not isinstance(role, dict):
             return ""
-
-        role_name = esc(role.get('name', 'Rôle'))
-        cost = role.get('cost', 0)
+    
+        role_name = esc(role.get('name', ''))
         special_rules = role.get('special_rules', [])
-
-        rules_text = ", ".join(special_rules) if special_rules else "-"
-
+    
         # Formatage des armes du rôle si elles existent
         weapons_html = ""
         if "weapon" in role:
             role_weapons = role.get("weapon", [])
             if isinstance(role_weapons, list):
-                weapons_html = "<div style='margin-top: 8px; margin-left: 15px;'>"
-                weapons_html += "<div style='font-weight: 600; margin-bottom: 4px; color: var(--text-main);'>Armes du rôle:</div>"
+                weapons_html = "<div style='margin-top: 8px;'>"
                 for weapon in role_weapons:
                     if isinstance(weapon, dict):
                         weapons_html += f"""
-                        <div style='margin-bottom: 4px; margin-left: 10px;'>
+                        <div style='margin-bottom: 4px;'>
                             {format_weapon_html(weapon)}
                         </div>
                         """
                 weapons_html += "</div>"
             elif isinstance(role_weapons, dict):
-                weapons_html = "<div style='margin-top: 8px; margin-left: 15px;'>"
-                weapons_html += "<div style='font-weight: 600; margin-bottom: 4px; color: var(--text-main);'>Arme du rôle:</div>"
+                weapons_html = "<div style='margin-top: 8px;'>"
                 weapons_html += f"""
-                <div style='margin-bottom: 4px; margin-left: 10px;'>
+                <div style='margin-bottom: 4px;'>
                     {format_weapon_html(role_weapons)}
                 </div>
                 """
                 weapons_html += "</div>"
-
+    
+        # Formatage des règles spéciales en rectangles gris
+        rules_html = ""
+        if special_rules:
+            rules_html = "<div style='margin-top: 8px;'>"
+            rules_html += "<div style='font-weight: 600; margin-bottom: 4px;'>Règles:</div>"
+            rules_html += "<div style='display: flex; flex-wrap: wrap; gap: 4px;'>"
+            for rule in special_rules:
+                rules_html += f"<span class='rule-tag'>{esc(rule)}</span>"
+            rules_html += "</div>"
+            rules_html += "</div>"
+    
         return f"""
         <div style='margin-top: 10px; margin-bottom: 10px; padding: 8px; background: rgba(240, 248, 255, 0.3); border-radius: 6px; border-left: 3px solid #3498db;'>
             <div style='font-weight: 600; color: #3498db; margin-bottom: 5px;'>
-                Rôle: {role_name}
+                {role_name}
             </div>
             {weapons_html}
-            <div style='margin-top: 8px;'>
-                <div style='font-weight: 600; margin-bottom: 4px; color: var(--text-main);'>Règles spéciales:</div>
-                <div style='font-size: 14px; color: var(--text-muted);'>{rules_text}</div>
-            </div>
+            {rules_html}
         </div>
         """
 
@@ -841,36 +844,20 @@ body {{
             html += """
             <div style='margin-top: 15px;'>
                 <div style='font-weight: 600; margin-bottom: 8px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 4px;'>
-                    Rôles et améliorations:
+                    Améliorations:
                 </div>
             """
-
+        
             # Affichage des rôles
             for group_name, opts in options.items():
                 if isinstance(opts, list) and opts:
                     for opt in opts:
                         if "weapon" in opt or "special_rules" in opt:
                             html += format_role_html(opt)
-
-            # Affichage des autres améliorations (non-rôles)
-            other_upgrades = []
-            for group_name, opts in options.items():
-                if isinstance(opts, list):
-                    for opt in opts:
-                        if "weapon" not in opt and "special_rules" in opt:
-                            other_upgrades.append({
-                                "name": opt.get("name", "Amélioration"),
-                                "rules": opt.get("special_rules", []),
-                                "cost": opt.get("cost", 0)
-                            })
-
-            if other_upgrades:
-                html += """
-                <div style='margin-top: 10px;'>
-                    <div style='font-weight: 600; margin-bottom: 5px; color: var(--text-main);'>
-                        Autres améliorations:
-                    </div>
-                """
+        
+            html += """
+            </div>
+            """
 
                 for upgrade in other_upgrades:
                     rules_text = ", ".join(upgrade["rules"]) if upgrade["rules"] else "Aucune"
