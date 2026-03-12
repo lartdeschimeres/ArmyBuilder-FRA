@@ -410,6 +410,55 @@ def export_html(army_list, army_name, army_limit):
     
         return f"{weapon_name}{mention} | {range_text} | A{attacks} | PA{ap} | {esc(rules_text)}"
 
+    def format_role_html(role):
+        """Formate un rôle pour l'affichage HTML"""
+        if not role or not isinstance(role, dict):
+            return ""
+
+        role_name = esc(role.get('name', 'Rôle'))
+        cost = role.get('cost', 0)
+        special_rules = role.get('special_rules', [])
+
+        rules_text = ", ".join(special_rules) if special_rules else "-"
+
+        # Formatage des armes du rôle si elles existent
+        weapons_html = ""
+        if "weapon" in role:
+            role_weapons = role.get("weapon", [])
+            if isinstance(role_weapons, list):
+                weapons_html = "<div style='margin-top: 8px; margin-left: 15px;'>"
+                weapons_html += "<div style='font-weight: 600; margin-bottom: 4px; color: var(--text-main);'>Armes du rôle:</div>"
+                for weapon in role_weapons:
+                    if isinstance(weapon, dict):
+                        weapons_html += f"""
+                        <div style='margin-bottom: 4px; margin-left: 10px;'>
+                            {format_weapon_html(weapon)}
+                        </div>
+                        """
+                weapons_html += "</div>"
+            elif isinstance(role_weapons, dict):
+                weapons_html = "<div style='margin-top: 8px; margin-left: 15px;'>"
+                weapons_html += "<div style='font-weight: 600; margin-bottom: 4px; color: var(--text-main);'>Arme du rôle:</div>"
+                weapons_html += f"""
+                <div style='margin-bottom: 4px; margin-left: 10px;'>
+                    {format_weapon_html(role_weapons)}
+                </div>
+                """
+                weapons_html += "</div>"
+
+        return f"""
+        <div style='margin-top: 10px; margin-bottom: 10px; padding: 8px; background: rgba(240, 248, 255, 0.3); border-radius: 6px; border-left: 3px solid #3498db;'>
+            <div style='font-weight: 600; color: #3498db; margin-bottom: 5px;'>
+                Rôle: {role_name}
+            </div>
+            {weapons_html}
+            <div style='margin-top: 8px;'>
+                <div style='font-weight: 600; margin-bottom: 4px; color: var(--text-main);'>Règles spéciales:</div>
+                <div style='font-size: 14px; color: var(--text-muted);'>{rules_text}</div>
+            </div>
+        </div>
+        """
+
     # Trier la liste pour afficher les héros en premier
     sorted_army_list = sorted(army_list, key=lambda x: 0 if x.get("type") == "hero" else 1)
 
@@ -787,6 +836,55 @@ body {{
           </div>
         '''
 
+        # RÔLES ET AMÉLIORATIONS (pour les héros et titans uniquement)
+        if options and unit.get("type") in ["hero", "titan"]:
+            html += """
+            <div style='margin-top: 15px;'>
+                <div style='font-weight: 600; margin-bottom: 8px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 4px;'>
+                    Rôles et améliorations:
+                </div>
+            """
+
+            # Affichage des rôles
+            for group_name, opts in options.items():
+                if isinstance(opts, list) and opts:
+                    for opt in opts:
+                        if "weapon" in opt or "special_rules" in opt:
+                            html += format_role_html(opt)
+
+            # Affichage des autres améliorations (non-rôles)
+            other_upgrades = []
+            for group_name, opts in options.items():
+                if isinstance(opts, list):
+                    for opt in opts:
+                        if "weapon" not in opt and "special_rules" in opt:
+                            other_upgrades.append({
+                                "name": opt.get("name", "Amélioration"),
+                                "rules": opt.get("special_rules", []),
+                                "cost": opt.get("cost", 0)
+                            })
+
+            if other_upgrades:
+                html += """
+                <div style='margin-top: 10px;'>
+                    <div style='font-weight: 600; margin-bottom: 5px; color: var(--text-main);'>
+                        Autres améliorations:
+                    </div>
+                """
+
+                for upgrade in other_upgrades:
+                    rules_text = ", ".join(upgrade["rules"]) if upgrade["rules"] else "Aucune"
+                    html += f"""
+                    <div style='margin-bottom: 8px; margin-left: 15px; padding: 6px; background: rgba(245, 245, 245, 0.5); border-radius: 4px;'>
+                        <div style='font-weight: 500; color: var(--text-main);'>{esc(upgrade["name"])}</div>
+                        <div style='font-size: 14px; color: var(--text-muted);'>{rules_text}</div>
+                    </div>
+                    """
+
+            html += """
+            </div>
+            """
+            
         # Règles spéciales (hors armes et hors règles des rôles déjà affichées)
         if special_rules:
             html += '''
@@ -1841,7 +1939,29 @@ if st.session_state.page == "army":
                 if checked:
                     upgrades_cost += o["cost"]
                     selected_options.setdefault(group.get("group", "Options"), []).append(o)
-    
+
+        # AMÉLIORATIONS D'UNITÉ (après les rôles pour les héros)
+        if "unit_upgrades" in unit and unit["unit_upgrades"]:
+            html += """
+            <div style='margin-top: 15px;'>
+                <div style='font-weight: 600; margin-bottom: 8px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 4px;'>
+                    Améliorations d'unité:
+                </div>
+            """
+        
+            for upgrade in unit["unit_upgrades"]:
+                rules_text = ", ".join(upgrade.get("special_rules", [])) if upgrade.get("special_rules", []) else "Aucune"
+                html += f"""
+                <div style='margin-bottom: 8px; margin-left: 15px; padding: 6px; background: rgba(245, 245, 245, 0.5); border-radius: 4px;'>
+                    <div style='font-weight: 500; color: var(--text-main);'>{esc(upgrade.get("name", "Amélioration"))}</div>
+                    <div style='font-size: 14px; color: var(--text-muted);'>{rules_text}</div>
+                </div>
+                """
+        
+            html += """
+            </div>
+            """
+        
         # MONTURE
         elif group.get("type") == "mount":
             choices = ["Aucune monture"]
@@ -1907,6 +2027,7 @@ if st.session_state.page == "army":
                     if not rule.startswith(("Griffes", "Sabots")) and "Coriace" not in rule:
                         all_special_rules.append(rule)
 
+        # Dans la section de création de l'unité (quand on ajoute à l'armée)
         unit_data = {
             "name": unit["name"],
             "type": unit.get("type", "unit"),
@@ -1916,12 +2037,25 @@ if st.session_state.page == "army":
             "defense": unit.get("defense"),
             "weapon": weapons,
             "weapon_upgrades": weapon_upgrades,
-            "options": selected_options if unit.get("type") in ["hero", "titan"] else {},
+            "options": selected_options,  # Inclure les options pour tous les types d'unité
             "mount": mount,
             "special_rules": all_special_rules,
-            "coriace": coriace_total
+            "coriace": coriace_total,
+            "unit_upgrades": []  # Ajouter une section pour les améliorations d'unité
         }
 
+        # Ajouter les améliorations d'unité sélectionnées
+        for group in unit.get("upgrade_groups", []):
+            if group.get("type") == "upgrades":
+                for o_idx, o in enumerate(group.get("options", [])):
+                    opt_key = f"{unit_key}_{g_idx}_{o['name']}_{o_idx}"
+                    if st.session_state.unit_selections[unit_key].get(opt_key, False):
+                        unit_data["unit_upgrades"].append({
+                            "name": o.get("name", "Amélioration"),
+                            "cost": o.get("cost", 0),
+                            "special_rules": o.get("special_rules", [])
+                        })
+        
         if mount and "coriace_bonus" in mount.get("mount", {}):
             mount_name = mount.get("name", "Monture")
             mount_bonus = mount.get("mount", {}).get("coriace_bonus", 0)
