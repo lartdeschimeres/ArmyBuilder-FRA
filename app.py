@@ -859,14 +859,14 @@ body {{
             </div>
             """
 
-                for upgrade in other_upgrades:
-                    rules_text = ", ".join(upgrade["rules"]) if upgrade["rules"] else "Aucune"
-                    html += f"""
-                    <div style='margin-bottom: 8px; margin-left: 15px; padding: 6px; background: rgba(245, 245, 245, 0.5); border-radius: 4px;'>
-                        <div style='font-weight: 500; color: var(--text-main);'>{esc(upgrade["name"])}</div>
-                        <div style='font-size: 14px; color: var(--text-muted);'>{rules_text}</div>
-                    </div>
-                    """
+            for upgrade in other_upgrades:
+                rules_text = ", ".join(upgrade["rules"]) if upgrade["rules"] else "Aucune"
+                html += f"""
+                <div style='margin-bottom: 8px; margin-left: 15px; padding: 6px; background: rgba(245, 245, 245, 0.5); border-radius: 4px;'>
+                    <div style='font-weight: 500; color: var(--text-main);'>{esc(upgrade["name"])}</div>
+                    <div style='font-size: 14px; color: var(--text-muted);'>{rules_text}</div>
+                </div>
+                """
 
             html += """
             </div>
