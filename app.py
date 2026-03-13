@@ -919,6 +919,28 @@ body {{
                 </div>
                 """
 
+        # AMÉLIORATIONS D'ARME (weapon_upgrades)
+        if weapon_upgrades and len(weapon_upgrades) > 0:
+            html += """
+            <div style='margin-top: 15px;'>
+                <div style='font-weight: 600; margin-bottom: 8px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 4px;'>
+                    Améliorations d'arme:
+                </div>
+            """
+        
+            for weapon in weapon_upgrades:
+                if isinstance(weapon, dict):
+                    html += f"""
+                    <div style='margin-bottom: 8px; margin-left: 15px; padding: 6px; background: rgba(245, 245, 245, 0.5); border-radius: 4px;'>
+                        <div style='font-weight: 500; color: var(--text-main);'>{esc(weapon.get('name', 'Amélioration'))}</div>
+                        <div style='margin-top: 4px;'>{format_weapon_html(weapon)}</div>
+                    </div>
+                    """
+        
+            html += """
+            </div>
+            """
+        
         # Règles spéciales (hors armes et hors règles des rôles déjà affichées)
         if special_rules and len(special_rules) > 0:
             html += '''
@@ -1279,9 +1301,6 @@ if st.session_state.page == "setup":
 
 # ======================================================
 # PAGE 2 – CONSTRUCTEUR D'ARMÉE
-# ======================================================
-# ======================================================
-# PAGE 2 – CONSTRUCTEUR D'ARMÉE (version complète avec améliorations d'arme)
 # ======================================================
 if st.session_state.page == "army":
     required_keys = ["game", "faction", "points", "list_name", "units", "faction_special_rules", "faction_spells"]
@@ -1961,6 +1980,49 @@ if st.session_state.page == "army":
 
                         weapons = final_weapons
 
+        # AMÉLIORATIONS D'ARME (weapon_upgrades)
+        elif group.get("type") == "weapon_upgrades":
+            st.subheader(group.get("group", "Améliorations d'arme"))
+        
+            choices = []
+            opt_map = {}
+        
+            # Ajouter une option "Aucune amélioration"
+            choices.append("Aucune amélioration d'arme")
+        
+            for o in group.get("options", []):
+                weapon = o.get("weapon", {})
+                label = f"{o.get('name', 'Amélioration')} (+{o.get('cost', 0)} pts)"
+                choices.append(label)
+                opt_map[label] = o
+        
+            current = st.session_state.unit_selections[unit_key].get(g_key, choices[0])
+            choice = st.radio(
+                group.get("group", "Améliorations d'arme"),
+                choices,
+                index=choices.index(current) if current in choices else 0,
+                key=f"{unit_key}_{g_key}_weapon_upgrades",
+            )
+        
+            st.session_state.unit_selections[unit_key][g_key] = choice
+        
+            if choice != choices[0]:
+                opt = opt_map[choice]
+                upgrades_cost += opt.get("cost", 0)
+        
+                # Ajouter l'amélioration d'arme à la liste
+                if "weapon" in opt:
+                    weapon_upgrade = opt["weapon"]
+                    if isinstance(weapon_upgrade, dict):
+                        weapon_upgrade = weapon_upgrade.copy()
+                        weapon_upgrade["_upgraded"] = True
+                        weapon_upgrades.append(weapon_upgrade)
+                    elif isinstance(weapon_upgrade, list):
+                        for w in weapon_upgrade:
+                            w = w.copy()
+                            w["_upgraded"] = True
+                            weapon_upgrades.append(w)
+        
         # AMÉLIORATIONS D'UNITÉ
         elif group.get("type") == "upgrades":
             for o_idx, o in enumerate(group.get("options", [])):
