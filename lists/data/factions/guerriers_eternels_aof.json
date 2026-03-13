@@ -466,7 +466,7 @@
         },
         {
           "group": "Améliorations d'arme",
-          "type": "conditional_weapons",
+          "type": "conditional_weapon",
           "description": "Remplacer UNE SEULE Arme à une main lourde par :",
           "options": [
             {"name": "Masse-tonnerre", "cost": 5, "weapon": {"name": "Masse-tonnerre", "range": "Mêlée", "attacks": 1, "armor_piercing": 4, "special_rules": ["Fracas"]}},
