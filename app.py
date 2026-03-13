@@ -363,15 +363,90 @@ def export_html(army_list, army_name, army_limit):
     def esc(txt):
         if txt is None:
             return ""
-        return str(txt).replace("&","&amp;").replace("<","&lt;").replace(">","&gt;").replace('"',"&quot;")
+        return str(txt).replace("&","&amp;").replace("<","&lt;").replace(">","&gt;")
 
-    # -------------------------------------------------------
-    # récupération règles spéciales
-    # -------------------------------------------------------
+    # --------------------------------------------------
+    # COLLECTE + TRI + REGROUPEMENT DES ARMES
+    # --------------------------------------------------
 
-    def get_special_rules(unit):
+    def collect_weapons(unit):
 
-        rules=set()
+        weapons = []
+
+        # armes de base
+        if "weapon" in unit:
+            if isinstance(unit["weapon"], list):
+                weapons.extend(unit["weapon"])
+            else:
+                weapons.append(unit["weapon"])
+
+        # armes d'options
+        if "options" in unit:
+            for group in unit["options"].values():
+                if isinstance(group, list):
+                    for opt in group:
+                        if "weapon" in opt:
+                            if isinstance(opt["weapon"], list):
+                                weapons.extend(opt["weapon"])
+                            else:
+                                weapons.append(opt["weapon"])
+
+        # armes de monture
+        if unit.get("mount"):
+            mount = unit["mount"].get("mount", {})
+            if "weapon" in mount:
+                if isinstance(mount["weapon"], list):
+                    weapons.extend(mount["weapon"])
+                else:
+                    weapons.append(mount["weapon"])
+
+        return weapons
+
+
+    def group_weapons(weapons):
+
+        weapon_map = {}
+
+        for w in weapons:
+
+            name = w.get("name","Arme")
+            rng = w.get("range","-")
+            att = w.get("attacks","-")
+            ap = w.get("armor_piercing","-")
+            rules = tuple(sorted(w.get("special_rules",[])))
+
+            key = (name,rng,att,ap,rules)
+
+            if key not in weapon_map:
+                weapon_map[key] = dict(w)
+                weapon_map[key]["count"] = 1
+            else:
+                weapon_map[key]["count"] += 1
+
+        grouped = list(weapon_map.values())
+
+        # tri tir -> mêlée
+        def sort_key(w):
+
+            r = w.get("range","-")
+
+            if r == "-" or str(r).lower() == "mêlée":
+                return (1, w["name"])
+
+            return (0, w["name"])
+
+        grouped.sort(key=sort_key)
+
+        return grouped
+
+
+    # --------------------------------------------------
+    # REGLES SPECIALES
+    # --------------------------------------------------
+
+    def get_rules(unit):
+
+        rules = set()
 
         if "special_rules" in unit:
             for r in unit["special_rules"]:
@@ -384,272 +459,165 @@ def export_html(army_list, army_name, army_limit):
                     for opt in group:
                         if "special_rules" in opt:
                             for r in opt["special_rules"]:
-                                if isinstance(r,str):
-                                    rules.add(r)
+                                rules.add(r)
 
-        if "mount" in unit and unit.get("mount"):
-            mount=unit["mount"].get("mount",{})
-            if "special_rules" in mount:
-                for r in mount["special_rules"]:
-                    if isinstance(r,str):
-                        rules.add(r)
+        if unit.get("mount"):
+            mount = unit["mount"].get("mount",{})
+            for r in mount.get("special_rules",[]):
+                rules.add(r)
 
         return sorted(rules)
 
-    # -------------------------------------------------------
-    # type unité
-    # -------------------------------------------------------
 
-    def get_french_type(unit):
+    # --------------------------------------------------
+    # HTML
+    # --------------------------------------------------
 
-        if unit.get("type")=="hero":
-            return "Héros"
+    total = sum(u["cost"] for u in army_list)
 
-        mapping={
-            "unit":"Unité de base",
-            "light_vehicle":"Véhicule léger",
-            "vehicle":"Véhicule/Monstre",
-            "titan":"Titan"
-        }
-
-        return mapping.get(unit.get("unit_detail","unit"),"Unité")
-
-    # -------------------------------------------------------
-    # collecte + regroupement + tri armes
-    # -------------------------------------------------------
-
-    def collect_and_group_weapons(unit):
-
-        weapons=[]
-
-        if "weapon" in unit and isinstance(unit["weapon"],list):
-            weapons.extend(unit["weapon"])
-
-        if "options" in unit:
-            for group in unit["options"].values():
-                if isinstance(group,list):
-                    for opt in group:
-                        if "weapon" in opt:
-                            if isinstance(opt["weapon"],list):
-                                weapons.extend(opt["weapon"])
-                            else:
-                                weapons.append(opt["weapon"])
-
-        if "mount" in unit and unit.get("mount"):
-            mount_data=unit["mount"].get("mount",{})
-            if "weapon" in mount_data:
-                if isinstance(mount_data["weapon"],list):
-                    weapons.extend(mount_data["weapon"])
-                else:
-                    weapons.append(mount_data["weapon"])
-
-        weapon_map={}
-
-        for w in weapons:
-
-            name=w.get("name","Arme")
-            rng=w.get("range","-")
-            att=w.get("attacks","-")
-            ap=w.get("armor_piercing","-")
-            rules=tuple(sorted(w.get("special_rules",[])))
-
-            key=(name,rng,att,ap,rules)
-
-            if key not in weapon_map:
-                weapon_map[key]=dict(w)
-                weapon_map[key]["_count"]=1
-            else:
-                weapon_map[key]["_count"]+=1
-
-        grouped=list(weapon_map.values())
-
-        def weapon_sort_key(w):
-
-            r=w.get("range","-")
-
-            if r=="-" or str(r).lower()=="mêlée":
-                return (1,w.get("name",""))
-
-            return (0,w.get("name",""))
-
-        grouped.sort(key=weapon_sort_key)
-
-        return grouped
-
-    # -------------------------------------------------------
-    # affichage arme
-    # -------------------------------------------------------
-
-    def format_weapon_html(w):
-
-        name=esc(w.get("name","Arme"))
-        rng=w.get("range","-")
-        att=w.get("attacks","-")
-        ap=w.get("armor_piercing","-")
-        rules=w.get("special_rules",[])
-        count=w.get("_count",1)
-
-        if rng=="-" or str(rng).lower()=="mêlée":
-            range_text="Mêlée"
-        else:
-            range_text=f'{rng}"'
-
-        rules_text=", ".join(rules) if rules else "-"
-
-        count_text=f" ×{count}" if count>1 else ""
-
-        return f"""
-        <div class="weapon-entry">
-          {name}{count_text} | {range_text} | A{att} | PA{ap} | {rules_text}
-        </div>
-        """
-
-    # -------------------------------------------------------
-    # tri unités (héros en premier)
-    # -------------------------------------------------------
-
-    sorted_army_list=sorted(
-        army_list,
-        key=lambda x:0 if x.get("type")=="hero" else 1
-    )
-
-    total=sum(u["cost"] for u in sorted_army_list)
-
-    html=f"""
+    html = f"""
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
 <title>Liste d'Armée OPR - {esc(army_name)}</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+"""
 
-<style>
+    # on réutilise ton CSS existant
+    html += "</head><body><div class='army'>"
 
-body{{background:#f8f9fa;font-family:Inter;margin:20px}}
+    html += f"""
+<div class="army-title">{esc(army_name)}</div>
 
-.army{{max-width:800px;margin:auto}}
-
-.army-title{{text-align:center;font-size:24px;font-weight:700;margin-bottom:20px;color:#3498db}}
-
-.unit-card{{background:white;border:1px solid #dee2e6;border-radius:8px;margin-bottom:20px;padding:16px}}
-
-.unit-header{{display:flex;justify-content:space-between}}
-
-.unit-name{{font-size:18px;font-weight:600}}
-
-.unit-type{{font-size:14px;color:#6c757d}}
-
-.unit-cost{{font-family:monospace;font-weight:bold;color:#e74c3c}}
-
-.unit-stats{{display:grid;grid-template-columns:repeat(4,1fr);background:#e9ecef;padding:10px;border-radius:6px;margin:10px 0;text-align:center}}
-
-.weapon-list{{margin:10px 0;padding-left:10px;border-left:3px solid #3498db}}
-
-.weapon-entry{{margin-bottom:5px;font-size:14px}}
-
-.rules-list{{display:flex;flex-wrap:wrap;gap:4px}}
-
-.rule-tag{{background:#e9ecef;padding:3px 6px;border-radius:4px;font-size:11px}}
-
-</style>
-</head>
-
-<body>
-
-<div class="army">
-
-<div class="army-title">
-{esc(army_name)} — {total}/{army_limit} pts
+<div class="army-summary">
+<div>Total unités : {len(army_list)}</div>
+<div class="summary-cost">{total} / {army_limit} pts</div>
 </div>
 """
 
-    # -------------------------------------------------------
-    # unités
-    # -------------------------------------------------------
+    # --------------------------------------------------
+    # UNITES
+    # --------------------------------------------------
 
-    for unit in sorted_army_list:
+    for unit in army_list:
 
-        name=esc(unit.get("name","Unité"))
-        cost=unit.get("cost",0)
+        name = esc(unit["name"])
+        cost = unit["cost"]
 
-        quality=esc(unit.get("quality","-"))
-        defense=esc(unit.get("defense","-"))
+        quality = unit.get("quality","-")
+        defense = unit.get("defense","-")
+        tough = unit.get("tough", "-")
 
-        size=unit.get("size",10)
-        coriace=unit.get("coriace",0)
-
-        unit_type=get_french_type(unit)
-
-        hero_role=""
-        if unit.get("type")=="hero" and unit.get("role"):
-            hero_role=f" — {esc(unit['role'])}"
-
-        html+=f"""
-
+        html += f"""
 <div class="unit-card">
 
 <div class="unit-header">
-
 <div>
-
 <div class="unit-name">{name} [{size}]</div>
-
-<div class="unit-type">
-{unit_type}{hero_role}
-</div>
-
+<div class="unit-type">{unit.get("type","Unité")}</div>
 </div>
 
 <div class="unit-cost">{cost} pts</div>
-
 </div>
+"""
 
+        # rôle héros
+        if unit.get("role"):
+            html += f"""
+<div class="role-section">
+<div class="role-title">Rôle</div>
+{esc(unit["role"])}
+</div>
+"""
+
+        # stats
+        html += f"""
 <div class="unit-stats">
 
-<div>⚔ {quality}+</div>
-<div>🛡 {defense}+</div>
-<div>❤️ {coriace if coriace else "-"}</div>
-<div>👥 {size}</div>
+<div class="stat-item">
+<div class="stat-label">Qualité</div>
+<div class="stat-value">{quality}+</div>
+</div>
+
+<div class="stat-item">
+<div class="stat-label">Défense</div>
+<div class="stat-value">{defense}+</div>
+</div>
+
+<div class="stat-item">
+<div class="stat-label">Coriace</div>
+<div class="stat-value tough-value">{tough}</div>
+</div>
+
+<div class="stat-item">
+<div class="stat-label">Figurines</div>
+<div class="stat-value">{size}</div>
+</div>
 
 </div>
 """
 
-        # armes
-        weapons=collect_and_group_weapons(unit)
+        # --------------------------------------------------
+        # ARMES
+        # --------------------------------------------------
+
+        weapons = group_weapons(collect_weapons(unit))
 
         if weapons:
 
-            html+="""
-<div class="weapon-list">
-"""
+            html += '<div class="section-title">Armes</div>'
 
             for w in weapons:
-                html+=format_weapon_html(w)
 
-            html+="</div>"
+                name = esc(w["name"])
+                count = w.get("count",1)
 
-        # règles
-        rules=get_special_rules(unit)
+                if count > 1:
+                    name = f"{name} ×{count}"
+
+                rng = w.get("range","-")
+                att = w.get("attacks","-")
+                ap = w.get("armor_piercing","-")
+
+                if rng == "-" or str(rng).lower() == "mêlée":
+                    rng = "Mêlée"
+                else:
+                    rng = f'{rng}"'
+
+                rules = ", ".join(w.get("special_rules",[]))
+
+                html += f"""
+<div class="weapon-item">
+<div class="weapon-name">{name}</div>
+<div class="weapon-stats">
+{rng} | A{att} | PA{ap} {rules}
+</div>
+</div>
+"""
+
+        # --------------------------------------------------
+        # REGLES
+        # --------------------------------------------------
+
+        rules = get_rules(unit)
 
         if rules:
 
-            html+="""
+            html += """
+<div class="rules-section">
+<div class="rules-title">Règles spéciales</div>
 <div class="rules-list">
 """
 
             for r in rules:
-                html+=f'<span class="rule-tag">{esc(r)}</span>'
+                html += f'<span class="rule-tag">{esc(r)}</span>'
 
-            html+="</div>"
+            html += "</div></div>"
 
-        html+="</div>"
+        html += "</div>"
 
-    html+="""
-</div>
-</body>
-</html>
-"""
+    html += "</div></body></html>"
 
     return html
 
