@@ -712,7 +712,7 @@
               "cost": 5, 
               "weapon": {
                 "name": "Grande masse-tonnerre", 
-                "range": "Mêlée", *
+                "range": "Mêlée", 
                 "attacks": 2, 
                 "armor_piercing": 4, 
                 "special_rules": ["Fracas"]
