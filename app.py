@@ -839,25 +839,85 @@ body {{
           </div>
         '''
 
-        # RÔLES ET AMÉLIORATIONS (pour les héros et titans uniquement)
-        if options and unit.get("type") in ["hero", "titan"]:
-            html += """
-            <div style='margin-top: 15px;'>
-                <div style='font-weight: 600; margin-bottom: 8px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 4px;'>
-                    Améliorations:
-                </div>
-            """
-
-            # Affichage des rôles
+        # AMÉLIORATIONS D'ARME (pour toutes les unités)
+        if options:
+            # Vérifier s'il y a des améliorations d'arme
+            has_weapon_upgrades = False
             for group_name, opts in options.items():
                 if isinstance(opts, list) and opts:
                     for opt in opts:
-                        if isinstance(opt, dict):
-                            html += format_role_html(opt)
+                        if "weapon" in opt:
+                            has_weapon_upgrades = True
+                            break
+                    if has_weapon_upgrades:
+                        break
 
-            html += """
-            </div>
-            """
+            if has_weapon_upgrades:
+                html += """
+                <div style='margin-top: 15px;'>
+                    <div style='font-weight: 600; margin-bottom: 8px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 4px;'>
+                        Améliorations d'arme:
+                    </div>
+                """
+
+                # Affichage des améliorations d'arme
+                for group_name, opts in options.items():
+                    if isinstance(opts, list) and opts:
+                        for opt in opts:
+                            if "weapon" in opt:
+                                weapon = opt.get("weapon", {})
+                                if isinstance(weapon, dict):
+                                    html += f"""
+                                    <div style='margin-bottom: 8px; margin-left: 15px; padding: 6px; background: rgba(245, 245, 245, 0.5); border-radius: 4px;'>
+                                        <div style='font-weight: 500; color: var(--text-main);'>{esc(opt.get("name", "Amélioration"))}</div>
+                                        <div style='margin-top: 4px;'>{format_weapon_html(weapon)}</div>
+                                    </div>
+                                    """
+                                elif isinstance(weapon, list):
+                                    for w in weapon:
+                                        if isinstance(w, dict):
+                                            html += f"""
+                                            <div style='margin-bottom: 8px; margin-left: 15px; padding: 6px; background: rgba(245, 245, 245, 0.5); border-radius: 4px;'>
+                                                <div style='font-weight: 500; color: var(--text-main);'>{esc(opt.get("name", "Amélioration"))}</div>
+                                                <div style='margin-top: 4px;'>{format_weapon_html(w)}</div>
+                                            </div>
+                                            """
+
+                html += """
+                </div>
+                """
+
+        # RÔLES (uniquement pour les héros et titans)
+        if options and unit.get("type") in ["hero", "titan"]:
+            # Vérifier s'il y a des rôles
+            has_roles = False
+            for group_name, opts in options.items():
+                if isinstance(opts, list) and opts:
+                    for opt in opts:
+                        if "special_rules" in opt and not "weapon" in opt:
+                            has_roles = True
+                            break
+                    if has_roles:
+                        break
+
+            if has_roles:
+                html += """
+                <div style='margin-top: 15px;'>
+                    <div style='font-weight: 600; margin-bottom: 8px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 4px;'>
+                        Rôles:
+                    </div>
+                """
+
+                # Affichage des rôles
+                for group_name, opts in options.items():
+                    if isinstance(opts, list) and opts:
+                        for opt in opts:
+                            if "special_rules" in opt and not "weapon" in opt:
+                                html += format_role_html(opt)
+
+                html += """
+                </div>
+                """
 
         # Règles spéciales (hors armes et hors règles des rôles déjà affichées)
         if special_rules and len(special_rules) > 0:
