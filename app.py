@@ -258,11 +258,11 @@ def format_unit_option(u):
 
     rules_text = ", ".join(rules_text) if rules_text else "Aucune"
 
-    # Construction du texte final SANS le coût
+    # Construction du texte final
     qua_def = f"Déf {u.get('defense', '?')}+"
+    cost = f"{u.get('base_cost', 0)}pts"
 
-    return f"{name_part} | {qua_def} | {weapon_text} | {rules_text}"
-
+    return f"{name_part} | {qua_def} | {weapon_text} | {rules_text} | {cost}"
 def format_weapon_option(weapon, cost=0):
     if not weapon or not isinstance(weapon, dict):
         return "Aucune arme"
@@ -313,20 +313,40 @@ def format_mount_option(mount):
     weapons = mount_data.get('weapon', [])
     special_rules = mount_data.get('special_rules', [])
     coriace = mount_data.get('coriace_bonus', 0)
-    spells = mount_data.get('spells', [])
 
     stats = []
     weapon_profiles = []
+    if isinstance(weapons, list) and weapons:
+        for weapon in weapons:
+            if isinstance(weapon, dict):
+                weapon_name = weapon.get('name', 'Arme')
+                attacks = weapon.get('attacks', '?')
+                ap = weapon.get('armor_piercing', '?')
+                special = ", ".join(weapon.get('special_rules', [])) if weapon.get('special_rules') else ""
+                profile = f"{weapon_name} A{attacks}/PA{ap}"
+                if special:
+                    profile += f" ({special})"
+                weapon_profiles.append(profile)
+    elif isinstance(weapons, dict):
+        weapon_name = weapons.get('name', 'Arme')
+        attacks = weapons.get('attacks', '?')
+        ap = weapons.get('armor_piercing', '?')
+        special = ", ".join(weapons.get('special_rules', [])) if weapons.get('special_rules') else ""
+        profile = f"{weapon_name} A{attacks}/PA{ap}"
+        if special:
+            profile += f" ({special})"
+        weapon_profiles.append(profile)
 
-    # ... (le reste du code pour les armes et règles spéciales)
+    if weapon_profiles:
+        stats.extend(weapon_profiles)
 
-    # Pour les sorts de monture (si applicable)
-    if spells:
-        for spell in spells:
-            if isinstance(spell, dict):
-                stats.append(f"{spell.get('name', '')}")  # Sans le coût ici
-            elif isinstance(spell, str):
-                stats.append(spell)
+    if coriace > 0:
+        stats.append(f"Coriace+{coriace}")
+
+    if special_rules:
+        rules_text = ", ".join([r for r in special_rules if not r.startswith(("Griffes", "Sabots"))])
+        if rules_text:
+            stats.append(rules_text)
 
     label = f"{name}"
     if stats:
@@ -383,11 +403,10 @@ def export_html(army_list, army_name, army_limit):
         return type_mapping.get(unit_detail, 'Unité')
 
     def format_weapon_html(weapon):
-        """Formate une arme pour l'affichage HTML avec mentions spéciales"""
+        """Formate une arme pour l'affichage HTML"""
         if not weapon:
             return ""
 
-        weapon_name = esc(weapon.get('name', 'Arme'))
         range_text = weapon.get('range', '-')
         attacks = weapon.get('attacks', '-')
         ap = weapon.get('armor_piercing', '-')
@@ -400,330 +419,271 @@ def export_html(army_list, army_name, army_limit):
 
         rules_text = ", ".join(special_rules) if special_rules else "-"
 
-        # Ajouter les mentions spéciales
-        mention = ""
-        if weapon.get("_conditional", False):
-            mention = " (un seul exemplaire)"
-        elif weapon.get("_upgraded", False):
-            count = weapon.get("_count", 1)
-            mention = f" ({count} exemplaires)"
-
-        return f"{weapon_name}{mention} | {range_text} | A{attacks} | PA{ap} | {esc(rules_text)}"
-
-    def format_role_html(role):
-        """Formate un rôle pour l'affichage HTML"""
-        if not role or not isinstance(role, dict):
-            return ""
-
-        role_name = esc(role.get('name', ''))
-        special_rules = role.get('special_rules', [])
-
-        # Formatage des armes du rôle si elles existent
-        weapons_html = ""
-        if "weapon" in role:
-            role_weapons = role.get("weapon", [])
-            if isinstance(role_weapons, list):
-                weapons_html = "<div style='margin-top: 8px;'>"
-                for weapon in role_weapons:
-                    if isinstance(weapon, dict):
-                        weapons_html += f"""
-                        <div style='margin-bottom: 4px;'>
-                            {format_weapon_html(weapon)}
-                        </div>
-                        """
-                weapons_html += "</div>"
-            elif isinstance(role_weapons, dict):
-                weapons_html = "<div style='margin-top: 8px;'>"
-                weapons_html += f"""
-                <div style='margin-bottom: 4px;'>
-                    {format_weapon_html(role_weapons)}
-                </div>
-                """
-                weapons_html += "</div>"
-
-        # Formatage des règles spéciales en rectangles gris
-        rules_html = ""
-        if special_rules:
-            rules_html = "<div style='margin-top: 8px;'>"
-            rules_html += "<div style='display: flex; flex-wrap: wrap; gap: 4px;'>"
-            for rule in special_rules:
-                rules_html += f"<span class='rule-tag'>{esc(rule)}</span>"
-            rules_html += "</div>"
-            rules_html += "</div>"
-
-        return f"""
-        <div style='margin-top: 10px; margin-bottom: 10px; padding: 8px; background: rgba(240, 248, 255, 0.3); border-radius: 6px; border-left: 3px solid #3498db;'>
-            <div style='font-weight: 600; color: #3498db; margin-bottom: 5px;'>
-                {role_name}
-            </div>
-            {weapons_html}
-            {rules_html}
-        </div>
-        """
+        return f"{esc(weapon.get('name', 'Arme'))} | {range_text} | A{attacks} | PA{ap} | {esc(rules_text)}"
 
     # Trier la liste pour afficher les héros en premier
     sorted_army_list = sorted(army_list, key=lambda x: 0 if x.get("type") == "hero" else 1)
 
     html = f"""
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-    <meta charset="utf-8">
-    <title>Liste d'Armée OPR - {esc(army_name)}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-    :root {{
-      --bg-dark: #f8f9fa;
-      --bg-card: #ffffff;
-      --bg-header: #e9ecef;
-      --accent: #3498db;
-      --text-main: #212529;
-      --text-muted: #6c757d;
-      --border: #dee2e6;
-      --cost-color: #ff6b6b;
-      --tough-color: #e74c3c;
-    }}
-    
-    body {{
-      background: var(--bg-dark);
-      color: var(--text-main);
-      font-family: 'Inter', sans-serif;
-      margin: 0;
-      padding: 20px;
-      line-height: 1.5;
-    }}
-    
-    .army {{
-      max-width: 800px;
-      margin: 0 auto;
-    }}
-    
-    .army-title {{
-      text-align: center;
-      font-size: 24px;
-      font-weight: 700;
-      margin-bottom: 20px;
-      color: var(--accent);
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 10px;
-    }}
-    
-    .army-summary {{
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--bg-card);
-      padding: 16px;
-      border-radius: 8px;
-      margin: 20px 0;
-      border: 1px solid var(--border);
-    }}
-    
-    .unit-card {{
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      margin-bottom: 20px;
-      padding: 16px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }}
-    
-    .unit-header {{
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }}
-    
-    .unit-name {{
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--text-main);
-      margin: 0;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }}
-    
-    .unit-cost {{
-      font-family: monospace;
-      font-size: 18px;
-      font-weight: bold;
-      color: var(--cost-color);
-    }}
-    
-    .unit-type {{
-      font-size: 14px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }}
-    
-    .unit-stats {{
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      background: var(--bg-header);
-      padding: 12px;
-      border-radius: 6px;
-      text-align: center;
-      font-size: 12px;
-      margin: 12px 0;
-    }}
-    
-    .stat-item {{
-      padding: 5px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }}
-    
-    .stat-label {{
-      color: var(--text-muted);
-      font-size: 10px;
-      text-transform: uppercase;
-      margin-bottom: 3px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }}
-    
-    .stat-value {{
-      font-weight: bold;
-      font-size: 16px;
-      color: var(--text-main);
-    }}
-    
-    .tough-value {{
-      color: var(--tough-color) !important;
-      font-weight: bold;
-      font-size: 18px;
-    }}
-    
-    .section-title {{
-      font-weight: 600;
-      margin: 15px 0 8px 0;
-      color: var(--text-main);
-      font-size: 14px;
-    }}
-    
-    .weapon-item {{
-      background: var(--bg-header);
-      padding: 8px;
-      border-radius: 4px;
-      margin-bottom: 6px;
-      display: flex;
-      justify-content: space-between;
-    }}
-    
-    .weapon-name {{
-      font-weight: 500;
-      color: var(--text-main);
-      flex: 1;
-    }}
-    
-    .weapon-stats {{
-      text-align: right;
-      white-space: nowrap;
-      flex: 1;
-    }}
-    
-    .weapon-list {{
-      margin: 10px 0;
-      padding-left: 10px;
-      border-left: 3px solid var(--accent);
-    }}
-    
-    .weapon-entry {{
-      margin-bottom: 5px;
-      font-size: 14px;
-    }}
-    
-    .rules-section {{
-      margin: 12px 0;
-    }}
-    
-    .rules-title {{
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: #3498db;
-      font-size: 14px;
-    }}
-    
-    .rules-list {{
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-    }}
-    
-    .rule-tag {{
-      background: var(--bg-header);
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      color: var(--text-main);
-    }}
-    
-    .summary-cost {{
-      font-family: monospace;
-      font-size: 24px;
-      font-weight: bold;
-      color: var(--cost-color);
-    }}
-    
-    .role-section {{
-      background: rgba(240, 248, 255, 0.3);
-      padding: 10px;
-      border-radius: 6px;
-      margin: 10px 0;
-      border-left: 3px solid #3498db;
-    }}
-    
-    .role-title {{
-      font-weight: 600;
-      color: #3498db;
-      margin-bottom: 5px;
-      font-size: 14px;
-    }}
-    
-    .mount-section {{
-      background: rgba(150, 150, 150, 0.1);
-      border: 1px solid rgba(150, 150, 150, 0.3);
-      padding: 10px;
-      border-radius: 6px;
-      margin: 15px 0;
-    }}
-    
-    @media print {{
-      body {{
-        background: white;
-        color: black;
-      }}
-      .unit-card, .army-summary {{
-        background: white;
-        border: 1px solid #ccc;
-        page-break-inside: avoid;
-      }}
-    }}
-    </style>
-    </head>
-    <body>
-    <div class="army">
-      <!-- Titre de la liste -->
-      <div class="army-title">
-        {esc(army_name)} - {sum(unit['cost'] for unit in sorted_army_list)}/{army_limit} pts
-      </div>
-    
-      <!-- Résumé de l'armée -->
-      <div class="army-summary">
-        <div style="font-size: 14px; color: var(--text-main);">
-          <span style="color: var(--text-muted);">Nombre d'unités:</span>
-          <strong style="margin-left: 8px; font-size: 18px;">{len(sorted_army_list)}</strong>
-        </div>
-        <div class="summary-cost">
-          {sum(unit['cost'] for unit in sorted_army_list)}/{army_limit} pts
-        </div>
-      </div>
-    """
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Liste d'Armée OPR - {esc(army_name)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {{
+  --bg-dark: #f8f9fa;
+  --bg-card: #ffffff;
+  --bg-header: #e9ecef;
+  --accent: #3498db;
+  --text-main: #212529;
+  --text-muted: #6c757d;
+  --border: #dee2e6;
+  --cost-color: #ff6b6b;
+  --tough-color: #e74c3c;
+}}
+
+body {{
+  background: var(--bg-dark);
+  color: var(--text-main);
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 20px;
+  line-height: 1.5;
+}}
+
+.army {{
+  max-width: 800px;
+  margin: 0 auto;
+}}
+
+.army-title {{
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+}}
+
+.army-summary {{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-card);
+  padding: 16px;
+  border-radius: 8px;
+  margin: 20px 0;
+  border: 1px solid var(--border);
+}}
+
+.unit-card {{
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}}
+
+.unit-header {{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}}
+
+.unit-name {{
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}}
+
+.unit-cost {{
+  font-family: monospace;
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--cost-color);
+}}
+
+.unit-type {{
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}}
+
+.unit-stats {{
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  background: var(--bg-header);
+  padding: 12px;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 12px;
+  margin: 12px 0;
+}}
+
+.stat-item {{
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}}
+
+.stat-label {{
+  color: var(--text-muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}}
+
+.stat-value {{
+  font-weight: bold;
+  font-size: 16px;
+  color: var(--text-main);
+}}
+
+.tough-value {{
+  color: var(--tough-color) !important;
+  font-weight: bold;
+  font-size: 18px;
+}}
+
+.section-title {{
+  font-weight: 600;
+  margin: 15px 0 8px 0;
+  color: var(--text-main);
+  font-size: 14px;
+}}
+
+.weapon-item {{
+  background: var(--bg-header);
+  padding: 8px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+}}
+
+.weapon-name {{
+  font-weight: 500;
+  color: var(--text-main);
+  flex: 1;
+}}
+
+.weapon-stats {{
+  text-align: right;
+  white-space: nowrap;
+  flex: 1;
+}}
+
+.weapon-list {{
+  margin: 10px 0;
+  padding-left: 10px;
+  border-left: 3px solid var(--accent);
+}}
+
+.weapon-entry {{
+  margin-bottom: 5px;
+  font-size: 14px;
+}}
+
+.rules-section {{
+  margin: 12px 0;
+}}
+
+.rules-title {{
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #3498db;
+  font-size: 14px;
+}}
+
+.rules-list {{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}}
+
+.rule-tag {{
+  background: var(--bg-header);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--text-main);
+}}
+
+.summary-cost {{
+  font-family: monospace;
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--cost-color);
+}}
+
+.role-section {{
+  background: rgba(240, 248, 255, 0.3);
+  padding: 10px;
+  border-radius: 6px;
+  margin: 10px 0;
+  border-left: 3px solid #3498db;
+}}
+
+.role-title {{
+  font-weight: 600;
+  color: #3498db;
+  margin-bottom: 5px;
+  font-size: 14px;
+}}
+
+.mount-section {{
+  background: rgba(150, 150, 150, 0.1);
+  border: 1px solid rgba(150, 150, 150, 0.3);
+  padding: 10px;
+  border-radius: 6px;
+  margin: 15px 0;
+}}
+
+@media print {{
+  body {{
+    background: white;
+    color: black;
+  }}
+  .unit-card, .army-summary {{
+    background: white;
+    border: 1px solid #ccc;
+    page-break-inside: avoid;
+  }}
+}}
+</style>
+</head>
+<body>
+<div class="army">
+  <!-- Titre de la liste -->
+  <div class="army-title">
+    {esc(army_name)} - {sum(unit['cost'] for unit in sorted_army_list)}/{army_limit} pts
+  </div>
+
+  <!-- Résumé de l'armée -->
+  <div class="army-summary">
+    <div style="font-size: 14px; color: var(--text-main);">
+      <span style="color: var(--text-muted);">Nombre d'unités:</span>
+      <strong style="margin-left: 8px; font-size: 18px;">{len(sorted_army_list)}</strong>
+    </div>
+    <div class="summary-cost">
+      {sum(unit['cost'] for unit in sorted_army_list)}/{army_limit} pts
+    </div>
+  </div>
+"""
 
     for unit in sorted_army_list:
         name = esc(unit.get("name", "Unité"))
@@ -742,10 +702,7 @@ def export_html(army_list, army_name, army_limit):
         if not isinstance(weapons, list):
             weapons = [weapons] if weapons else []
 
-        # Initialisation de weapon_upgrades
-        weapon_upgrades = unit.get("weapon_upgrades", [])
-
-        # Récupération des règles spéciales
+        # Récupération des règles spéciales (sans celles des armes)
         special_rules = get_special_rules(unit)
 
         # Récupération des options et montures
@@ -789,163 +746,67 @@ def export_html(army_list, army_name, army_limit):
 '''
 
         # Deuxième ligne : Armes
-        if weapons and len(weapons) > 0:
+        if weapons:
             html += '''
-          <div class="weapon-list">
-            <div style="font-weight: 600; margin-bottom: 5px; color: var(--accent);">Armes :</div>
-        '''
-
-            # Organiser les armes : d'abord les armes améliorées, puis les armes de base
-            upgraded_weapons = []
-            base_weapons = []
-
+  <div class="weapon-list">
+    <div style="font-weight: 600; margin-bottom: 5px; color: var(--accent);">Armes :</div>
+'''
             for weapon in weapons:
                 if weapon and isinstance(weapon, dict):
-                    if weapon.get("_upgraded", False):
-                        upgraded_weapons.append(weapon)
-                    else:
-                        base_weapons.append(weapon)
-
-            # Afficher d'abord les armes améliorées
-            for weapon in upgraded_weapons:
-                html += f'''
-            <div class="weapon-entry">
-              {format_weapon_html(weapon)}
-            </div>
-        '''
-
-            # Puis afficher les armes de base (si elles existent et n'ont pas toutes été remplacées)
-            if base_weapons:
-                for weapon in base_weapons:
-                    # Vérifier si cette arme de base a été complètement remplacée
-                    weapon_name = weapon.get('name', '')
-                    is_replaced = False
-
-                    for upgraded_weapon in upgraded_weapons:
-                        if weapon_name in upgraded_weapon.get("_replaces", []):
-                            # Vérifier si TOUTES les occurrences ont été remplacées
-                            replace_count = upgraded_weapon.get("_count", 0)
-                            unit_size = unit.get("size", 1)
-                            if replace_count >= unit_size:
-                                is_replaced = True
-                                break
-
-                    # N'afficher que si l'arme n'a pas été complètement remplacée
-                    if not is_replaced:
-                        html += f'''
-            <div class="weapon-entry">
-              {format_weapon_html(weapon)}
-            </div>
-        '''
-
+                    html += f'''
+    <div class="weapon-entry">
+      {format_weapon_html(weapon)}
+    </div>
+'''
             html += '''
-          </div>
-        '''
+  </div>
+'''
 
-        # AMÉLIORATIONS D'ARME (pour toutes les unités)
-        if options:
-            # Vérifier s'il y a des améliorations d'arme
-            has_weapon_upgrades = False
+        # Rôles (pour les héros et titans uniquement)
+        if options and unit.get("type") in ["hero", "titan"]:
             for group_name, opts in options.items():
                 if isinstance(opts, list) and opts:
                     for opt in opts:
                         if "weapon" in opt:
-                            has_weapon_upgrades = True
-                            break
-                    if has_weapon_upgrades:
-                        break
+                            role_name = opt.get("name", "Rôle")
+                            role_weapons = opt.get("weapon", [])
 
-            if has_weapon_upgrades:
-                html += """
-                <div style='margin-top: 15px;'>
-                    <div style='font-weight: 600; margin-bottom: 8px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 4px;'>
-                        Améliorations d'arme:
-                    </div>
-                """
+                            html += f'''
+  <div class="role-section">
+    <div class="role-title">Rôle: {esc(role_name)}</div>
+'''
 
-                # Affichage des améliorations d'arme
-                for group_name, opts in options.items():
-                    if isinstance(opts, list) and opts:
-                        for opt in opts:
-                            if "weapon" in opt:
-                                weapon = opt.get("weapon", {})
-                                if isinstance(weapon, dict):
-                                    html += f"""
-                                    <div style='margin-bottom: 8px; margin-left: 15px; padding: 6px; background: rgba(245, 245, 245, 0.5); border-radius: 4px;'>
-                                        <div style='font-weight: 500; color: var(--text-main);'>{esc(opt.get("name", "Amélioration"))}</div>
-                                        <div style='margin-top: 4px;'>{format_weapon_html(weapon)}</div>
-                                    </div>
-                                    """
-                                elif isinstance(weapon, list):
-                                    for w in weapon:
-                                        if isinstance(w, dict):
-                                            html += f"""
-                                            <div style='margin-bottom: 8px; margin-left: 15px; padding: 6px; background: rgba(245, 245, 245, 0.5); border-radius: 4px;'>
-                                                <div style='font-weight: 500; color: var(--text-main);'>{esc(opt.get("name", "Amélioration"))}</div>
-                                                <div style='margin-top: 4px;'>{format_weapon_html(w)}</div>
-                                            </div>
-                                            """
+                            if role_weapons:
+                                html += '''
+    <div style="margin-top: 8px;">
+      <div style="font-weight: 600; margin-bottom: 4px; color: var(--text-main);">Armes du rôle:</div>
+      <div class="weapon-list" style="margin-left: 15px;">
+'''
+                                if isinstance(role_weapons, list):
+                                    for weapon in role_weapons:
+                                        if isinstance(weapon, dict):
+                                            html += f'''
+        <div class="weapon-entry">
+          {format_weapon_html(weapon)}
+        </div>
+'''
+                                else:
+                                    html += f'''
+        <div class="weapon-entry">
+          {format_weapon_html(role_weapons)}
+        </div>
+'''
+                                html += '''
+      </div>
+    </div>
+'''
 
-                html += """
-                </div>
-                """
+                            html += '''
+  </div>
+'''
 
-        # RÔLES (uniquement pour les héros et titans)
-        if options and unit.get("type") in ["hero", "titan"]:
-            # Vérifier s'il y a des rôles
-            has_roles = False
-            for group_name, opts in options.items():
-                if isinstance(opts, list) and opts:
-                    for opt in opts:
-                        if "special_rules" in opt and not "weapon" in opt:
-                            has_roles = True
-                            break
-                    if has_roles:
-                        break
-
-            if has_roles:
-                html += """
-                <div style='margin-top: 15px;'>
-                    <div style='font-weight: 600; margin-bottom: 8px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 4px;'>
-                        Rôles:
-                    </div>
-                """
-
-                # Affichage des rôles
-                for group_name, opts in options.items():
-                    if isinstance(opts, list) and opts:
-                        for opt in opts:
-                            if "special_rules" in opt and not "weapon" in opt:
-                                html += format_role_html(opt)
-
-                html += """
-                </div>
-                """
-
-        # AMÉLIORATIONS D'ARME (weapon_upgrades)
-        if weapon_upgrades and len(weapon_upgrades) > 0:
-            html += """
-            <div style='margin-top: 15px;'>
-                <div style='font-weight: 600; margin-bottom: 8px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 4px;'>
-                    Améliorations d'arme:
-                </div>
-            """
-        
-            for weapon in weapon_upgrades:
-                if isinstance(weapon, dict):
-                    html += f"""
-                    <div style='margin-bottom: 8px; margin-left: 15px; padding: 6px; background: rgba(245, 245, 245, 0.5); border-radius: 4px;'>
-                        <div style='font-weight: 500; color: var(--text-main);'>{esc(weapon.get('name', 'Amélioration'))}</div>
-                        <div style='margin-top: 4px;'>{format_weapon_html(weapon)}</div>
-                    </div>
-                    """
-        
-            html += """
-            </div>
-            """
-        
         # Règles spéciales (hors armes et hors règles des rôles déjà affichées)
-        if special_rules and len(special_rules) > 0:
+        if special_rules:
             html += '''
   <div class="rules-section">
     <div class="rules-title">Règles spéciales:</div>
@@ -972,7 +833,7 @@ def export_html(army_list, army_name, army_limit):
     </div>
 '''
 
-            if mount_weapons and len(mount_weapons) > 0:
+            if mount_weapons:
                 html += '''
     <div style="margin-top: 8px;">
       <div style="font-weight: 600; margin-bottom: 4px; color: var(--text-main);">Armes de la monture:</div>
@@ -1002,7 +863,7 @@ def export_html(army_list, army_name, army_limit):
         faction_rules = st.session_state.faction_special_rules
         all_rules = [rule for rule in faction_rules if isinstance(rule, dict)]
 
-        if all_rules and len(all_rules) > 0:
+        if all_rules:
             html += '''
 <div class="faction-rules">
   <h3 style="text-align: center; color: #3498db; border-top: 1px solid var(--border); padding-top: 10px; margin-bottom: 15px;">
@@ -1047,7 +908,7 @@ def export_html(army_list, army_name, army_limit):
         spells = st.session_state.faction_spells
         all_spells = [{"name": name, "details": details} for name, details in spells.items() if isinstance(details, dict)]
 
-        if all_spells and len(all_spells) > 0:
+        if all_spells:
             html += '''
 <div class="spells-section">
   <h3 style="text-align: center; color: #3498db; border-top: 1px solid var(--border); padding-top: 10px; margin-bottom: 15px;">
@@ -1062,10 +923,9 @@ def export_html(army_list, army_name, army_limit):
       <div style="margin-bottom: 12px; padding: 8px; background: rgba(240, 248, 255, 0.2); border-radius: 4px;">
         <div>
           <span style="color: #3498db; font-weight: bold; font-size: 16px;">{esc(spell.get('name', ''))}</span>
+          <span style="color: var(--text-muted); margin-left: 8px;">({spell.get('details', {}).get('cost', '?')} pts)</span>
         </div>
-        <div style="font-size: 14px; color: var(--text-main); margin-top: 4px;">
-          {esc(spell.get('details', {}).get('description', ''))}
-        </div>
+        <div style="font-size: 14px; color: var(--text-main); margin-top: 4px;">{esc(spell.get('details', {}).get('description', ''))}</div>
       </div>
 '''
             html += '''
@@ -1444,7 +1304,7 @@ if st.session_state.page == "army":
         with st.expander("✨ Sorts de la faction", expanded=False):
             for spell_name, spell_details in st.session_state.faction_spells.items():
                 if isinstance(spell_details, dict):
-                    st.markdown(f"**{spell_name}**: {spell_details.get('description', '')}")
+                    st.markdown(f"**{spell_name}** ({spell_details.get('cost', '?')} pts): {spell_details.get('description', '')}")
 
     # Liste de l'Armée
     st.subheader("Liste de l'Armée")
@@ -1465,7 +1325,7 @@ if st.session_state.page == "army":
                     coriace = unit_data.get("coriace", 0)
                     st.markdown(f"**Coriace :** {coriace if coriace > 0 else '-'}")
                     st.markdown(f"**Taille :** {unit_data.get('size', '?')}")
-
+    
                 # Deuxième ligne : Armes
                 weapons = unit_data.get("weapon", [])
                 if weapons:
@@ -1478,39 +1338,39 @@ if st.session_state.page == "army":
                                 attacks = weapon.get('attacks', '-')
                                 ap = weapon.get('armor_piercing', '-')
                                 special_rules = weapon.get('special_rules', [])
-
+    
                                 if isinstance(range_text, (int, float)):
                                     range_text = f'{range_text}"'
                                 elif range_text == "Mêlée":
                                     range_text = "Mêlée"
-
+    
                                 rules_text = ", ".join(special_rules) if special_rules else "-"
-
+    
                                 st.markdown(f"- {weapon.get('name', 'Arme')} | {range_text} | A{attacks} | PA{ap} | {rules_text}")
                     elif isinstance(weapons, dict):
                         range_text = weapons.get('range', '-')
                         attacks = weapons.get('attacks', '-')
                         ap = weapons.get('armor_piercing', '-')
                         special_rules = weapons.get('special_rules', [])
-
+    
                         if isinstance(range_text, (int, float)):
                             range_text = f'{range_text}"'
                         elif range_text == "Mêlée":
                             range_text = "Mêlée"
-
+    
                         rules_text = ", ".join(special_rules) if special_rules else "-"
-
+    
                         st.markdown(f"- {weapons.get('name', 'Arme')} | {range_text} | A{attacks} | PA{ap} | {rules_text}")
-
+    
                 # Monture si présente
                 if "mount" in unit_data and unit_data["mount"]:
                     mount = unit_data["mount"]
                     mount_name = mount.get("name", "Monture")
                     mount_data = mount.get("mount", {})
-
+    
                     st.markdown("---")
                     st.markdown(f"**Monture :** {mount_name}")
-
+    
                     if "weapon" in mount_data:
                         mount_weapons = mount_data["weapon"]
                         st.markdown("**Armes de la monture :**")
@@ -1521,16 +1381,16 @@ if st.session_state.page == "army":
                                     attacks = weapon.get('attacks', '-')
                                     ap = weapon.get('armor_piercing', '-')
                                     special_rules = weapon.get('special_rules', [])
-
+    
                                     if isinstance(range_text, (int, float)):
                                         range_text = f'{range_text}"'
                                     elif range_text == "Mêlée":
                                         range_text = "Mêlée"
-
+    
                                     rules_text = ", ".join(special_rules) if special_rules else "-"
-
+    
                                     st.markdown(f"- {weapon.get('name', 'Arme')} | {range_text} | A{attacks} | PA{ap} | {rules_text}")
-
+    
                 if st.button(f"Supprimer {unit_data['name']}", key=f"delete_unit_{i}"):
                     st.session_state.army_cost -= unit_data['cost']
                     st.session_state.army_list.pop(i)
@@ -1666,281 +1526,354 @@ if st.session_state.page == "army":
     mount_cost = 0
     upgrades_cost = 0
     weapon_upgrades = []
-
+    
     # Initialiser les marqueurs de groupes affichés
     for group_type in ["weapon", "role", "variable_weapon_count", "conditional_weapon", "upgrades", "mount"]:
         st.session_state.unit_selections[unit_key][f"displayed_{group_type}"] = False
-
+    
     # Configuration des améliorations
     for g_idx, group in enumerate(unit.get("upgrade_groups", [])):
         g_key = f"group_{g_idx}"
     
-        # Vérifier si le groupe a des options valides
+        # Vérifier si le groupe a des options valides avant de l'afficher
         has_valid_options = False
-        if group.get("type") in ["weapon", "conditional_weapon"]:
+        if group.get("type") == "weapon":
             has_valid_options = len(group.get("options", [])) > 0
         elif group.get("type") == "role":
             has_valid_options = len(group.get("options", [])) > 0
+        elif group.get("type") == "variable_weapon_count":
+            has_valid_options = len(group.get("options", [])) > 0
+        elif group.get("type") == "conditional_weapon":
+            has_valid_options = len([o for o in group.get("options", [])
+                                    if not o.get("requires", []) or check_weapon_conditions(unit_key, o.get("requires", []))]) > 0
         elif group.get("type") == "upgrades":
             has_valid_options = len(group.get("options", [])) > 0
         elif group.get("type") == "mount":
             has_valid_options = len(group.get("options", [])) > 0
     
+        # Ne pas afficher les groupes sans options valides
         if not has_valid_options:
             continue
     
+        # Vérifier si ce type de groupe a déjà été affiché
+        group_type_displayed = st.session_state.unit_selections[unit_key].get(f"displayed_{group.get('type')}", False)
+    
+        # Si c'est un groupe "conditional_weapon" ou "variable_weapon_count" et qu'il y en a déjà eu un, on le saute
+        if (group.get("type") in ["conditional_weapon", "variable_weapon_count"]) and group_type_displayed:
+            continue
+    
         st.subheader(group.get("group", "Améliorations"))
-
-    # =============================================
-    # GESTION DES AMÉLIORATIONS D'ARME
-    # =============================================
-    if group.get("type") in ["weapon", "conditional_weapon"]:
-        available_options = []
-        for opt in group.get("options", []):
-            requires = opt.get("requires", [])
-            if not requires or check_weapon_conditions(unit_key, requires):
-                available_options.append(opt)
-
-        if not available_options:
-            st.markdown(f"""
-            <div style='color: #999; font-size: 0.9em; margin-bottom: 15px;'>
-                {group.get("description", "Améliorations d'arme")} <em>(Non disponible)</em>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            choices = ["Aucune amélioration"]
-            opt_map = {}
-
-            for opt in available_options:
-                weapon = opt.get("weapon", {})
-                if isinstance(weapon, dict):
-                    label = f"{opt.get('name', 'Amélioration')} (+{opt.get('cost', 0)} pts)"
+    
+        # Marquer ce type de groupe comme affiché
+        st.session_state.unit_selections[unit_key][f"displayed_{group.get('type')}"] = True
+    
+        # ARMES
+        if group.get("type") == "weapon":
+            choices = []
+            base_weapons = unit.get("weapon", [])
+    
+            if isinstance(base_weapons, list) and base_weapons:
+                base_weapons_labels = []
+                for weapon in base_weapons:
+                    base_weapons_labels.append(weapon.get('name', 'Arme'))
+    
+                if len(base_weapons_labels) == 1:
+                    choices.append(format_weapon_option(base_weapons[0]))
                 else:
-                    label = f"{opt.get('name', 'Amélioration')} (+{opt.get('cost', 0)} pts)"
-
+                    choices.append(" et ".join(base_weapons_labels))
+            elif isinstance(base_weapons, dict):
+                choices.append(format_weapon_option(base_weapons))
+    
+            opt_map = {}
+            for o in group.get("options", []):
+                weapon = o.get("weapon", {})
+                if isinstance(weapon, list):
+                    weapon_names = [w.get('name', 'Arme') for w in weapon]
+                    label = " et ".join(weapon_names) + f" (+{o['cost']} pts)"
+                else:
+                    label = format_weapon_option(weapon, o['cost'])
                 choices.append(label)
-                opt_map[label] = opt
-
-            current = st.session_state.unit_selections[unit_key].get(g_key, choices[0])
-            choice = st.radio(
-                group.get("description", "Sélectionnez une amélioration"),
-                choices,
-                index=choices.index(current) if current in choices else 0,
-                key=f"{unit_key}_{g_key}_weapon"
-            )
-
+                opt_map[label] = o
+    
+            if choices:
+                current = st.session_state.unit_selections[unit_key].get(g_key, choices[0] if choices else "Aucune arme")
+                choice = st.radio(
+                    "Sélection de l'arme",
+                    choices,
+                    index=choices.index(current) if current in choices else 0,
+                    key=f"{unit_key}_{g_key}_weapon",
+                )
+    
+                st.session_state.unit_selections[unit_key][g_key] = choice
+    
+                if choice != choices[0]:
+                    for opt_label, opt in opt_map.items():
+                        if opt_label == choice:
+                            weapon_cost += opt["cost"]
+                            if not isinstance(opt["weapon"], list):
+                                weapons = [opt["weapon"]]
+                            else:
+                                weapons = opt["weapon"]
+                            st.session_state.unit_selections[unit_key]["weapon"] = weapons
+                            break
+    
+        # RÔLES
+        elif group.get("type") == "role":
+            choices = []
+            opt_map = {}
+    
+            if unit.get("unit_detail") == "titan":
+                for o in group.get("options", []):
+                    role_name = o.get('name', 'Rôle')
+                    cost = o.get('cost', 0)
+                    special_rules = o.get('special_rules', [])
+    
+                    label = f"{role_name}"
+                    if special_rules:
+                        rules_text = ", ".join(special_rules)
+                        label += f" | {rules_text}"
+                    label += f" (+{cost} pts)"
+    
+                    choices.append(label)
+                    opt_map[label] = o
+    
+                default_choice = choices[0] if choices else ""
+                current = st.session_state.unit_selections[unit_key].get(g_key, default_choice)
+                choice = st.radio(
+                    group.get("group", "Rôle"),
+                    choices,
+                    index=choices.index(current) if current in choices else 0,
+                    key=f"{unit_key}_{g_key}_role_{g_idx}",
+                )
+            else:
+                choices = ["Aucun rôle"]
+                opt_map = {}
+    
+                for o in group.get("options", []):
+                    role_name = o.get('name', 'Rôle')
+                    cost = o.get('cost', 0)
+                    special_rules = o.get('special_rules', [])
+    
+                    label = f"{role_name}"
+                    if special_rules:
+                        rules_text = ", ".join(special_rules)
+                        label += f" | {rules_text}"
+                    label += f" (+{cost} pts)"
+    
+                    choices.append(label)
+                    opt_map[label] = o
+    
+                current = st.session_state.unit_selections[unit_key].get(g_key, choices[0])
+                choice = st.radio(
+                    group.get("group", "Rôle"),
+                    choices,
+                    index=choices.index(current) if current in choices else 0,
+                    key=f"{unit_key}_{g_key}_role_{g_idx}",
+                    horizontal=True if len(choices) <= 4 else False
+                )
+    
             st.session_state.unit_selections[unit_key][g_key] = choice
-
-            if choice != choices[0]:
-                opt = opt_map[choice]
-                upgrades_cost += opt.get("cost", 0)
-
-                # Logique de remplacement d'arme
-                if "replaces" in opt and "weapon" in opt:
-                    # Trouver et remplacer l'arme
-                    weapons_to_replace = []
-                    for weapon in weapons:
-                        if weapon.get("name") in opt.get("replaces", []):
-                            weapons_to_replace.append(weapon)
-
-                    if weapons_to_replace:
-                        weapons.remove(weapons_to_replace[0])
-
-                    # Ajouter la nouvelle arme
-                    new_weapon = opt.get("weapon", {})
-                    if isinstance(new_weapon, dict):
-                        new_weapon = new_weapon.copy()
-                        new_weapon["_upgraded"] = True
-                        weapons.append(new_weapon)
-                    elif isinstance(new_weapon, list):
-                        for w in new_weapon:
-                            w = w.copy()
-                            w["_upgraded"] = True
-                            weapons.append(w)
-
-    # =============================================
-    # RÔLES
-    # =============================================
-    elif group.get("type") == "role":
-        choices = ["Aucun rôle"]
-        opt_map = {}
-
-        for o in group.get("options", []):
-            role_name = o.get('name', 'Rôle')
-            cost = o.get('cost', 0)
-            special_rules = o.get('special_rules', [])
-
-            label = f"{role_name}"
-            if special_rules:
-                rules_text = ", ".join(special_rules)
-                label += f" | {rules_text}"
-            label += f" (+{cost} pts)"
-
-            choices.append(label)
-            opt_map[label] = o
-
-        current = st.session_state.unit_selections[unit_key].get(g_key, choices[0])
-        choice = st.radio(
-            group.get("group", "Rôle"),
-            choices,
-            index=choices.index(current) if current in choices else 0,
-            key=f"{unit_key}_{g_key}_role",
-            horizontal=True if len(choices) <= 4 else False
-        )
-
-        st.session_state.unit_selections[unit_key][g_key] = choice
-
-        if choice != choices[0]:
-            opt = opt_map[choice]
-            upgrades_cost += opt.get("cost", 0)
-            selected_options[group.get("group", "Rôle")] = [opt]
-
-            if "weapon" in opt:
-                role_weapons = opt.get("weapon", [])
-                if isinstance(role_weapons, list):
-                    weapons.extend(role_weapons)
-                elif isinstance(role_weapons, dict):
-                    weapons.append(role_weapons)
-
-    # =============================================
-    # AMÉLIORATIONS D'ARME A NOMBRE VARIABLE
-    # =============================================
-    elif group.get("type") == "variable_weapon_count":
-        st.subheader(group.get("group", "Améliorations variables"))
-
-        # Conserver les armes de base
-        base_weapons = unit.get("weapon", [])
-        if isinstance(base_weapons, list):
-            base_weapons = base_weapons.copy()
-        elif isinstance(base_weapons, dict):
-            base_weapons = [base_weapons]
-
-        # Stocker les armes originales pour référence
-        original_weapons = []
-        for weapon in base_weapons:
-            if isinstance(weapon, dict):
-                original_weapon = weapon.copy()
-                original_weapon["_original"] = True
-                original_weapons.append(original_weapon)
-
-        # Pour chaque option d'amélioration
-        for opt_idx, option in enumerate(group.get("options", [])):
-            st.markdown(f"""
-            <div style='margin-top: 15px; margin-bottom: 10px;'>
-              <h4 style='color: #3498db;'>{option['name']}</h4>
-            </div>
-            """, unsafe_allow_html=True)
-
-            requires = option.get("requires", [])
-            if requires and not check_weapon_conditions(unit_key, requires):
+    
+            for opt_label, opt in opt_map.items():
+                if opt_label == choice:
+                    upgrades_cost += opt.get("cost", 0)
+                    selected_options[group.get("group", "Rôle")] = [opt]
+    
+                    if "weapon" in opt:
+                        role_weapons = opt.get("weapon", [])
+                        if isinstance(role_weapons, list):
+                            weapons.extend(role_weapons)
+                        elif isinstance(role_weapons, dict):
+                            weapons.append(role_weapons)
+                    break
+    
+        # AMÉLIORATIONS D'ARME A NOMBRE VARIABLE
+        elif group.get("type") == "variable_weapon_count":
+            # Récupérer les améliorations sélectionnées précédemment
+            current_selection = st.session_state.unit_selections[unit_key].get(g_key, {})
+    
+            # Conserver les armes de base
+            base_weapons = unit.get("weapon", [])
+            if isinstance(base_weapons, list):
+                base_weapons = base_weapons.copy()
+            elif isinstance(base_weapons, dict):
+                base_weapons = [base_weapons]
+    
+            # Pour chaque option d'amélioration
+            for opt_idx, option in enumerate(group.get("options", [])):
                 st.markdown(f"""
-                <div style='color: #999; font-size: 0.9em; margin-bottom: 15px;'>
-                    {option['name']} <em>(Non disponible - nécessite {', '.join(requires)})</em>
+                <div style='margin-top: 15px; margin-bottom: 10px;'>
+                  <h4 style='color: #3498db;'>{option['name']}</h4>
                 </div>
                 """, unsafe_allow_html=True)
-                continue
-
-            max_count = unit.get("size", 1)
-            if "max_count" in option:
-                max_count = option["max_count"].get("value", max_count)
-
-            min_count = option.get("min_count", 0)
-
-            count = st.slider(
-                f"Nombre de {option['name']} (max: {max_count})",
-                min_value=min_count,
-                max_value=max_count,
-                value=min_count,
-                key=f"{unit_key}_{g_key}_count_{opt_idx}_{option['name']}",
-            )
-
-            total_cost = count * option["cost"]
-            upgrades_cost += total_cost
-
-            st.markdown(f"""
-            <div style='margin: 10px 0; padding: 8px; background: #f8f9fa; border-radius: 4px;'>
-                <strong>{option['name']}</strong> × {count} figurines =
-                <strong style='color: #e74c3c;'>{total_cost} pts</strong>
-            </div>
-            """, unsafe_allow_html=True)
-
-            if "replaces" in option and count > 0:
-                # Conserver toutes les armes de base
-                final_weapons = original_weapons.copy()
-
-                # Ajouter les nouvelles armes avec le nombre d'exemplaires
-                new_weapon = option["weapon"]
-                if isinstance(new_weapon, dict):
-                    new_weapon = new_weapon.copy()
-                    new_weapon["_count"] = count
-                    new_weapon["_replaces"] = option.get("replaces", [])
-                    new_weapon["_upgraded"] = True
-                    final_weapons.append(new_weapon)
-                elif isinstance(new_weapon, list):
-                    for w in new_weapon:
-                        w = w.copy()
-                        w["_count"] = count
-                        w["_replaces"] = option.get("replaces", [])
-                        w["_upgraded"] = True
-                        final_weapons.append(w)
-
-                weapons = final_weapons
+    
+                # Vérifier si l'option a des conditions
+                requires = option.get("requires", [])
+                if requires and not check_weapon_conditions(unit_key, requires):
+                    st.markdown(f"""
+                    <div style='color: #999; font-size: 0.9em; margin-bottom: 15px;'>
+                        {option['name']} <em>(Non disponible - nécessite {', '.join(requires)})</em>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    continue
+    
+                # Calculer les options de compteur disponibles
+                max_count = unit.get("size", 1)
+                if "max_count" in option:
+                    max_count = option["max_count"].get("value", max_count)
+    
+                min_count = option.get("min_count", 0)
+    
+                # Créer un slider pour sélectionner le nombre
+                count = st.slider(
+                    f"Nombre de {option['name']} (max: {max_count})",
+                    min_value=min_count,
+                    max_value=max_count,
+                    value=min_count,
+                    key=f"{unit_key}_{g_key}_count_{opt_idx}_{option['name']}",
+                )
+    
+                # Calcul du coût total
+                total_cost = count * option["cost"]
+                upgrades_cost += total_cost
+    
+                # Afficher le coût total
+                st.markdown(f"""
+                <div style='margin: 10px 0; padding: 8px; background: #f8f9fa; border-radius: 4px;'>
+                    <strong>{option['name']}</strong> × {count} figurines =
+                    <strong style='color: #e74c3c;'>{total_cost} pts</strong>
+                </div>
+                """, unsafe_allow_html=True)
+    
+                # Remplacer les armes concernées
+                if "replaces" in option and count > 0:
+                    # Trouver les armes à remplacer
+                    weapons_to_replace = []
+                    for weapon in base_weapons:
+                        if weapon.get("name") in option["replaces"]:
+                            weapons_to_replace.append(weapon)
+    
+                    # Limiter le nombre de remplacements
+                    weapons_to_replace = weapons_to_replace[:count]
+    
+                    # Remplacer les armes
+                    for _ in range(count):
+                        if weapons_to_replace:
+                            base_weapons.remove(weapons_to_replace.pop(0))
+    
+                    # Ajouter les nouvelles armes
+                    new_weapon = option["weapon"]
+                    if isinstance(new_weapon, dict):
+                        # Vérifier si l'arme existe déjà
+                        weapon_exists = any(w.get('name') == new_weapon.get('name') for w in base_weapons)
+                        if not weapon_exists:
+                            base_weapons.append(new_weapon)
+                    elif isinstance(new_weapon, list):
+                        for w in new_weapon:
+                            # Vérifier si l'arme existe déjà
+                            weapon_exists = any(weapon.get('name') == w.get('name') for weapon in base_weapons)
+                            if not weapon_exists:
+                                base_weapons.append(w)
+    
+            # Mettre à jour les armes de l'unité
+            weapons = base_weapons
+    
+        # AMÉLIORATIONS D'ARME CONDITIONNELLES
+        elif group.get("type") == "conditional_weapon":
+            # Vérifier les conditions pour chaque option
+            available_options = []
+            for opt_idx, option in enumerate(group.get("options", [])):
+                requires = option.get("requires", [])
+                if not requires or check_weapon_conditions(unit_key, requires):
+                    available_options.append(option)
+    
+            if not available_options:
+                st.markdown(f"""
+                <div style='color: #999; font-size: 0.9em; margin-bottom: 15px;'>
+                    {group.get("description", "")} <em>(Non disponible - conditions non remplies)</em>
+                </div>
+                """, unsafe_allow_html=True)
             else:
-                # Si aucune amélioration n'est choisie, conserver les armes originales
-                weapons = original_weapons
-
-            selected_options[group.get("group", "Améliorations")] = [
-                {
-                    "name": option["name"],
-                    "count": count,
-                    "cost_per_unit": option["cost"],
-                    "total_cost": total_cost,
-                    "weapon": option.get("weapon"),
-                    "replaces": option.get("replaces", [])
-                }
-            ]
-
-    # =============================================
-    # AMÉLIORATIONS D'UNITÉ
-    # =============================================
-    elif group.get("type") == "upgrades":
-        for o_idx, o in enumerate(group.get("options", [])):
-            opt_key = f"{unit_key}_{g_key}_{o['name']}_{o_idx}"
-            checked = st.checkbox(
-                f"{o['name']} (+{o['cost']} pts)",
-                value=st.session_state.unit_selections[unit_key].get(opt_key, False),
-                key=opt_key,
+                # Si des options sont disponibles, les afficher
+                choices = ["Aucune amélioration"]
+                opt_map = {}
+    
+                for o in available_options:
+                    weapon = o.get("weapon", {})
+                    label = format_weapon_option(weapon, o.get("cost", 0))
+                    choices.append(label)
+                    opt_map[label] = o
+    
+                current = st.session_state.unit_selections[unit_key].get(g_key, choices[0])
+                choice = st.radio(
+                    group.get("description", "Sélectionnez une amélioration"),
+                    choices,
+                    index=choices.index(current) if current in choices else 0,
+                    key=f"{unit_key}_{g_key}_conditional_{opt_idx}"
+                )
+    
+                st.session_state.unit_selections[unit_key][g_key] = choice
+    
+                if choice != choices[0]:
+                    opt = opt_map[choice]
+                    upgrades_cost += opt.get("cost", 0)
+                    if "weapon" in opt:
+                        # Remplacer une seule arme
+                        for weapon in weapons:
+                            if weapon.get("name") in opt.get("replaces", []):
+                                weapons.remove(weapon)
+                                break
+                        new_weapon = opt["weapon"]
+                        if isinstance(new_weapon, dict):
+                            # Vérifier si l'arme existe déjà
+                            weapon_exists = any(w.get('name') == new_weapon.get('name') for w in weapons)
+                            if not weapon_exists:
+                                weapons.append(new_weapon)
+                        elif isinstance(new_weapon, list):
+                            for w in new_weapon:
+                                # Vérifier si l'arme existe déjà
+                                weapon_exists = any(weapon.get('name') == w.get('name') for weapon in weapons)
+                                if not weapon_exists:
+                                    weapons.append(w)
+    
+        # AMÉLIORATIONS D'UNITÉ
+        elif group.get("type") == "upgrades":
+            for o_idx, o in enumerate(group.get("options", [])):
+                opt_key = f"{unit_key}_{g_key}_{o['name']}_{o_idx}"
+                checked = st.checkbox(
+                    f"{o['name']} (+{o['cost']} pts)",
+                    value=st.session_state.unit_selections[unit_key].get(opt_key, False),
+                    key=opt_key,
+                )
+                st.session_state.unit_selections[unit_key][opt_key] = checked
+                if checked:
+                    upgrades_cost += o["cost"]
+                    selected_options.setdefault(group.get("group", "Options"), []).append(o)
+    
+        # MONTURE
+        elif group.get("type") == "mount":
+            choices = ["Aucune monture"]
+            opt_map = {}
+    
+            for o in group.get("options", []):
+                label = format_mount_option(o)
+                choices.append(label)
+                opt_map[label] = o
+    
+            current = st.session_state.unit_selections[unit_key].get(g_key, choices[0])
+            choice = st.radio(
+                "Monture",
+                choices,
+                index=choices.index(current) if current in choices else 0,
+                key=f"{unit_key}_{g_key}_mount",
             )
-            st.session_state.unit_selections[unit_key][opt_key] = checked
-            if checked:
-                upgrades_cost += o["cost"]
-                selected_options.setdefault(group.get("group", "Options"), []).append(o)
+    
+            st.session_state.unit_selections[unit_key][g_key] = choice
+    
+            if choice != "Aucune monture":
+                mount = opt_map[choice]
+                mount_cost = mount["cost"]
 
-    # =============================================
-    # MONTURE
-    # =============================================
-    elif group.get("type") == "mount":
-        choices = ["Aucune monture"]
-        opt_map = {}
-
-        for o in group.get("options", []):
-            label = format_mount_option(o)
-            choices.append(label)
-            opt_map[label] = o
-
-        current = st.session_state.unit_selections[unit_key].get(g_key, choices[0])
-        choice = st.radio(
-            "Monture",
-            choices,
-            index=choices.index(current) if current in choices else 0,
-            key=f"{unit_key}_{g_key}_mount",
-        )
-
-        st.session_state.unit_selections[unit_key][g_key] = choice
-
-        if choice != "Aucune monture":
-            mount = opt_map[choice]
-            mount_cost = mount["cost"]
 
     multiplier = 1
     if unit.get("type") != "hero" and unit.get("size", 1) > 1:
@@ -1983,31 +1916,19 @@ if st.session_state.page == "army":
                         all_special_rules.append(rule)
 
         unit_data = {
-        "name": unit["name"],
-        "type": unit.get("type", "unit"),
-        "cost": final_cost,
-        "size": unit.get("size", 10) * multiplier if unit.get("type") != "hero" else 1,
-        "quality": unit.get("quality"),
-        "defense": unit.get("defense"),
-        "weapon": weapons,  # Les armes incluent déjà les améliorations
-        "options": selected_options,
-        "mount": mount,
-        "special_rules": all_special_rules,
-        "coriace": coriace_total,
-        "unit_upgrades": []
-    }
-
-        # Ajouter les améliorations d'unité sélectionnées
-        for group in unit.get("upgrade_groups", []):
-            if group.get("type") == "upgrades":
-                for o_idx, o in enumerate(group.get("options", [])):
-                    opt_key = f"{unit_key}_{g_idx}_{o['name']}_{o_idx}"
-                    if st.session_state.unit_selections[unit_key].get(opt_key, False):
-                        unit_data["unit_upgrades"].append({
-                            "name": o.get("name", "Amélioration"),
-                            "cost": o.get("cost", 0),
-                            "special_rules": o.get("special_rules", [])
-                        })
+            "name": unit["name"],
+            "type": unit.get("type", "unit"),
+            "cost": final_cost,
+            "size": unit.get("size", 10) * multiplier if unit.get("type") != "hero" else 1,
+            "quality": unit.get("quality"),
+            "defense": unit.get("defense"),
+            "weapon": weapons,
+            "weapon_upgrades": weapon_upgrades,
+            "options": selected_options if unit.get("type") in ["hero", "titan"] else {},
+            "mount": mount,
+            "special_rules": all_special_rules,
+            "coriace": coriace_total
+        }
 
         if mount and "coriace_bonus" in mount.get("mount", {}):
             mount_name = mount.get("name", "Monture")
