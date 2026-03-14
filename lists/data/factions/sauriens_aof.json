@@ -115,28 +115,22 @@
         }
     ],
     "spells": {
-        "Poison Mist [Brume empoisonnée]": {
-            "cost": 1,
+        "Poison Mist [Brume empoisonnée] (1)": {
             "description": "Choisissez une unité ennemie à 18” ou moins. Les unités amies bénéficient de la règle spéciale Perforant une seule fois lorsqu'elles l'attaquent (la prochaine fois que l'effet s'appliquerait)."
         },
-        "Piranha Swarm [Nuée de piranhas]": {
-            "cost": 1,
+        "Piranha Swarm [Nuée de piranhas] (1)": {
             "description": "Choisissez une unité ennemie à 12” ou moins, qui subit deux touches avec Désintégration."
         },
-        "Fateful Guidance [Guide providentiel]": {
-            "cost": 2,
+        "Fateful Guidance [Guide providentiel] (2)": {
             "description": "Choisissez jusqu'à deux unités amies à 12” ou moins, qui obtiennent une seule fois la règle spéciale Inébranlable (la prochaine fois que cet effet s'appliquerait)."
         },
-        "Jaguar Pounce [Jaguar bondissant]": {
-            "cost": 2,
+        "Jaguar Pounce [Jaguar bondissant] (2)": {
             "description": "Choisissez une figurine ennemie à 18” ou moins, qui subit quatre touches avec PA (1)."
         },
-        "Primordial Roar [Rugissement primal]": {
-            "cost": 3,
+        "Primordial Roar [Rugissement primal] (3)": {
             "description": "Choisissez jusqu'à trois unités amies à 12” ou moins, qui bénéficient de la règle spéciale Bonus de Primal une seule fois (la prochaine fois que cet effet s'appliquerait)."
         },
-        "Serpent Egg [Œuf de serpent]": {
-            "cost": 3,
+        "Serpent Egg [Œuf de serpent] (3)": {
             "description": "Choisissez une unité ennemie à 6” ou moins, qui subit neuf touches avec Fléau."
         }
     },
@@ -527,7 +521,7 @@
                 },
                 {
                     "group": "Améliorations d'unité",
-                    "type": "weapon_upgrades",
+                    "type": "conditional_weapon",
                     "description": "Améliorer avec une des options suivantes (un seul choix possible)",
                     "options": [
                         {
@@ -721,7 +715,7 @@
             "upgrade_groups": [
                 {
                     "group": "Améliorations d'arme",
-                    "type": "weapon_upgrades",
+                    "type": "conditional_weapon",
                     "description": "Améliorer avec une des options suivantes (un seul choix possible)",
                     "options": [
                         {
@@ -1003,7 +997,7 @@
             "upgrade_groups": [
                 {
                     "group": "Améliorations d'arme",
-                    "type": "weapon_upgrades",
+                    "type": "conditional_weapon",
                     "description": "Améliorer avec une des options suivantes (un seul choix possible)",
                     "options": [
                         {
@@ -1065,7 +1059,7 @@
             "upgrade_groups": [
                 {
                     "group": "Améliorations d'arme",
-                    "type": "weapon_upgrades",
+                    "type": "conditional_weapon",
                     "description": "Améliorer avec une des options suivantes (un seul choix possible)",
                     "options": [
                         {
