@@ -106,17 +106,37 @@ def validate_army_rules(army_list, army_points, game):
             check_unit_max_cost(army_list, army_points, game_config) and
             check_unit_copy_rule(army_list, army_points, game_config))
 
-def check_weapon_conditions(unit_key, requires):
+def check_weapon_conditions(unit_key, requires, unit=None):
+    """
+    Vérifie si les conditions d'une option sont remplies.
+    Prend en compte :
+    - Les sélections explicites dans session_state (armes de remplacement choisies)
+    - Les armes de BASE de l'unité, actives quand aucun groupe type=weapon
+      n'a de sélection explicite (= le joueur garde choices[0])
+    """
     if not requires:
         return True
     current_weapons = []
-    for selection in st.session_state.unit_selections.get(unit_key, {}).values():
-        if isinstance(selection, dict) and "weapon" in selection:
-            weapon = selection["weapon"]
-            if isinstance(weapon, dict): current_weapons.append(weapon)
-            elif isinstance(weapon, list): current_weapons.extend(weapon)
-        elif isinstance(selection, str) and selection not in ("Aucune amélioration", "Aucune arme"):
-            current_weapons.append({"name": selection.split(" (")[0]})
+    selections = st.session_state.unit_selections.get(unit_key, {})
+
+    # 1. Sélections explicites (armes remplacées, conditionnelles choisies)
+    for v in selections.values():
+        if isinstance(v, str) and v not in ("Aucune amélioration", "Aucune arme", "Aucun rôle"):
+            current_weapons.append({"name": v.split(" (")[0]})
+
+    # 2. Armes de BASE — actives pour chaque groupe type=weapon
+    #    où aucune sélection explicite n'est stockée (= choices[0] implicite)
+    if unit is not None:
+        for gi, g in enumerate(unit.get("upgrade_groups", [])):
+            if g.get("type") != "weapon":
+                continue
+            g_key = f"group_{gi}"
+            if g_key not in selections:
+                # Aucune sélection explicite → les armes de base sont actives
+                for w in unit.get("weapon", []):
+                    if isinstance(w, dict):
+                        current_weapons.append(w)
+
     for req in requires:
         if not any(w.get("name") == req or req in w.get("tags", []) for w in current_weapons):
             return False
@@ -643,7 +663,7 @@ if st.session_state.page == "army":
         g_key = f"group_{g_idx}"
         gtype = group.get("type","")
         hvo = (bool(group.get("options")) if gtype != "conditional_weapon"
-               else any(not o.get("requires") or check_weapon_conditions(unit_key, o.get("requires",[])) for o in group.get("options",[])))
+               else any(not o.get("requires") or check_weapon_conditions(unit_key, o.get("requires",[]), unit) for o in group.get("options",[])))
         if not hvo: continue
         st.subheader(group.get("group","Améliorations"))
 
@@ -668,7 +688,7 @@ if st.session_state.page == "army":
                         if ol==ch: weapon_cost+=o["cost"]; weapons=o["weapon"] if isinstance(o["weapon"],list) else [o["weapon"]]; break
 
         elif gtype == "conditional_weapon":
-            ao=[o for o in group.get("options",[]) if not o.get("requires") or check_weapon_conditions(unit_key,o.get("requires",[]))]
+            ao=[o for o in group.get("options",[]) if not o.get("requires") or check_weapon_conditions(unit_key,o.get("requires",[]),unit)]
             if not ao: st.markdown(f"<div style='color:#999;font-size:.9em;'>{group.get('description','')} <em>(Non disponible)</em></div>",unsafe_allow_html=True)
             else:
                 choices=["Aucune amélioration"]; opt_map={}
@@ -697,10 +717,10 @@ if st.session_state.page == "army":
             for oi,option in enumerate(group.get("options",[])):
                 st.markdown(f"<h4 style='color:#3498db;'>{option['name']}</h4>",unsafe_allow_html=True)
                 req=option.get("requires",[])
-                if req and not check_weapon_conditions(unit_key,req): st.markdown(f"<div style='color:#999;font-size:.9em;'>{option['name']} <em>(Non disponible)</em></div>",unsafe_allow_html=True); continue
+                if req and not check_weapon_conditions(unit_key,req,unit): st.markdown(f"<div style='color:#999;font-size:.9em;'>{option['name']} <em>(Non disponible)</em></div>",unsafe_allow_html=True); continue
                 mc=unit.get("size",1)
                 if "max_count" in option: mc=min(option["max_count"].get("value",mc),unit.get("size",1))
-                cnt=st.slider(f"Nombre de {option['name']} (max:{mc})",min_value=option.get("min_count",0),max_value=mc,value=option.get("min_count",0),key=f"{unit_key}_{g_key}_cnt_{oi}")
+                cnt=st.number_input(f"Nombre de {option['name']} (0 – {mc})",min_value=option.get("min_count",0),max_value=mc,value=option.get("min_count",0),step=1,key=f"{unit_key}_{g_key}_cnt_{oi}")
                 tc=cnt*option["cost"]; upgrades_cost+=tc
                 st.markdown(f"<div style='margin:10px 0;padding:8px;background:#f8f9fa;border-radius:4px;'><strong>{option['name']}</strong> × {cnt} = <strong style='color:#e74c3c;'>{tc} pts</strong></div>",unsafe_allow_html=True)
                 if cnt > 0:
