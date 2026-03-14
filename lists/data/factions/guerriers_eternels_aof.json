@@ -1095,7 +1095,7 @@
             {
               "name": "Masse-tonnerre",
               "cost": 5,
-              "requires": [
+              "replaces": [
                 "Arme à une main lourde"
               ],
               "weapon": {
@@ -1111,7 +1111,7 @@
             {
               "name": "Grande arme lourde",
               "cost": 10,
-              "requires": [
+              "replaces": [
                 "Arme à une main lourde"
               ],
               "weapon": {
