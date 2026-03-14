@@ -684,9 +684,12 @@ if st.session_state.page == "army":
                         if "replaces" in opt:
                             weapons=[w for w in weapons if w.get("name") not in opt.get("replaces",[])]
                         # Dans tous les cas : ajouter la nouvelle arme
+                        # Conserver "_replaces" pour que render_weapon_rows affiche le bon Nx
                         nw=opt["weapon"]
-                        if isinstance(nw,dict): weapons.append({**nw,"_upgraded":True})
-                        elif isinstance(nw,list): weapons.extend({**w,"_upgraded":True} for w in nw)
+                        extra={"_upgraded":True}
+                        if "replaces" in opt: extra["_replaces"]=opt["replaces"]
+                        if isinstance(nw,dict): weapons.append({**nw,**extra})
+                        elif isinstance(nw,list): weapons.extend({**w,**extra} for w in nw)
 
         elif gtype == "variable_weapon_count":
             st.markdown(f"<div style='margin-bottom:10px;color:#6c757d;'>{group.get('description','')}</div>",unsafe_allow_html=True)
