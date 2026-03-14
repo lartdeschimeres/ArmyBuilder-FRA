@@ -1,4 +1,5 @@
 import json
+import copy
 import streamlit as st
 from pathlib import Path
 from datetime import datetime
@@ -230,7 +231,14 @@ def export_html(army_list, army_name, army_limit):
         if isinstance(bw, dict): bw = [bw]
         for w in bw:
             if isinstance(w, dict):
-                wc = w.copy(); wc.setdefault("range", "Mêlée"); result.append(wc)
+                wc = w.copy(); wc.setdefault("range", "Mêlée")
+                # Purger _count sur les armes de base (not _upgraded) :
+                # _count ne doit exister que sur les armes ajoutées via slider.
+                # Un résidu de cache ou de JSON corrompu sur une arme de base
+                # fausserait le calcul de replaced_count dans group_weapons.
+                if not wc.get("_upgraded") and "_count" in wc:
+                    del wc["_count"]
+                result.append(wc)
         # Armes de monture uniquement
         if unit.get("mount"):
             m = unit["mount"]
@@ -656,7 +664,7 @@ if st.session_state.page == "army":
         st.session_state.draft_unit_name = unit['name']
     unit_key = f"draft_{st.session_state.draft_counter}"
     st.session_state.unit_selections.setdefault(unit_key, {})
-    weapons = list(unit.get("weapon",[])); selected_options = {}; mount = None
+    weapons = copy.deepcopy(list(unit.get("weapon",[]))); selected_options = {}; mount = None
     weapon_cost = 0; mount_cost = 0; upgrades_cost = 0
 
     for g_idx, group in enumerate(unit.get("upgrade_groups",[])):
@@ -685,7 +693,7 @@ if st.session_state.page == "army":
                 st.session_state.unit_selections[unit_key][g_key]=ch
                 if ch!=choices[0]:
                     for ol,o in opt_map.items():
-                        if ol==ch: weapon_cost+=o["cost"]; weapons=o["weapon"] if isinstance(o["weapon"],list) else [o["weapon"]]; break
+                        if ol==ch: weapon_cost+=o["cost"]; weapons=copy.deepcopy(o["weapon"] if isinstance(o["weapon"],list) else [o["weapon"]]); break
 
         elif gtype == "conditional_weapon":
             ao=[o for o in group.get("options",[]) if not o.get("requires") or check_weapon_conditions(unit_key,o.get("requires",[]),unit)]
@@ -713,7 +721,7 @@ if st.session_state.page == "army":
 
         elif gtype == "variable_weapon_count":
             st.markdown(f"<div style='margin-bottom:10px;color:#6c757d;'>{group.get('description','')}</div>",unsafe_allow_html=True)
-            bw=list(unit.get("weapon",[])) if isinstance(unit.get("weapon"),list) else [unit.get("weapon",{})]
+            bw=copy.deepcopy(list(unit.get("weapon",[])) if isinstance(unit.get("weapon"),list) else [unit.get("weapon",{})])
             for oi,option in enumerate(group.get("options",[])):
                 st.markdown(f"<h4 style='color:#3498db;'>{option['name']}</h4>",unsafe_allow_html=True)
                 req=option.get("requires",[])
@@ -741,8 +749,8 @@ if st.session_state.page == "army":
             if ch!=choices[0]:
                 opt=opt_map[ch]; upgrades_cost+=opt.get("cost",0); selected_options[group.get("group","Rôle")]=[opt]
                 rw=opt.get("weapon",[])
-                if isinstance(rw,list): weapons.extend(rw)
-                elif isinstance(rw,dict): weapons.append(rw)
+                if isinstance(rw,list): weapons.extend(copy.deepcopy(rw))
+                elif isinstance(rw,dict): weapons.append(copy.deepcopy(rw))
 
         elif gtype == "upgrades":
             for oi,o in enumerate(group.get("options",[])):
