@@ -389,8 +389,33 @@ def export_html(army_list, army_name, army_limit):
             return "🤖"
         return "🛡️"
 
+    def get_roles(unit):
+        """Récupère les rôles sélectionnés pour les héros/titans"""
+        roles = []
+        if "options" in unit:
+            for group_name, options in unit["options"].items():
+                if isinstance(options, list):
+                    for opt in options:
+                        if isinstance(opt, dict) and opt.get("type") == "role":
+                            roles.append(opt)
+                elif isinstance(options, dict) and options.get("type") == "role":
+                    roles.append(options)
+        return roles
+
+    def get_role_weapons(unit):
+        """Récupère les armes spécifiques aux rôles"""
+        role_weapons = []
+        roles = get_roles(unit)
+        for role in roles:
+            if "weapon" in role:
+                if isinstance(role["weapon"], list):
+                    role_weapons.extend(role["weapon"])
+                else:
+                    role_weapons.append(role["weapon"])
+        return role_weapons
+
     def collect_weapons(unit):
-        """Collecte toutes les armes de l'unité, y compris les améliorations"""
+        """Collecte toutes les armes de l'unité"""
         weapons = []
 
         # Armes de base
@@ -400,7 +425,11 @@ def export_html(army_list, army_name, army_limit):
             else:
                 weapons.append(unit["weapon"])
 
-        # Armes des options sélectionnées
+        # Armes des rôles
+        role_weapons = get_role_weapons(unit)
+        weapons.extend(role_weapons)
+
+        # Armes des options
         if "options" in unit:
             for group in unit["options"].values():
                 if isinstance(group, list):
@@ -410,6 +439,11 @@ def export_html(army_list, army_name, army_limit):
                                 weapons.extend(opt["weapon"])
                             else:
                                 weapons.append(opt["weapon"])
+                elif isinstance(group, dict) and "weapon" in group:
+                    if isinstance(group["weapon"], list):
+                        weapons.extend(group["weapon"])
+                    else:
+                        weapons.append(group["weapon"])
 
         # Armes de monture
         if unit.get("mount"):
@@ -423,14 +457,13 @@ def export_html(army_list, army_name, army_limit):
         return weapons
 
     def group_weapons(weapons):
-        """Regroupe les armes identiques et compte leurs occurrences"""
+        """Regroupe les armes identiques"""
         weapon_map = {}
 
         for w in weapons:
             if not isinstance(w, dict):
                 continue
 
-            # Créer une clé unique pour chaque arme
             name = w.get("name", "Arme")
             rng = w.get("range", "-")
             att = w.get("attacks", "-")
@@ -442,47 +475,21 @@ def export_html(army_list, army_name, army_limit):
             if key not in weapon_map:
                 weapon_map[key] = dict(w)
                 weapon_map[key]["count"] = 1
-                # Conserver les informations d'amélioration si elles existent
-                if "_upgraded" in w:
-                    weapon_map[key]["_upgraded"] = True
-                if "_replaces" in w:
-                    weapon_map[key]["_replaces"] = w["_replaces"]
             else:
                 weapon_map[key]["count"] += 1
 
         grouped = list(weapon_map.values())
-
-        # Tri: armes de mêlée en dernier
-        def sort_key(w):
-            r = w.get("range", "-")
-            if r == "-" or str(r).lower() == "mêlée":
-                return (1, w["name"])
-            return (0, w["name"])
-
-        grouped.sort(key=sort_key)
         return grouped
 
-    def get_weapon_upgrades(unit):
-        """Récupère les améliorations d'armes appliquées à l'unité"""
-        upgrades = []
-        if "weapon_upgrades" in unit:
-            if isinstance(unit["weapon_upgrades"], list):
-                upgrades.extend(unit["weapon_upgrades"])
-            else:
-                upgrades.append(unit["weapon_upgrades"])
-        return upgrades
-
     def get_rules(unit):
-        """Récupère toutes les règles spéciales de l'unité"""
+        """Récupère toutes les règles spéciales"""
         rules = set()
 
-        # Règles de base de l'unité
         if "special_rules" in unit:
             for r in unit["special_rules"]:
                 if isinstance(r, str):
                     rules.add(r)
 
-        # Règles des options sélectionnées
         if "options" in unit:
             for group in unit["options"].values():
                 if isinstance(group, list):
@@ -491,36 +498,38 @@ def export_html(army_list, army_name, army_limit):
                             for r in opt["special_rules"]:
                                 if isinstance(r, str):
                                     rules.add(r)
+                elif isinstance(group, dict) and "special_rules" in group:
+                    for r in group["special_rules"]:
+                        if isinstance(r, str):
+                            rules.add(r)
 
-        # Règles de la monture
+        roles = get_roles(unit)
+        for role in roles:
+            if "special_rules" in role:
+                for r in role["special_rules"]:
+                    if isinstance(r, str):
+                        rules.add(r)
+
         if unit.get("mount"):
             mount = unit["mount"].get("mount", {})
             for r in mount.get("special_rules", []):
-                if isinstance(r, str):
+                if isinstance(r, str) and not r.startswith(("Griffes", "Sabots")):
                     rules.add(r)
 
         return sorted(rules)
 
-    def get_roles(unit):
-        """Récupère les rôles sélectionnés pour les héros/titans"""
-        roles = []
+    def get_upgrades(unit):
+        """Récupère les améliorations de l'unité"""
+        upgrades = []
         if "options" in unit:
-            for group_name, options in unit["options"].items():
-                if isinstance(options, list):
-                    for opt in options:
-                        if isinstance(opt, dict) and opt.get("type") == "role":
-                            roles.append(opt)
-        return roles
-
-    def get_mount_rules(unit):
-        """Récupère les règles spéciales de la monture sans doublons"""
-        rules = set()
-        if unit.get("mount"):
-            mount = unit["mount"].get("mount", {})
-            for r in mount.get("special_rules", []):
-                if isinstance(r, str) and not r.startswith(("Griffes", "Sabots", "Coriace")):
-                    rules.add(r)
-        return sorted(rules)
+            for group in unit["options"].values():
+                if isinstance(group, list):
+                    for opt in group:
+                        if isinstance(opt, dict) and opt.get("type") == "upgrade":
+                            upgrades.append(opt)
+                elif isinstance(group, dict) and group.get("type") == "upgrade":
+                    upgrades.append(group)
+        return upgrades
 
     total = sum(u["cost"] for u in army_list)
 
@@ -533,20 +542,24 @@ def export_html(army_list, army_name, army_limit):
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {{
-  --bg-dark: #f8f9fa;
-  --bg-card: #ffffff;
-  --bg-header: #e9ecef;
+  --bg-dark: #2c3e50;
+  --bg-card: #34495e;
+  --bg-header: #2c3e50;
+  --bg-section: #2c3e50;
   --accent: #3498db;
-  --text-main: #212529;
-  --text-muted: #6c757d;
-  --border: #dee2e6;
+  --accent-dark: #2980b9;
+  --text-main: #ecf0f1;
+  --text-muted: #bdc3c7;
+  --border: #34495e;
   --cost-color: #e74c3c;
-  --tough-color: #e74c3c;
-  --rule-bg: #f0f0f0;
-  --weapon-bg: #f8f9fa;
-  --role-bg: #e3f2fd;
-  --mount-bg: #f5f5f5;
-  --upgrade-bg: #e8f5e9;
+  --tough-color: #f39c12;
+  --rule-bg: rgba(52, 152, 219, 0.2);
+  --weapon-bg: rgba(44, 62, 80, 0.3);
+  --role-bg: rgba(52, 152, 219, 0.3);
+  --upgrade-bg: rgba(46, 204, 113, 0.2);
+  --mount-bg: rgba(155, 89, 182, 0.2);
+  --stat-badge: #2980b9;
+  --table-header: #2c3e50;
 }}
 
 body {{
@@ -565,11 +578,11 @@ body {{
 
 .army-title {{
   text-align: center;
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 700;
   margin-bottom: 20px;
-  color: var(--accent);
-  border-bottom: 1px solid var(--border);
+  color: var(--text-main);
+  border-bottom: 2px solid var(--accent);
   padding-bottom: 10px;
 }}
 
@@ -577,7 +590,7 @@ body {{
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: var(--bg-card);
+  background: var(--bg-header);
   padding: 16px;
   border-radius: 8px;
   margin: 20px 0;
@@ -590,39 +603,34 @@ body {{
   border-radius: 8px;
   margin-bottom: 20px;
   padding: 0;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  page-break-inside: avoid;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  overflow: hidden;
 }}
 
 .unit-header {{
-  padding: 16px 16px 12px;
+  padding: 16px;
+  background: var(--bg-header);
   border-bottom: 1px solid var(--border);
 }}
 
 .unit-name-container {{
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 8px;
 }}
 
 .unit-name {{
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--text-main);
   margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }}
 
-.unit-type {{
-  font-size: 14px;
+.unit-size {{
+  font-size: 16px;
   color: var(--text-muted);
-  margin-top: 4px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  margin-left: 8px;
 }}
 
 .unit-cost {{
@@ -633,79 +641,84 @@ body {{
 }}
 
 .unit-stats {{
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  display: flex;
+  gap: 12px;
   background: var(--bg-header);
   padding: 12px;
-  margin: 0 16px 16px;
+  margin: 0 16px;
   border-radius: 6px;
-  text-align: center;
-  font-size: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
 }}
 
-.stat-item {{
-  padding: 5px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}}
-
-.stat-label {{
-  color: var(--text-muted);
-  font-size: 10px;
-  text-transform: uppercase;
-  margin-bottom: 3px;
+.stat-badge {{
+  background: var(--stat-badge);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
+  min-width: 100px;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }}
 
 .stat-value {{
   font-weight: bold;
   font-size: 16px;
-  color: var(--text-main);
 }}
 
-.tough-value {{
-  color: var(--tough-color) !important;
-  font-weight: bold;
-  font-size: 18px;
-}}
-
-.section {{
-  padding: 0 16px 16px;
+.stat-label {{
+  font-size: 12px;
+  opacity: 0.9;
 }}
 
 .section-title {{
   font-weight: 600;
-  margin: 12px 0;
+  margin: 16px 16px 8px;
   color: var(--text-main);
-  font-size: 14px;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 6px;
+  font-size: 16px;
   display: flex;
   align-items: center;
   gap: 8px;
+  border-bottom: 1px solid var(--accent);
+  padding-bottom: 4px;
 }}
 
-.weapons-section {{
+.weapon-table {{
+  width: calc(100% - 32px);
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 0 16px 16px;
   background: var(--weapon-bg);
-  border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 12px;
-  margin: 0 0 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }}
 
-.weapon-item {{
-  display: flex;
-  justify-content: space-between;
-  padding: 6px 0;
+.weapon-table th {{
+  background: var(--table-header);
+  color: var(--text-main);
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
   border-bottom: 1px solid var(--border);
 }}
 
-.weapon-item:last-child {{
+.weapon-table td {{
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  vertical-align: top;
+}}
+
+.weapon-table tr:last-child td {{
   border-bottom: none;
+}}
+
+.weapon-table tr:nth-child(even) {{
+  background: rgba(0,0,0,0.05);
 }}
 
 .weapon-name {{
@@ -715,52 +728,18 @@ body {{
 
 .weapon-stats {{
   color: var(--text-muted);
-  font-size: 13px;
 }}
 
-.upgrade-section {{
-  background: var(--upgrade-bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 12px;
-  margin: 0 0 16px;
-}}
-
-.upgrade-title {{
-  font-weight: 600;
-  color: var(--accent);
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}}
-
-.rules-section {{
-  margin: 0 0 16px;
-}}
-
-.rules-container {{
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}}
-
-.rule-tag {{
-  background: var(--rule-bg);
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 13px;
-  color: var(--text-main);
-  border: 1px solid var(--border);
+.section {{
+  padding: 0 16px 16px;
 }}
 
 .role-section {{
   background: var(--role-bg);
-  border: 1px solid var(--border);
+  border: 1px solid var(--accent);
   border-radius: 6px;
   padding: 12px;
-  margin: 0 0 16px;
+  margin: 16px;
 }}
 
 .role-title {{
@@ -770,46 +749,99 @@ body {{
   display: flex;
   align-items: center;
   gap: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding-bottom: 4px;
 }}
 
 .role-item {{
-  margin-bottom: 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px dashed var(--border);
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed rgba(255,255,255,0.2);
 }}
 
 .role-name {{
-  font-weight: 500;
-  color: var(--text-main);
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 4px;
+  font-size: 16px;
 }}
 
-.role-stats {{
+.role-cost {{
   font-size: 13px;
   color: var(--text-muted);
+  margin-bottom: 6px;
+}}
+
+.role-description {{
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}}
+
+.role-weapons-table {{
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0;
+  background: rgba(52, 152, 219, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}}
+
+.role-weapons-table th {{
+  background: rgba(52, 152, 219, 0.2);
+  color: var(--text-main);
+  padding: 6px 8px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+}}
+
+.role-weapons-table td {{
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  vertical-align: top;
+  font-size: 13px;
+}}
+
+.upgrade-section {{
+  background: var(--upgrade-bg);
+  border: 1px solid rgba(46, 204, 113, 0.4);
+  border-radius: 6px;
+  padding: 12px;
+  margin: 16px;
 }}
 
 .mount-section {{
   background: var(--mount-bg);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(155, 89, 182, 0.4);
   border-radius: 6px;
   padding: 12px;
-  margin: 0 0 16px;
+  margin: 16px;
 }}
 
-.mount-title {{
+.rules-section {{
+  margin: 16px;
+}}
+
+.rules-title {{
   font-weight: 600;
-  color: var(--text-main);
   margin-bottom: 8px;
+  color: var(--text-main);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }}
 
-.mount-weapons {{
-  margin-top: 12px;
-  background: rgba(245, 245, 245, 0.5);
-  border-radius: 6px;
-  padding: 8px;
+.rule-tag {{
+  background: var(--rule-bg);
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--text-main);
+  border: 1px solid rgba(255,255,255,0.2);
+  margin-right: 8px;
+  margin-bottom: 8px;
+  display: inline-block;
 }}
 
 .faction-rules, .faction-spells {{
@@ -849,6 +881,10 @@ body {{
     border: 1px solid #ccc;
     page-break-inside: avoid;
   }}
+  .stat-badge {{
+    background: #3498db !important;
+    color: white !important;
+  }}
 }}
 </style>
 </head>
@@ -887,192 +923,206 @@ body {{
 <div class="unit-card">
   <div class="unit-header">
     <div class="unit-name-container">
-      <div>
-        <div class="unit-name">
-          {name} <span style="font-size: 12px; color: var(--text-muted); margin-left: 8px;">[{size}]</span>
-        </div>
-        <div class="unit-type">
-          {unit_icon} {unit_type}
-        </div>
+      <div class="unit-name">
+        {name} <span class="unit-size">[{size}]</span>
       </div>
       <div class="unit-cost">{cost} pts</div>
     </div>
 
-    <!-- Profil de l'unité -->
+    <!-- Profil de l'unité avec badges -->
     <div class="unit-stats">
-      <div class="stat-item">
-        <div class="stat-label">⚔️ QUALITÉ</div>
-        <div class="stat-value">{quality}+</div>
+      <div class="stat-badge">
+        <span class="stat-label">QUAL</span>
+        <span class="stat-value">{quality}+</span>
       </div>
-      <div class="stat-item">
-        <div class="stat-label">🛡️ DÉFENSE</div>
-        <div class="stat-value">{defense}+</div>
+      <div class="stat-badge">
+        <span class="stat-label">DÉF</span>
+        <span class="stat-value">{defense}+</span>
       </div>
-      <div class="stat-item">
-        <div class="stat-label">❤️ CORIACE</div>
-        <div class="stat-value tough-value">{coriace if coriace > 0 else "-"}</div>
+      <div class="stat-badge">
+        <span class="stat-label">CORIACE</span>
+        <span class="stat-value">{coriace if coriace > 0 else '-'}</span>
       </div>
-      <div class="stat-item">
-        <div class="stat-label">👥 TAILLE</div>
-        <div class="stat-value">{size}</div>
+      <div class="stat-badge">
+        <span class="stat-label">TAILLE</span>
+        <span class="stat-value">{size}</span>
       </div>
     </div>
 
-    <div class="section">
+    <!-- Règles spéciales de l'unité -->
+    <div class="rules-section">
+      <div class="rules-title">📜 Règles spéciales</div>
+      <div style="margin: 0 16px 12px;">
+'''
+        rules = get_rules(unit)
+        if rules:
+            html += ' '.join(f'<span class="rule-tag">{esc(r)}</span>' for r in rules)
+        else:
+            html += '<span class="rule-tag">Aucune</span>'
+
+        html += '''
+      </div>
+    </div>
+
+    <!-- Tableau des armes -->
+    <div class="section-title">⚔️ Armes</div>
+    <table class="weapon-table">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>PORTÉE</th>
+          <th>ATQ</th>
+          <th>PA</th>
+          <th>SPÉCIAUX</th>
+        </tr>
+      </thead>
+      <tbody>
+'''
+
+        # Armes de l'unité
+        weapons = collect_weapons(unit)
+        grouped_weapons = group_weapons(weapons)
+
+        for w in grouped_weapons:
+            name = esc(w.get("name", "Arme"))
+            count = w.get("count", 1)
+            name_display = f"{name} ×{count}" if count > 1 else name
+
+            rng = w.get("range", "-")
+            if rng == "-" or str(rng).lower() == "mêlée":
+                rng = "Mêlée"
+            else:
+                rng = f'{rng}"'
+
+            att = w.get("attacks", "-")
+            ap = w.get("armor_piercing", "-")
+            rules = ", ".join(w.get("special_rules", []))
+            rules_display = rules if rules else "-"
+
+            html += f"""
+        <tr>
+          <td class="weapon-name">{name_display}</td>
+          <td class="weapon-stats">{rng}</td>
+          <td class="weapon-stats">{att}</td>
+          <td class="weapon-stats">{ap}</td>
+          <td class="weapon-stats">{rules_display}</td>
+        </tr>
+"""
+
+        html += '''
+      </tbody>
+    </table>
 '''
 
         # Section Rôles (pour héros et titans)
         roles = get_roles(unit)
         if roles and unit.get("type") == "hero":
             html += '''
-      <!-- Section Rôles -->
-      <div class="role-section">
-        <div class="role-title">🏆 Rôles</div>
+    <div class="role-section">
+      <div class="role-title">👑 Rôles</div>
 '''
             for role in roles:
                 role_name = esc(role.get("name", "Rôle"))
                 role_cost = role.get("cost", 0)
+                role_description = esc(role.get("description", ""))
                 role_rules = ", ".join(role.get("special_rules", []))
-                role_weapon = role.get("weapon", {})
+                role_weapons = []
+
+                if "weapon" in role:
+                    if isinstance(role["weapon"], list):
+                        role_weapons = role["weapon"]
+                    else:
+                        role_weapons = [role["weapon"]]
 
                 html += f'''
-        <div class="role-item">
-          <div class="role-name">{role_name}{' (+' + str(role_cost) + ' pts)' if role_cost > 0 else ''}</div>
+      <div class="role-item">
+        <div class="role-name">{role_name}</div>
 '''
+                if role_cost > 0:
+                    html += f'''
+        <div class="role-cost">+{role_cost} pts</div>
+'''
+
+                if role_description:
+                    html += f'''
+        <div class="role-description">{role_description}</div>
+'''
+
                 if role_rules:
                     html += f'''
-          <div class="role-stats">Règles: {role_rules}</div>
+        <div class="role-description"><strong>Règles:</strong> {role_rules}</div>
 '''
-                if role_weapon:
-                    if isinstance(role_weapon, list):
-                        for w in role_weapon:
-                            w_name = esc(w.get("name", "Arme"))
-                            w_range = w.get("range", "Mêlée")
-                            w_att = w.get("attacks", "-")
-                            w_ap = w.get("armor_piercing", "-")
+
+                if role_weapons:
+                    html += '''
+        <div style="margin-top: 8px;">
+          <div style="font-weight: 600; color: var(--accent); margin-bottom: 4px; font-size: 14px;">Armes du rôle:</div>
+          <table class="role-weapons-table">
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>ATQ</th>
+                <th>PA</th>
+                <th>SPÉCIAUX</th>
+              </tr>
+            </thead>
+            <tbody>
+'''
+                    for weapon in role_weapons:
+                        if isinstance(weapon, dict):
+                            w_name = esc(weapon.get("name", "Arme"))
+                            w_range = weapon.get("range", "Mêlée")
+                            w_att = weapon.get("attacks", "-")
+                            w_ap = weapon.get("armor_piercing", "-")
+                            w_rules = ", ".join(weapon.get("special_rules", []))
+
                             html += f'''
-          <div class="role-stats">Arme: {w_name} ({w_range}, A{w_att}, PA{w_ap})</div>
+              <tr>
+                <td>{w_name}</td>
+                <td>{w_att}</td>
+                <td>{w_ap}</td>
+                <td>{w_rules if w_rules else '-'}</td>
+              </tr>
 '''
-                    else:
-                        w_name = esc(role_weapon.get("name", "Arme"))
-                        w_range = role_weapon.get("range", "Mêlée")
-                        w_att = role_weapon.get("attacks", "-")
-                        w_ap = role_weapon.get("armor_piercing", "-")
-                        html += f'''
-          <div class="role-stats">Arme: {w_name} ({w_range}, A{w_att}, PA{w_ap})</div>
+                    html += '''
+            </tbody>
+          </table>
+        </div>
+'''
+                html += '''
+      </div>
+'''
+            html += '''
+    </div>
+'''
+
+        # Section Améliorations
+        upgrades = get_upgrades(unit)
+        if upgrades:
+            html += '''
+    <div class="upgrade-section">
+      <div class="section-title">⬆️ Améliorations</div>
+      <div style="margin-left: 8px;">
+'''
+            for upgrade in upgrades:
+                upgrade_name = esc(upgrade.get("name", "Amélioration"))
+                upgrade_cost = upgrade.get("cost", 0)
+                upgrade_rules = ", ".join(upgrade.get("special_rules", []))
+
+                html += f'''
+        <div style="margin-bottom: 8px;">
+          <strong>{upgrade_name}</strong>{' (+' + str(upgrade_cost) + ' pts)' if upgrade_cost > 0 else ''}
+'''
+                if upgrade_rules:
+                    html += f'''
+          <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">{upgrade_rules}</div>
 '''
                 html += '''
         </div>
 '''
             html += '''
       </div>
-'''
-
-        # Section Armes de base et améliorées
-        weapons = collect_weapons(unit)
-        grouped_weapons = group_weapons(weapons)
-
-        # Séparer les armes de base et les améliorations
-        base_weapons = []
-        upgraded_weapons = []
-
-        for w in grouped_weapons:
-            if w.get("_upgraded", False):
-                upgraded_weapons.append(w)
-            else:
-                base_weapons.append(w)
-
-        # Afficher d'abord les armes de base
-        if base_weapons:
-            html += '''
-      <!-- Section Armes de base -->
-      <div class="weapons-section">
-        <div class="section-title">⚔️ Armes de base</div>
-'''
-            for w in base_weapons:
-                name = esc(w.get("name", "Arme"))
-                count = w.get("count", 1)
-                name_display = f"{name} ×{count}" if count > 1 else name
-
-                rng = w.get("range", "-")
-                if rng == "-" or str(rng).lower() == "mêlée":
-                    rng = "Mêlée"
-                else:
-                    rng = f'{rng}"'
-
-                att = w.get("attacks", "-")
-                ap = w.get("armor_piercing", "-")
-                rules = ", ".join(w.get("special_rules", []))
-                rules_display = f" | {rules}" if rules else ""
-
-                html += f"""
-        <div class="weapon-item">
-          <div class="weapon-name">{name_display}</div>
-          <div class="weapon-stats">
-            {rng} | A{att} | PA{ap}{rules_display}
-          </div>
-        </div>
-"""
-            html += '''
-      </div>
-'''
-
-        # Afficher les améliorations d'armes
-        if upgraded_weapons:
-            html += '''
-      <!-- Section Améliorations d'armes -->
-      <div class="upgrade-section">
-        <div class="upgrade-title">🔧 Améliorations d'armes</div>
-'''
-            for w in upgraded_weapons:
-                name = esc(w.get("name", "Amélioration"))
-                count = w.get("count", 1)
-                name_display = f"{name} ×{count}" if count > 1 else name
-
-                rng = w.get("range", "-")
-                if rng == "-" or str(rng).lower() == "mêlée":
-                    rng = "Mêlée"
-                else:
-                    rng = f'{rng}"'
-
-                att = w.get("attacks", "-")
-                ap = w.get("armor_piercing", "-")
-                rules = ", ".join(w.get("special_rules", []))
-                rules_display = f" | {rules}" if rules else ""
-
-                # Afficher quelle arme a été remplacée si disponible
-                replaces = w.get("_replaces", [])
-                replaces_display = ""
-                if replaces:
-                    replaces_display = f" (remplace: {', '.join(replaces)})"
-
-                html += f"""
-        <div class="weapon-item">
-          <div class="weapon-name">{name_display}{replaces_display}</div>
-          <div class="weapon-stats">
-            {rng} | A{att} | PA{ap}{rules_display}
-          </div>
-        </div>
-"""
-            html += '''
-      </div>
-'''
-
-        # Section Règles spéciales
-        rules = get_rules(unit)
-        if rules:
-            html += '''
-      <!-- Section Règles spéciales -->
-      <div class="rules-section">
-        <div class="section-title">📜 Règles spéciales</div>
-        <div class="rules-container">
-'''
-            for r in rules:
-                html += f'<span class="rule-tag">{esc(r)}</span>'
-
-            html += '''
-        </div>
-      </div>
+    </div>
 '''
 
         # Section Monture
@@ -1084,11 +1134,10 @@ body {{
             mount_coriace = mount_data.get("coriace_bonus", 0)
 
             html += f'''
-      <!-- Section Monture -->
-      <div class="mount-section">
-        <div class="mount-title">
-          🐴 {mount_name}{' (+' + str(mount_cost) + ' pts)' if mount_cost > 0 else ''}
-        </div>
+    <div class="mount-section">
+      <div class="section-title">🐴 {mount_name}</div>
+      <div style="margin: 0 8px 8px 8px;">
+        +{mount_cost} pts
 '''
 
             # Armes de la monture
@@ -1096,8 +1145,19 @@ body {{
                 mount_weapons = mount_data["weapon"]
                 if isinstance(mount_weapons, list) and mount_weapons:
                     html += '''
-        <div class="mount-weapons">
-          <div style="font-weight: 600; margin-bottom: 8px;">Armes de la monture:</div>
+        <div style="margin-top: 12px;">
+          <div style="font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 14px;">Armes de la monture:</div>
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px; background: rgba(0,0,0,0.1); border-radius: 4px;">
+            <thead>
+              <tr style="background: rgba(155, 89, 182, 0.2);">
+                <th style="text-align: left; padding: 6px 8px; font-size: 12px;">Nom</th>
+                <th style="text-align: left; padding: 6px 8px; font-size: 12px;">PORTÉE</th>
+                <th style="text-align: left; padding: 6px 8px; font-size: 12px;">ATQ</th>
+                <th style="text-align: left; padding: 6px 8px; font-size: 12px;">PA</th>
+                <th style="text-align: left; padding: 6px 8px; font-size: 12px;">SPÉCIAUX</th>
+              </tr>
+            </thead>
+            <tbody>
 '''
                     for weapon in mount_weapons:
                         if isinstance(weapon, dict):
@@ -1111,30 +1171,35 @@ body {{
                             att = weapon.get("attacks", "-")
                             ap = weapon.get("armor_piercing", "-")
                             rules = ", ".join(weapon.get("special_rules", []))
-                            rules_display = f" | {rules}" if rules else ""
+                            rules_display = rules if rules else "-"
 
                             html += f"""
-          <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border);">
-            <div style="font-weight: 500; font-size: 14px;">{name}</div>
-            <div style="color: var(--text-muted); font-size: 13px;">
-              {rng} | A{att} | PA{ap}{rules_display}
-            </div>
-          </div>
+              <tr style="background: rgba(155, 89, 182, 0.05);">
+                <td style="padding: 6px 8px; font-size: 13px;">{name}</td>
+                <td style="padding: 6px 8px; font-size: 13px;">{rng}</td>
+                <td style="padding: 6px 8px; font-size: 13px;">{att}</td>
+                <td style="padding: 6px 8px; font-size: 13px;">{ap}</td>
+                <td style="padding: 6px 8px; font-size: 13px;">{rules_display}</td>
+              </tr>
 """
                     html += '''
+            </tbody>
+          </table>
         </div>
 '''
 
-            # Règles spéciales de la monture (sans doublons)
-            mount_rules = get_mount_rules(unit)
+            # Règles spéciales de la monture
+            mount_rules = []
+            if "special_rules" in mount_data:
+                mount_rules = [r for r in mount_data["special_rules"] if not r.startswith(("Griffes", "Sabots", "Coriace"))]
+
             if mount_rules:
                 html += '''
         <div style="margin-top: 12px;">
-          <div style="font-weight: 600; margin-bottom: 8px;">Règles spéciales:</div>
-          <div class="rules-container">
+          <div style="font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 14px;">Règles spéciales:</div>
+          <div>
 '''
-                for rule in mount_rules:
-                    html += f'<span class="rule-tag">{esc(rule)}</span>'
+                html += ' '.join(f'<span class="rule-tag">{esc(r)}</span>' for r in mount_rules)
                 html += '''
           </div>
         </div>
@@ -1142,10 +1207,10 @@ body {{
 
             html += '''
       </div>
+    </div>
 '''
 
         html += '''
-    </div>
 </div>
 '''
 
@@ -1157,7 +1222,7 @@ body {{
         if all_rules:
             html += '''
 <div class="faction-rules">
-  <h3 style="text-align: center; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px;">
+  <h3 style="text-align: center; color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 10px; margin-bottom: 20px;">
     📜 Légende des règles spéciales de la faction
   </h3>
   <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
@@ -1183,7 +1248,7 @@ body {{
         if all_spells:
             html += '''
 <div class="faction-spells" style="margin-top: 20px;">
-  <h3 style="text-align: center; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px;">
+  <h3 style="text-align: center; color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 10px; margin-bottom: 20px;">
     ✨ Légende des sorts de la faction
   </h3>
   <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
