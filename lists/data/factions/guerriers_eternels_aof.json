@@ -1095,6 +1095,9 @@
             {
               "name": "Masse-tonnerre",
               "cost": 5,
+              "requires": [
+                "Javelot"
+              ],
               "weapon": {
                 "name": "Masse-tonnerre",
                 "range": "Mêlée",
@@ -1108,6 +1111,9 @@
             {
               "name": "Grande arme lourde",
               "cost": 10,
+              "requires": [
+                "Javelot"
+              ],
               "weapon": {
                 "name": "Grande arme lourde",
                 "range": "Mêlée",
