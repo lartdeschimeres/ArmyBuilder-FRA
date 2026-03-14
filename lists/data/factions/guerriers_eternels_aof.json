@@ -1096,7 +1096,7 @@
               "name": "Masse-tonnerre",
               "cost": 5,
               "requires": [
-                "Javelot"
+                "Arme à une main lourde"
               ],
               "weapon": {
                 "name": "Masse-tonnerre",
@@ -1112,7 +1112,7 @@
               "name": "Grande arme lourde",
               "cost": 10,
               "requires": [
-                "Javelot"
+                "Arme à une main lourde"
               ],
               "weapon": {
                 "name": "Grande arme lourde",
