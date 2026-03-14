@@ -200,27 +200,16 @@ def export_html(army_list, army_name, army_limit):
         return s if s.endswith('"') else f'{s}"'
 
     def collect_weapons(unit):
+        # unit["weapon"] contient DEJA toutes les armes consolidees par la page army
+        # (armes de base, remplacements, armes de role). Ne PAS relire unit["options"]
+        # pour eviter les doublons sur les roles avec weapon.
         result = []
         bw = unit.get("weapon", [])
         if isinstance(bw, dict): bw = [bw]
         for w in bw:
             if isinstance(w, dict):
                 wc = w.copy(); wc.setdefault("range", "Mêlée"); result.append(wc)
-        if "options" in unit and isinstance(unit["options"], dict):
-            for group in unit["options"].values():
-                opts = group if isinstance(group, list) else [group]
-                for opt in opts:
-                    if not isinstance(opt, dict): continue
-                    raw = opt.get("weapon")
-                    if not raw: continue
-                    ws = raw if isinstance(raw, list) else [raw]
-                    for w in ws:
-                        if not isinstance(w, dict): continue
-                        wc = w.copy(); wc.setdefault("range", "Mêlée")
-                        if opt.get("_count"): wc["_count"] = opt["_count"]
-                        if opt.get("type") == "variable_weapon_count": wc["_count"] = opt.get("count", 1)
-                        if opt.get("replaces"): wc["_replaces"] = opt["replaces"]; wc["_upgraded"] = True
-                        result.append(wc)
+        # Armes de monture uniquement
         if unit.get("mount"):
             m = unit["mount"]
             if isinstance(m, dict):
@@ -230,19 +219,33 @@ def export_html(army_list, army_name, army_limit):
                     if isinstance(mws, dict): mws = [mws]
                     for w in mws:
                         if isinstance(w, dict):
-                            wc = w.copy(); wc.setdefault("range","Mêlée"); wc["_mount_weapon"] = True; result.append(wc)
+                            wc = w.copy(); wc.setdefault("range", "Mêlée"); wc["_mount_weapon"] = True; result.append(wc)
         return result
 
     def group_weapons(weapons):
+        # Passe 1 : agreger par cle en accumulant les _count
         wmap = {}
         for w in weapons:
             if not isinstance(w, dict) or w.get("_mount_weapon"): continue
-            wc = w.copy(); wc.setdefault("range","Mêlée")
+            wc = w.copy(); wc.setdefault("range", "Mêlée")
             key = (wc.get("name",""), wc.get("range",""), wc.get("attacks",""), wc.get("armor_piercing",""), tuple(sorted(wc.get("special_rules",[]))))
             cnt = wc.get("_count", 1) or 1
             if key not in wmap: wmap[key] = wc; wmap[key]["_display_count"] = cnt
             else: wmap[key]["_display_count"] += cnt
-        return list(wmap.values())
+        # Passe 2 : appliquer _replaces — soustraire les remplacements
+        for w in weapons:
+            if not isinstance(w, dict) or w.get("_mount_weapon"): continue
+            replaces = w.get("_replaces", [])
+            if not replaces: continue
+            replaced_count = w.get("_count", 1) or 1
+            for replaced_name in replaces:
+                for key, entry in wmap.items():
+                    if entry.get("name") == replaced_name:
+                        wmap[key]["_display_count"] -= replaced_count
+                        break
+        # Passe 3 : exclure les armes avec count <= 0
+        return [v for v in wmap.values() if v.get("_display_count", 1) > 0]
+
 
     def get_rules(unit):
         rules = set()
@@ -726,3 +729,4 @@ if st.session_state.page == "army":
         ud={"name":unit["name"],"type":unit.get("type","unit"),"cost":final_cost,"size":unit.get("size",10)*multiplier if unit.get("type")!="hero" else 1,"quality":unit.get("quality"),"defense":unit.get("defense"),"weapon":weapons,"options":selected_options,"mount":mount,"special_rules":list(set(asr)),"coriace":cor}
         if validate_army_rules(st.session_state.army_list+[ud],st.session_state.points,st.session_state.game):
             st.session_state.army_list.append(ud); st.session_state.army_cost+=final_cost; st.rerun()
+        
