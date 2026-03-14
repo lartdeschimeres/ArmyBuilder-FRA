@@ -648,8 +648,11 @@ if st.session_state.page == "army":
                 st.session_state.unit_selections[unit_key][g_key]=ch
                 if ch!=choices[0]:
                     opt=opt_map[ch]; upgrades_cost+=opt.get("cost",0)
-                    if "replaces" in opt and "weapon" in opt:
-                        weapons=[w for w in weapons if w.get("name") not in opt.get("replaces",[])]
+                    if "weapon" in opt:
+                        # Si "replaces" present : retirer l'ancienne arme d'abord
+                        if "replaces" in opt:
+                            weapons=[w for w in weapons if w.get("name") not in opt.get("replaces",[])]
+                        # Dans tous les cas : ajouter la nouvelle arme
                         nw=opt["weapon"]
                         if isinstance(nw,dict): weapons.append({**nw,"_upgraded":True})
                         elif isinstance(nw,list): weapons.extend({**w,"_upgraded":True} for w in nw)
@@ -729,4 +732,3 @@ if st.session_state.page == "army":
         ud={"name":unit["name"],"type":unit.get("type","unit"),"cost":final_cost,"size":unit.get("size",10)*multiplier if unit.get("type")!="hero" else 1,"quality":unit.get("quality"),"defense":unit.get("defense"),"weapon":weapons,"options":selected_options,"mount":mount,"special_rules":list(set(asr)),"coriace":cor}
         if validate_army_rules(st.session_state.army_list+[ud],st.session_state.points,st.session_state.game):
             st.session_state.army_list.append(ud); st.session_state.army_cost+=final_cost; st.rerun()
-        
