@@ -336,7 +336,7 @@ def export_html(army_list, army_name, army_limit):
                         rules = ", ".join(opt.get("special_rules",[]))
                         if rules: upgrades.append((opt.get("name","Rôle"), rules))
         if not upgrades: return ""
-        rows = "<tr><td colspan='2' style='font-weight:700;background:#f0f0f0;padding:6px 12px;border-top:2px solid #dee2e6;'>Upgrade</td><td colspan='3' style='font-weight:700;background:#f0f0f0;padding:6px 12px;border-top:2px solid #dee2e6;'>SPE</td></tr>"
+        rows = "<tr><td colspan='2' style='font-weight:700;background:#f0f0f0;padding:6px 12px;border-top:2px solid #dee2e6;'>Upgrade</td><td colspan='3' style='font-weight:700;background:#f0f0f0;padding:6px 12px;border-top:2px solid #dee2e6;'>Spé</td></tr>"
         for n, r in upgrades:
             rows += f"<tr><td class='weapon-name' colspan='2'>{esc(n)}</td><td colspan='3'>{esc(r) if r else '-'}</td></tr>"
         return rows
@@ -357,7 +357,7 @@ def export_html(army_list, army_name, army_limit):
         rhtml = " ".join(f'<span class="rule-tag">{esc(r)}</span>' for r in mrules) if mrules else ""
         return f"""<div class="mount-section"><div class="section-title">🐴 {mname} (+{mcost} pts)</div>
 {('<div style="margin-bottom:8px;">' + rhtml + '</div>') if rhtml else ""}
-<table class="weapon-table"><thead><tr><th>Arme</th><th>RNG</th><th>ATK</th><th>AP</th><th>SPE</th></tr></thead><tbody>{wrows}</tbody></table></div>"""
+<table class="weapon-table"><thead><tr><th>Arme</th><th>Por</th><th>Att</th><th>PA</th><th>Spé</th></tr></thead><tbody>{wrows}</tbody></table></div>"""
 
     sorted_units = sorted(army_list, key=get_priority)
     total_cost = sum(u.get("cost",0) for u in sorted_units)
@@ -439,7 +439,7 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
     </div>
     <div class="section-title">⚔️ Armes</div>
     <table class="weapon-table">
-      <thead><tr><th>Arme</th><th>RNG</th><th>ATK</th><th>AP</th><th>SPE</th></tr></thead>
+      <thead><tr><th>Arme</th><th>Por</th><th>Att</th><th>PA</th><th>Spé</th></tr></thead>
       <tbody>{weapon_rows}{upgrade_rows}</tbody>
     </table>
     {mount_section}
@@ -469,7 +469,7 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
                         desc = spell_data.get("description","")
                     else:
                         cost = "?"; desc = str(spell_data)
-                    html += f'<div class="rule-item"><div class="rule-name" style="font-size:12px;">{esc(spell_name)} <span style="font-weight:400;color:#6c757d;">({cost} pts)</span></div><div style="font-size:11px;line-height:1.4;color:#6c757d;">{esc(desc)}</div></div>'
+                    html += f'<div class="rule-item"><div class="rule-name" style="font-size:12px;">{esc(spell_name)}</div><div style="font-size:11px;line-height:1.4;color:#6c757d;">{esc(desc)}</div></div>'
                 html += "</div>"
             html += "</div>"
     except Exception as e:
