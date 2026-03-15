@@ -583,12 +583,13 @@ if st.session_state.page == "setup":
         "Grimdark Future: Firefight":{"color": "#e67e22", "short": "GDF:FF"},
         "Age of Fantasy: Skirmish":  {"color": "#27ae60", "short": "AoF:S"},
     }
+    _BASE = Path(__file__).resolve().parent
     game_images = {
-        "Age of Fantasy":            "assets/games/aof_cover.jpg",
-        "Age of Fantasy: Regiments": "assets/games/aofr_cover.jpg",
-        "Grimdark Future":           "assets/games/gf_cover.jpg",
-        "Grimdark Future: Firefight":"assets/games/gff_cover.jpg",
-        "Age of Fantasy: Skirmish":  "assets/games/aofs_cover.jpg",
+        "Age of Fantasy":            str(_BASE / "assets/games/aof_cover.jpg"),
+        "Age of Fantasy: Regiments": str(_BASE / "assets/games/aofr_cover.jpg"),
+        "Grimdark Future":           str(_BASE / "assets/games/gf_cover.jpg"),
+        "Grimdark Future: Firefight":str(_BASE / "assets/games/gff_cover.jpg"),
+        "Age of Fantasy: Skirmish":  str(_BASE / "assets/games/aofs_cover.jpg"),
     }
     meta  = game_meta.get(current_game, {"color": "#2980b9", "short": "OPR"})
     acc   = meta["color"]
