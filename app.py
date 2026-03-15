@@ -418,11 +418,21 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
         upgrade_rows = render_upgrade_rows(unit)
         mount_section = render_mount_section(unit)
 
+        detail_labels = {
+            "named_hero":    "Héros nommé",
+            "hero":          "Héros",
+            "unit":          "Unité de base",
+            "light_vehicle": "Véhicule léger / Petit monstre",
+            "vehicle":       "Véhicule / Monstre",
+            "titan":         "Titan",
+        }
+        detail_label = detail_labels.get(unit.get("unit_detail", unit.get("type","unit")), "")
+
         html += f"""
 <div class="unit-card">
   <div class="unit-header">
     <div class="unit-name-container">
-      <div class="unit-name">{name}</div>
+      <div class="unit-name">{name}{'<div style="font-size:11px;font-weight:400;color:var(--muted);margin-top:2px;">' + detail_label + '</div>' if detail_label else ''}</div>
       <div class="unit-cost">{cost} pts</div>
     </div>
     <div class="unit-stats">
