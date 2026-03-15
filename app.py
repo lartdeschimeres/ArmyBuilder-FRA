@@ -170,7 +170,14 @@ def format_unit_option(u):
 
 def format_weapon_option(weapon, cost=0):
     if not weapon or not isinstance(weapon, dict): return "Aucune arme"
-    profile = f"{weapon.get('name','Arme')} (A{weapon.get('attacks','?')}/PA{weapon.get('armor_piercing','?')}/{weapon.get('range','Mêlée')})"
+    rng = weapon.get("range","Mêlée")
+    if rng in (None,"-","mêlée","Mêlée") or str(rng).lower()=="mêlée": rng_str="Mêlée"
+    elif isinstance(rng,(int,float)): rng_str=f'{int(rng)}"'
+    else: s=str(rng).strip(); rng_str=s if s.endswith('"') else f'{s}"'
+    sr = weapon.get("special_rules",[])
+    profile_inner = f"{rng_str}/A{weapon.get('attacks','?')}/PA{weapon.get('armor_piercing','?')}"
+    if sr: profile_inner += f", {', '.join(sr)}"
+    profile = f"{weapon.get('name','Arme')} ({profile_inner})"
     if cost > 0: profile += f" (+{cost} pts)"
     return profile
 
@@ -719,7 +726,12 @@ if st.session_state.page == "army":
             else:
                 choices=["Aucune amélioration"]; opt_map={}
                 for o in ao:
-                    lbl=f"{o.get('name','Amélioration')} (+{o.get('cost',0)} pts)"; choices.append(lbl); opt_map[lbl]=o
+                    w_cond=o.get("weapon",{})
+                    if isinstance(w_cond,dict) and w_cond:
+                        lbl=format_weapon_option(w_cond, o.get("cost",0))
+                    else:
+                        lbl=f"{o.get('name','Amélioration')} (+{o.get('cost',0)} pts)"
+                    choices.append(lbl); opt_map[lbl]=o
                 cur=st.session_state.unit_selections[unit_key].get(g_key,choices[0])
                 ch=st.radio(group.get("description","Sélectionnez une amélioration"),choices,index=choices.index(cur) if cur in choices else 0,key=f"{unit_key}_{g_key}_cond")
                 st.session_state.unit_selections[unit_key][g_key]=ch
