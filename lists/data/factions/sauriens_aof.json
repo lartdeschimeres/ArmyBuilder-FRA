@@ -1628,7 +1628,7 @@
     },
     {
       "name": "Lézard Épineux",
-      "type": "hero",
+      "type": "unit",
       "unit_detail": "light_vehicle",
       "size": 1,
       "base_cost": 140,
@@ -1685,7 +1685,7 @@
     },
     {
       "name": "Lézard Dragon",
-      "type": "hero",
+      "type": "unit",
       "unit_detail": "light_vehicle",
       "size": 1,
       "base_cost": 145,
