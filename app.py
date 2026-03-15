@@ -426,8 +426,8 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
 .legend-title{{text-align:center;color:var(--accent);border-bottom:2px solid var(--accent);padding-bottom:6px;margin-bottom:12px;font-size:14px;font-weight:700;}}
 .rule-item{{margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--brd);}}
 .rule-item:last-child{{border-bottom:none;margin-bottom:0;padding-bottom:0;}}
-.rule-name{{color:var(--accent);font-weight:600;font-size:10px;margin-bottom:2px;}}
-.rule-desc{{font-size:9px;line-height:1.4;color:#555;}}
+.rule-name{{color:var(--accent);font-weight:600;font-size:9px;margin-bottom:1px;}}
+.rule-desc{{font-size:8.5px;line-height:1.35;color:#555;}}
 
 @media print{{
   body{{padding:6px;}}
@@ -506,27 +506,40 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
         faction_spells = st.session_state.get("faction_spells", {})
         all_rules = [r for r in faction_rules if isinstance(r, dict)]
         if all_rules or faction_spells:
+            # ── Page légende : règles + sorts en colonnes CSS auto-ajustées ──
+            # columns: auto répartit le contenu sur plusieurs colonnes en remplissant
+            # chaque colonne avant d'en créer une nouvelle → s'adapte à n'importe quel volume.
             html += """<div class="legend-page"><div class="faction-rules">"""
-            # Règles spéciales — texte compact (12px)
+            html += """<div class="legend-title">📜 Règles spéciales &amp; Sorts</div>"""
+            html += """<div style="columns:2;column-gap:16px;column-rule:1px solid #dee2e6;">"""
+
             if all_rules:
-                html += """<div class="legend-title">📜 Règles spéciales de la faction</div>"""
-                html += """<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:24px;">"""
+                if faction_spells:
+                    html += """<div style="break-after:column;"></div>""" if False else ""
                 for rule in sorted(all_rules, key=lambda x: x.get("name","").lower()):
-                    html += f'<div class="rule-item"><div class="rule-name" style="font-size:12px;">{esc(rule.get("name",""))}</div><div class="rule-desc">{esc(rule.get("description",""))}</div></div>'
-                html += "</div>"
-            # Sorts — même style compact
+                    html += (
+                        f'<div class="rule-item" style="break-inside:avoid;">'
+                        f'<div class="rule-name">{esc(rule.get("name",""))}</div>'
+                        f'<div class="rule-desc">{esc(rule.get("description",""))}</div>'
+                        f'</div>'
+                    )
+
             if faction_spells:
-                html += """<div class="legend-title" style="margin-top:20px;">✨ Sorts de la faction</div>"""
-                html += """<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">"""
+                if all_rules:
+                    html += '<div class="rule-item" style="break-inside:avoid;border-bottom:2px solid var(--accent);margin-bottom:8px;"><div style="font-size:10px;font-weight:700;color:var(--accent);">✨ Sorts</div></div>'
                 for spell_name, spell_data in faction_spells.items():
                     if isinstance(spell_data, dict):
-                        cost = spell_data.get("cost","?")
                         desc = spell_data.get("description","")
                     else:
-                        cost = "?"; desc = str(spell_data)
-                    html += f'<div class="rule-item"><div class="rule-name" style="font-size:12px;">{esc(spell_name)}</div><div class="rule-desc">{esc(desc)}</div></div>'
-                html += "</div>"
-            html += "</div></div>"  # ferme faction-rules + legend-page
+                        desc = str(spell_data)
+                    html += (
+                        f'<div class="rule-item" style="break-inside:avoid;">'
+                        f'<div class="rule-name">{esc(spell_name)}</div>'
+                        f'<div class="rule-desc">{esc(desc)}</div>'
+                        f'</div>'
+                    )
+
+            html += "</div></div></div>"  # ferme columns + faction-rules + legend-page
     except Exception as e:
         html += f'<div style="color:red;padding:10px;">Erreur règles faction : {esc(str(e))}</div>'
 
