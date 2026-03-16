@@ -556,7 +556,33 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
     except Exception as e:
         html += f'<div style="color:red;padding:10px;">Erreur règles faction : {esc(str(e))}</div>'
 
-    html += f'<div style="text-align:center;margin-top:30px;font-size:12px;color:var(--muted);">Généré par OPR ArmyBuilder FR — {datetime.now().strftime("%d/%m/%Y %H:%M")}</div></div></body></html>'
+    # QR code encodant la liste (résumé JSON compact)
+    _qr_html = ""
+    try:
+        import qrcode as _qrc, io as _io, base64 as _b64
+        _payload = json.dumps({
+            "faction": army_name, "pts": army_limit,
+            "units": [{"n": u.get("name",""), "c": u.get("cost",0)} for u in army_list]
+        }, ensure_ascii=False, separators=(',',':'))
+        _qr = _qrc.QRCode(version=None, error_correction=_qrc.constants.ERROR_CORRECT_M, box_size=4, border=2)
+        _qr.add_data(_payload); _qr.make(fit=True)
+        _img = _qr.make_image(fill_color="black", back_color="white")
+        _buf = _io.BytesIO(); _img.save(_buf, format="PNG"); _buf.seek(0)
+        _qr_b64 = _b64.b64encode(_buf.read()).decode()
+        _qr_html = (
+            '<div style="text-align:center;margin-top:28px;padding:16px;border-top:1px solid var(--brd);">'
+            '<div style="font-size:11px;color:var(--muted);margin-bottom:8px;letter-spacing:.04em;">SCANNER POUR PARTAGER</div>'
+            f'<img src="data:image/png;base64,{_qr_b64}" '
+            'style="width:96px;height:96px;border:1px solid var(--brd);border-radius:4px;display:block;margin:0 auto;" '
+            'alt="QR code liste">'
+            '</div>'
+        )
+    except ImportError:
+        _qr_html = '<div style="text-align:center;font-size:10px;color:var(--muted);margin-top:20px;">Installez qrcode[pil] pour activer le QR code</div>'
+    except Exception:
+        _qr_html = ""
+    html += _qr_html
+    html += f'<div style="text-align:center;margin-top:16px;font-size:11px;color:var(--muted);">Généré par OPR ArmyBuilder FRA — {datetime.now().strftime("%d/%m/%Y %H:%M")}</div></div></body></html>'
     return html
 
 @st.cache_data
@@ -737,13 +763,22 @@ if st.session_state.page == "army":
     if st.button("⬅️ Retour à la configuration", key="back3"): st.session_state.page = "setup"; st.rerun()
 
     st.divider(); st.subheader("📤 Export/Import de la liste")
+    # Nom de fichier intelligent : si nom auto (Liste_YYYYMMDD) → faction_Xpts_date
+    _list_name = st.session_state.list_name
+    _auto_name = bool(re.match(r'^Liste_[0-9]{8}$', _list_name))
+    if _auto_name:
+        _slug = re.sub(r'[^a-z0-9]+', '_', st.session_state.faction.lower()).strip('_')
+        _base_name = f"{_slug}_{st.session_state.points}pts_{datetime.now().strftime('%Y%m%d')}"
+    else:
+        _base_name = re.sub(r'[^a-zA-Z0-9_ -]', '_', _list_name)
+
     colE1, colE2, colE3 = st.columns(3)
     with colE1:
-        json_data = json.dumps({"game":st.session_state.game,"faction":st.session_state.faction,"points":st.session_state.points,"list_name":st.session_state.list_name,"army_list":st.session_state.army_list,"army_cost":st.session_state.army_cost}, indent=2, ensure_ascii=False)
-        st.download_button("📄 Export JSON", data=json_data, file_name=f"{st.session_state.list_name}.json", mime="application/json", use_container_width=True, key="export_json")
+        json_data = json.dumps({"game":st.session_state.game,"faction":st.session_state.faction,"points":st.session_state.points,"list_name":st.session_state.list_name,"army_list":st.session_state.army_list,"army_cost":st.session_state.army_cost,"exported_at":datetime.now().strftime("%Y-%m-%d %H:%M")}, indent=2, ensure_ascii=False)
+        st.download_button("📄 Export JSON", data=json_data, file_name=f"{_base_name}.json", mime="application/json", use_container_width=True, key="export_json")
     with colE2:
         html_data = export_html(st.session_state.army_list, st.session_state.list_name, st.session_state.points)
-        st.download_button("🌐 Export HTML", data=html_data, file_name=f"{st.session_state.list_name}.html", mime="text/html", use_container_width=True, key="export_html_btn")
+        st.download_button("🌐 Export HTML", data=html_data, file_name=f"{_base_name}.html", mime="text/html", use_container_width=True, key="export_html_btn")
     with colE3:
         uploaded_file = st.file_uploader("📥 Importer", type=["json"], label_visibility="collapsed", key="import_file")
         if uploaded_file is not None:
