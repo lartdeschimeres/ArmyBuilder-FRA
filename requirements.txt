@@ -1,1 +1,3 @@
 streamlit
+qrcode[pil]
+Pillow
