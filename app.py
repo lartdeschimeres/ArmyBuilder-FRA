@@ -9,16 +9,29 @@ import base64
 
 st.set_page_config(page_title="OPR ArmyBuilder FR", layout="wide", initial_sidebar_state="expanded")
 
-st.markdown("""<style>
-#MainMenu {visibility: hidden;} footer {visibility: hidden;} header {background: transparent;}
-.stApp {background: #e9ecef; color: #212529;}
-section[data-testid="stSidebar"] {background: #dee2e6; border-right: 1px solid #adb5bd; box-shadow: 2px 0 5px rgba(0,0,0,0.1);}
-h1, h2, h3 {color: #202c45; letter-spacing: 0.04em; font-weight: 600;}
-.stSelectbox, .stNumberInput, .stTextInput {background-color: white; border-radius: 6px; border: 1px solid #ced4da;}
-button[kind="primary"] {background: linear-gradient(135deg, #2980b9, #1e5aa8) !important; color: white !important; font-weight: bold; border-radius: 6px;}
-.badge {display: inline-block; padding: 0.35rem 0.75rem; border-radius: 4px; background: #2980b9; color: white; font-size: 0.8rem; margin-bottom: 0.75rem; font-weight: 600;}
-.stButton>button {background-color: #f8f9fa; border: 1px solid #ced4da; border-radius: 6px; padding: 0.5rem 1rem; color: #212529; font-weight: 500;}
-.stProgress > div > div > div {background-color: #2980b9 !important;}
+# Couleur d'accent par jeu
+_GAME_COLORS = {
+    "Age of Fantasy":            "#2980b9",
+    "Age of Fantasy Regiments":  "#8e44ad",
+    "Grimdark Future":           "#c0392b",
+    "Grimdark Future Firefight": "#e67e22",
+    "Age of Fantasy Skirmish":   "#27ae60",
+}
+_acc_color = _GAME_COLORS.get(st.session_state.get("game",""), "#2980b9")
+
+st.markdown(f"""<style>
+:root {{--acc: {_acc_color};}}
+#MainMenu {{visibility: hidden;}} footer {{visibility: hidden;}} header {{background: transparent;}}
+.stApp {{background: #e9ecef; color: #212529;}}
+section[data-testid="stSidebar"] {{background: #dee2e6; border-right: 1px solid #adb5bd; box-shadow: 2px 0 5px rgba(0,0,0,0.1);}}
+h1, h2, h3 {{color: #202c45; letter-spacing: 0.04em; font-weight: 600;}}
+.stSelectbox, .stNumberInput, .stTextInput {{background-color: white; border-radius: 6px; border: 1px solid #ced4da;}}
+button[kind="primary"] {{background: var(--acc) !important; color: white !important; font-weight: bold; border-radius: 6px;}}
+.badge {{display: inline-block; padding: 0.35rem 0.75rem; border-radius: 4px; background: var(--acc); color: white; font-size: 0.8rem; margin-bottom: 0.75rem; font-weight: 600;}}
+.stButton>button {{background-color: #f8f9fa; border: 1px solid #ced4da; border-radius: 6px; padding: 0.5rem 1rem; color: #212529; font-weight: 500;}}
+.stProgress > div > div > div {{background-color: var(--acc) !important;}}
+.section-sep {{background: var(--acc); opacity:.12; height:2px; margin: 8px 0 12px; border-radius:1px;}}
+.section-header {{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color: var(--acc); margin: 16px 0 6px; padding: 4px 8px; background: rgba(0,0,0,.03); border-left: 3px solid var(--acc); border-radius: 0 4px 4px 0;}}
 </style>""", unsafe_allow_html=True)
 
 with st.sidebar:
@@ -811,7 +824,24 @@ if st.session_state.page == "army":
             sr=", ".join(w.get("special_rules",[])); rng=fmt_rng(w.get("range","Mêlée"))
             return f"{w.get('name','?')} ({rng}/A{w.get('attacks','?')}/PA{w.get('armor_piercing','?')}{', '+sr if sr else ''})"
 
+        # Séparateurs de section par type
+        _section_labels = {
+            "named_hero":   ("★ Héros nommés",    "⭐"),
+            "hero":         ("Héros",              "🦸"),
+            "unit":         ("Unités de base",     "⚔️"),
+            "light_vehicle":("Véhicules légers",   "🐉"),
+            "vehicle":      ("Véhicules / Monstres","🏰"),
+            "titan":        ("Titans",             "💀"),
+        }
+        _current_section = None
+
         for i, ud in enumerate(st.session_state.army_list):
+            _sec = ud.get("unit_detail", ud.get("type","unit"))
+            if _sec != _current_section:
+                _current_section = _sec
+                _lbl, _ico = _section_labels.get(_sec, (_sec, "•"))
+                st.markdown(f'<div class="section-header">{_ico} {_lbl}</div>', unsafe_allow_html=True)
+
             with st.expander(f"{ud['name']} — {ud['cost']} pts", expanded=False):
                 # ── Ligne de stats ──────────────────────────────────────────
                 cor=ud.get("coriace",0)
@@ -874,9 +904,18 @@ if st.session_state.page == "army":
                         + ", ".join(sr_unit) + "</div>",
                         unsafe_allow_html=True)
 
-                # ── Bouton supprimer ────────────────────────────────────────
-                if st.button(f"🗑 Supprimer", key=f"delete_{i}", type="secondary"):
-                    st.session_state.army_cost -= ud["cost"]; st.session_state.army_list.pop(i); st.rerun()
+                # ── Boutons supprimer / dupliquer ───────────────────────────
+                _col1, _col2 = st.columns(2)
+                with _col1:
+                    if st.button("🗑 Supprimer", key=f"delete_{i}", type="secondary", use_container_width=True):
+                        st.session_state.army_cost -= ud["cost"]; st.session_state.army_list.pop(i); st.rerun()
+                with _col2:
+                    if st.button("⧉ Dupliquer", key=f"dup_{i}", use_container_width=True):
+                        import copy as _copy
+                        _dup = _copy.deepcopy(ud)
+                        st.session_state.army_list.insert(i+1, _dup)
+                        st.session_state.army_cost += _dup["cost"]
+                        st.rerun()
 
     st.divider(); st.subheader("Filtres par type d'unité")
     filter_categories = {"Tous":None,"Héros":["hero"],"Héros nommés":["named_hero"],"Unités de base":["unit"],"Véhicules légers / Petits monstres":["light_vehicle"],"Véhicules / Monstres":["vehicle"],"Titans":["titan"]}
@@ -884,8 +923,14 @@ if st.session_state.page == "army":
         if st.button(cat, key=f"filter_{cat}", use_container_width=True): st.session_state.unit_filter = cat; st.rerun()
 
     fu = st.session_state.units if st.session_state.unit_filter == "Tous" else [u for u in st.session_state.units if u.get("unit_detail") in filter_categories[st.session_state.unit_filter]]
-    st.markdown(f"<div style='text-align:center;margin:10px 0;color:#6c757d;font-size:.9em;'>{len(fu)} unités disponibles (filtre: {st.session_state.unit_filter})</div>", unsafe_allow_html=True)
-    if not fu: st.warning(f"Aucune unité pour le filtre '{st.session_state.unit_filter}'."); st.stop()
+
+    # Recherche par nom
+    _search = st.text_input("🔍 Rechercher une unité", value="", placeholder="Nom de l'unité…", label_visibility="collapsed", key="unit_search")
+    if _search.strip():
+        fu = [u for u in fu if _search.strip().lower() in u.get("name","").lower()]
+
+    st.markdown(f"<div style='text-align:right;margin:4px 0 8px;color:#6c757d;font-size:.85em;'>{len(fu)} unité(s) — filtre : {st.session_state.unit_filter}</div>", unsafe_allow_html=True)
+    if not fu: st.warning(f"Aucune unité trouvée."); st.stop()
 
     unit = st.selectbox("Unité disponible", fu, format_func=format_unit_option, key="unit_select")
     if not unit: st.error("Aucune unité sélectionnée."); st.stop()
