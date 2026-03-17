@@ -99,41 +99,29 @@
     }
   ],
   "spells": {
-    "Terrifying Fury [Fureur terrifiante]": {
+    "Terrifying Fury [Fureur terrifiante] (1)": {
       "cost": 1,
-      "description": "Choisissez une unité ennemie à 18\" ou moins, qui doit effectuer un Test de Moral. En cas d'échec, elle devient Fatiguée.",
-      "range": "18\"",
-      "target": "1 unité ennemie"
+      "description": "Choisissez une unité ennemie à 18\" ou moins, qui doit effectuer un Test de Moral. En cas d'échec, elle devient Fatiguée."
     },
-    "Flame of Destruction [Flammes de la destruction]": {
+    "Flame of Destruction [Flammes de la destruction] (1)": {
       "cost": 1,
-      "description": "Choisissez une unité ennemie à 18\" ou moins, qui subit une touche avec Explosion (3).",
-      "range": "18\"",
-      "target": "1 unité ennemie"
+      "description": "Choisissez une unité ennemie à 18\" ou moins, qui subit une touche avec Explosion (3)."
     },
-    "Fiery Protection [Protection ardente]": {
+    "Fiery Protection [Protection ardente] (2)": {
       "cost": 2,
-      "description": "Choisissez jusqu'à deux unités amies à 12\" ou moins, qui obtiennent Esquive en mêlée une seule fois (la prochaine fois que l'effet s'appliquerait).",
-      "range": "12\"",
-      "target": "jusqu'à 2 unités amies"
+      "description": "Choisissez jusqu'à deux unités amies à 12\" ou moins, qui obtiennent Esquive en mêlée une seule fois (la prochaine fois que l'effet s'appliquerait)."
     },
-    "Brutal Massacre [Massacre brutal]": {
+    "Brutal Massacre [Massacre brutal] (2)": {
       "cost": 2,
-      "description": "Choisissez une unité ennemie à 6\" ou moins qui subit six touches avec Dislocation. Lancez autant de dés que de touches pour voir si les effets « sur un résultat de 6 » se déclenchent.",
-      "range": "6\"",
-      "target": "1 unité ennemie"
+      "description": "Choisissez une unité ennemie à 6\" ou moins qui subit six touches avec Dislocation. Lancez autant de dés que de touches pour voir si les effets « sur un résultat de 6 » se déclenchent."
     },
-    "War Boon [Bénédiction guerrière]": {
+    "War Boon [Bénédiction guerrière] (3)": {
       "cost": 3,
-      "description": "Choisissez jusqu'à trois unités amies à 12\" ou moins, qui bénéficient une fois de Boost de Guerrier-né (la prochaine fois que l'effet s'appliquera).",
-      "range": "12\"",
-      "target": "jusqu'à 3 unités amies"
+      "description": "Choisissez jusqu'à trois unités amies à 12\" ou moins, qui bénéficient une fois de Boost de Guerrier-né (la prochaine fois que l'effet s'appliquera)."
     },
-    "Headtaker Strike [Décapitation]": {
+    "Headtaker Strike [Décapitation] (3)": {
       "cost": 3,
-      "description": "Choisissez jusqu'à deux unités ennemies à 12\" ou moins, qui subissent chacune trois blessures avec PA (2).",
-      "range": "12\"",
-      "target": "jusqu'à 2 unités ennemies"
+      "description": "Choisissez jusqu'à deux unités ennemies à 12\" ou moins, qui subissent chacune trois blessures avec PA (2)."
     }
   },
   "units": [
@@ -1312,6 +1300,9 @@
               "requires": [
                 "Armes à une main lourdes"
               ],
+              "replaces": [
+                "Armes à une main lourdes"
+              ],
               "weapon": {
                 "name": "Grande arme lourde",
                 "range": "Mêlée",
@@ -2001,6 +1992,5 @@
         }
       ]
     }
-  ],
-  "faction_image_url": "https://cdn.prod.website-files.com/636c3b6dcdb4eb2dce722889/66804388df734edb194d3e8a_hw-1-textured-web.avif"
+  ]
 }
