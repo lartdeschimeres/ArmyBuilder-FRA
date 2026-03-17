@@ -673,10 +673,10 @@ if st.session_state.page == "setup":
 
     game_subtitles = {
         "Age of Fantasy":             "Construisez vos armées pour les batailles fantastiques",
-        "Age of Fantasy Regiments":   "Recrutez vos troupes pour de fantastiques batailles rangées",
+        "Age of Fantasy Regiments":  "Forgez vos régiments pour la guerre des âges",
         "Grimdark Future":            "Forgez vos escouades pour les guerres du futur",
-        "Grimdark Future Firefight":  "Constituez vos escouades pour des escarmouches à travers la galaxie",
-        "Age of Fantasy Skirmish":    "Composez vos bandes pour des affrontements brutaux",
+        "Grimdark Future Firefight": "Constituez vos escouades pour les combats rapprochés",
+        "Age of Fantasy Skirmish":   "Composez vos bandes pour l'escarmouche fantastique",
     }
     game_subtitle = game_subtitles.get(current_game, "Construisez et commandez vos armées")
     # ── Hero banner ───────────────────────────────────────────────────────────
@@ -744,7 +744,11 @@ if st.session_state.page == "setup":
         st.markdown("<span class='badge'>Faction</span>", unsafe_allow_html=True)
         faction_options = list(factions_by_game.get(game, {}).keys())
         if not faction_options: st.error("Aucune faction disponible"); st.stop()
-        faction = st.selectbox("Faction", faction_options, index=0, label_visibility="collapsed")
+        _cur_faction = st.session_state.get("faction", "")
+        _faction_idx = faction_options.index(_cur_faction) if _cur_faction in faction_options else 0
+        faction = st.selectbox("Faction", faction_options, index=_faction_idx, label_visibility="collapsed")
+        if st.session_state.get("army_list") and faction != st.session_state.get("faction",""):
+            st.warning("⚠️ Changer de faction réinitialisera l'armée en cours.")
     with col3:
         st.markdown("<span class='badge'>Format</span>", unsafe_allow_html=True)
         gc = GAME_CONFIG.get(game, {})
@@ -757,11 +761,15 @@ if st.session_state.page == "setup":
         st.markdown("<span class='badge'>Action</span>", unsafe_allow_html=True)
         st.markdown("<p>Prêt à forger votre armée ?</p>", unsafe_allow_html=True)
         if st.button("🔥 Construire l'armée", use_container_width=True, type="primary", disabled=not all([game, faction, points > 0]), key="build_army"):
+            _game_changed    = st.session_state.get("game")    != game
+            _faction_changed = st.session_state.get("faction") != faction
             st.session_state.game = game; st.session_state.faction = faction; st.session_state.points = points
             st.session_state.list_name = list_name.strip() or f"Liste_{datetime.now().strftime('%Y%m%d')}"
             fd = factions_by_game[game][faction]
             st.session_state.units = fd.get("units",[]); st.session_state.faction_special_rules = fd.get("faction_special_rules",[]); st.session_state.faction_spells = fd.get("spells",{})
-            st.session_state.army_list = []; st.session_state.army_cost = 0; st.session_state.unit_selections = {}
+            # Réinitialiser l'armée seulement si jeu ou faction a changé
+            if _game_changed or _faction_changed:
+                st.session_state.army_list = []; st.session_state.army_cost = 0; st.session_state.unit_selections = {}
             st.session_state.page = "army"; st.rerun()
 
 if st.session_state.page == "army":
@@ -779,7 +787,7 @@ if st.session_state.page == "army":
     st.session_state.setdefault("army_list",[]); st.session_state.setdefault("unit_selections",{}); st.session_state.setdefault("unit_filter","Tous")
 
     st.title(f"{st.session_state.list_name} - {st.session_state.army_cost}/{st.session_state.points} pts")
-    if st.button("⬅️ Retour à la configuration", key="back3"): st.session_state.page = "setup"; st.rerun()
+    if st.button("⬅️ Retour à la configuration", key="back3"): st.session_state.page = "setup"; st.rerun()  # army_list conservée
 
     st.divider(); st.subheader("📤 Export/Import de la liste")
     # Nom de fichier intelligent : si nom auto (Liste_YYYYMMDD) → faction_Xpts_date
