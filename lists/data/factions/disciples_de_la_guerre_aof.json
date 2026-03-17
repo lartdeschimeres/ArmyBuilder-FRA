@@ -100,21 +100,27 @@
   ],
   "spells": {
     "Terrifying Fury [Fureur terrifiante] (1)": {
+      "cost": 1,
       "description": "Choisissez une unité ennemie à 18\" ou moins, qui doit effectuer un Test de Moral. En cas d'échec, elle devient Fatiguée."
     },
     "Flame of Destruction [Flammes de la destruction] (1)": {
+      "cost": 1,
       "description": "Choisissez une unité ennemie à 18\" ou moins, qui subit une touche avec Explosion (3)."
     },
     "Fiery Protection [Protection ardente] (2)": {
+      "cost": 2,
       "description": "Choisissez jusqu'à deux unités amies à 12\" ou moins, qui obtiennent Esquive en mêlée une seule fois (la prochaine fois que l'effet s'appliquerait)."
     },
     "Brutal Massacre [Massacre brutal] (2)": {
+      "cost": 2,
       "description": "Choisissez une unité ennemie à 6\" ou moins qui subit six touches avec Dislocation. Lancez autant de dés que de touches pour voir si les effets « sur un résultat de 6 » se déclenchent."
     },
     "War Boon [Bénédiction guerrière] (3)": {
+      "cost": 3,
       "description": "Choisissez jusqu'à trois unités amies à 12\" ou moins, qui bénéficient une fois de Boost de Guerrier-né (la prochaine fois que l'effet s'appliquera)."
     },
     "Headtaker Strike [Décapitation] (3)": {
+      "cost": 3,
       "description": "Choisissez jusqu'à deux unités ennemies à 12\" ou moins, qui subissent chacune trois blessures avec PA (2)."
     }
   },
