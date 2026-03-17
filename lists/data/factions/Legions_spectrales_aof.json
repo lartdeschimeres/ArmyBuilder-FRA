@@ -1,0 +1,1399 @@
+{
+  "faction": "Légions Spectrales",
+  "game": "Age of Fantasy",
+  "version": "FR-3.5.2",
+  "status": "complete",
+  "description": "Les Légions Spectrales sont des êtres intangibles qui s'aventurent sur Tyria depuis le Plan Empyréen. Leurs armées sont composées de lignes de guerriers fantomatiques maniant des armes rouillées, soutenus par des banshees et des spectres, poussés par leurs geôliers spectraux.",
+  "faction_special_rules": [
+    {
+      "name": "Empyrean Spirit [Esprit empyréen]",
+      "description": "Lorsque des unités dont toutes les figurines possèdent cette règle spéciale subissent des tirs ou sont chargées d'une distance supérieure à 9\", les unités ennemies subissent un malus de -1 aux jets pour toucher."
+    },
+    {
+      "name": "Ethereal [Éthéré]",
+      "description": "Une fois par activation, avant d'attaquer, déplacez cette figurine n'importe où à 6\" ou moins de sa position. Cette figurine se déplace de -6\" lorsqu'elle Avance, et de -6\" lorsqu'elle Court ou Charge."
+    },
+    {
+      "name": "Armor (X) [Armure (X)]",
+      "description": "Compte comme ayant Défense X+."
+    },
+    {
+      "name": "Bane Mark [Marque de Fléau]",
+      "description": "Une fois par activation, avant d'attaquer, choisissez une unité ennemie à 18\" ou moins. Les unités amies obtiennent la règle spéciale Fléau une seule fois lorsqu'elles l'attaquent (la prochaine fois que l'effet s'appliquerait)."
+    },
+    {
+      "name": "Crossing Attack (X) [Attaque croisée (X)]",
+      "description": "Une fois par activation, lorsque cette figurine traverse des unités ennemies, choisissez-en une et lancez X dés. Pour chaque 6+, elle subit une touche."
+    },
+    {
+      "name": "Empyrean Spirit Boost [Boost de l'Esprit empyréen]",
+      "description": "Si toutes les figurines de cette unité possèdent la règle spéciale Esprit empyréen, les ennemis qui les attaquent subissent toujours un malus de -1 aux jets pour toucher à cause de la règle spéciale Esprit empyréen (au lieu de seulement lorsqu'ils lui tirent dessus ou la Chargent à plus de 9\")."
+    },
+    {
+      "name": "No Retreat [Pas de retraite]",
+      "description": "Lorsqu'une unité dont la plupart des figurines possèdent cette règle spéciale échoue à un Test de Moral qui la rend Ébranlée ou En déroute, le test est considéré comme réussi. Lancez ensuite autant de dés que le nombre de blessures nécessaires pour la détruire entièrement, et pour chaque résultat de 1 à 3, l'unité subit une blessure qui ne peut être ignorée."
+    },
+    {
+      "name": "Precision Feat [Précision extraordinaire]",
+      "description": "Une fois par partie, lorsque cette unité attaque et que toutes ses figurines possèdent cette règle spéciale, vous pouvez l'utiliser pour qu'ils obtiennent un bonus de +2 aux jets pour toucher."
+    },
+    {
+      "name": "Reap [Fauchage]",
+      "description": "Contre les unités dont la plupart des figurines possèdent une Défense de 2+ à 3+, cette arme gagne un bonus de PA (+2)."
+    },
+    {
+      "name": "Repel Ambushers [Chasse à l'Embuscade]",
+      "description": "Les unités ennemies utilisant la règle spéciale Embuscade doivent être placées à plus de 12\" de l'unité de cette figurine."
+    },
+    {
+      "name": "Resistance [Résistance]",
+      "description": "Lorsqu'une unité dont toutes les figurines possèdent cette règle spéciale subit des blessures, lancez un dé pour chacune d'entre elles. Sur un résultat de 6+, la blessure est ignorée. Si les blessures proviennent d'un sort, elles sont alors ignorées sur un résultat de 2+ à la place."
+    },
+    {
+      "name": "Shielded [Blindé]",
+      "description": "Les unités dont toutes les figurines possèdent cette règle spéciale obtiennent un bonus de +1 aux jets de Défense contre les blessures qui ne proviennent pas de sorts."
+    },
+    {
+      "name": "Surge [Surcharge]",
+      "description": "Sur les résultats non modifiés de 6 pour toucher, cette arme inflige une touche supplémentaire (seule la touche initiale compte comme un 6 pour les règles spéciales)."
+    },
+    {
+      "name": "Transversal [Transversant]",
+      "description": "Peut se déplacer à travers des unités amies ou ennemies."
+    },
+    {
+      "name": "Unpredictable [Imprévisible]",
+      "description": "Lors d'une attaque, lancez un dé et appliquez un effet à toutes les figurines dotées de cette règle : sur un résultat de 1 à 3, elles obtiennent PA (+1), et sur un résultat de 4 à 6, elles obtiennent +1 aux jets d'attaque."
+    },
+    {
+      "name": "Unpredictable Fighter [Combattant imprévisible]",
+      "description": "En mêlée, lancez un dé et appliquez un effet à toutes les figurines dotées de cette règle : sur un résultat de 1 à 3, elles obtiennent PA (+1), et sur un résultat de 4 à 6, elles obtiennent +1 aux jets d'attaque."
+    },
+    {
+      "name": "Empyrean Spirit Boost Aura [Aura Boost de l'Esprit empyréen]",
+      "description": "Cette figurine et son unité obtiennent la règle spéciale Boost d'Esprit empyréen."
+    },
+    {
+      "name": "No Retreat Aura [Aura Pas de retraite]",
+      "description": "Cette figurine et son unité obtiennent la règle spéciale Pas de retraite."
+    },
+    {
+      "name": "Precision Feat Aura [Aura Précision extraordinaire]",
+      "description": "Cette figurine et son unité obtiennent la règle spéciale Précision extraordinaire."
+    },
+    {
+      "name": "Relentless Aura [Aura Implacable]",
+      "description": "Cette figurine et son unité obtiennent la règle spéciale Implacable."
+    },
+    {
+      "name": "Scout Aura [Aura Éclaireur]",
+      "description": "Cette figurine et son unité obtiennent la règle spéciale Éclaireur."
+    },
+    {
+      "name": "Shielded Aura [Aura Blindé]",
+      "description": "Cette figurine et son unité obtiennent la règle spéciale Blindé."
+    },
+    {
+      "name": "Unpredictable Fighter Aura [Aura Combattant imprévisible]",
+      "description": "Cette figurine et son unité obtiennent la règle spéciale Combattant imprévisible."
+    }
+  ],
+  "spells": {
+    "Ethereal Warding [Protection éthérée] (1)": {
+      "cost": 1,
+      "description": "Choisissez une unité amie à 12\" ou moins, qui bénéficie une seule fois de l'effet Esprit empyréen (la prochaine fois que cet effet s'appliquerait)."
+    },
+    "Dread Shriek [Cri terrifiant] (1)": {
+      "cost": 1,
+      "description": "Choisissez une unité ennemie à 12\" ou moins, qui subit deux touches avec PA (1) et Surcharge. Lancez autant de dés que de touches pour voir si l'effet « sur un résultat de 6 » se déclenche."
+    },
+    "Irresistible Grief [Chagrin irrésistible] (2)": {
+      "cost": 2,
+      "description": "Choisissez jusqu'à deux unités ennemies à 18\" ou moins, contre lesquelles les unités amies obtiennent une seule fois la règle spéciale Fléau lorsqu'elles les attaquent (la prochaine fois que l'effet s'appliquerait)."
+    },
+    "Reaping Terror [Terreur faucheuse] (2)": {
+      "cost": 2,
+      "description": "Choisissez une unité ennemie à 12\" ou moins, qui subit quatre touches avec Fauchage."
+    },
+    "Vicious Spirits [Esprits vicieux] (3)": {
+      "cost": 3,
+      "description": "Choisissez jusqu'à trois unités amies à 12\" ou moins, qui obtiennent un bonus de +1 aux jets pour toucher en mêlée une seule fois (la prochaine fois que l'effet s'appliquerait)."
+    },
+    "Eat Soul [Mange-âmes] (3)": {
+      "cost": 3,
+      "description": "Choisissez une unité ennemie à 18\" ou moins, qui subit six touches."
+    }
+  },
+  "units": [
+    {
+      "name": "Banshee Ancestrale",
+      "type": "hero",
+      "unit_detail": "hero",
+      "size": 1,
+      "base_cost": 75,
+      "quality": 3,
+      "defense": 6,
+      "coriace": 3,
+      "special_rules": [
+        "Esprit empyréen",
+        "Éthéré",
+        "Héros",
+        "Résistance"
+      ],
+      "weapon": [
+        {
+          "name": "Hurlement",
+          "range": 12,
+          "attacks": 4,
+          "armor_piercing": 1,
+          "special_rules": []
+        },
+        {
+          "name": "Griffes",
+          "range": "Mêlée",
+          "attacks": 3,
+          "armor_piercing": 0,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Améliorations de rôle",
+          "type": "role",
+          "description": "Choisissez un rôle spécial pour ce héros (un seul choix possible)",
+          "options": [
+            {
+              "name": "Gardien",
+              "cost": 15,
+              "special_rules": [
+                "Aura Blindé"
+              ]
+            },
+            {
+              "name": "Geôlier",
+              "cost": 20,
+              "special_rules": [
+                "Aura Éclaireur"
+              ]
+            },
+            {
+              "name": "Chevalier",
+              "cost": 25,
+              "special_rules": [
+                "Aura Boost de l'Esprit empyréen"
+              ]
+            },
+            {
+              "name": "Tourmenteur",
+              "cost": 35,
+              "special_rules": [
+                "Aura Implacable"
+              ]
+            },
+            {
+              "name": "Contremaitre",
+              "cost": 35,
+              "special_rules": [
+                "Aura Pas de retraite"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Spectre Ancestral",
+      "type": "hero",
+      "unit_detail": "hero",
+      "size": 1,
+      "base_cost": 70,
+      "quality": 3,
+      "defense": 6,
+      "coriace": 3,
+      "special_rules": [
+        "Embuscade",
+        "Esprit empyréen",
+        "Éthéré",
+        "Héros",
+        "Résistance"
+      ],
+      "weapon": [
+        {
+          "name": "Faux lourde",
+          "range": "Mêlée",
+          "attacks": 3,
+          "armor_piercing": 2,
+          "special_rules": [
+            "Fauchage"
+          ]
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Améliorations de rôle",
+          "type": "role",
+          "description": "Choisissez un rôle spécial pour ce héros (un seul choix possible)",
+          "options": [
+            {
+              "name": "Gardien",
+              "cost": 15,
+              "special_rules": [
+                "Aura Blindé"
+              ]
+            },
+            {
+              "name": "Chevalier",
+              "cost": 25,
+              "special_rules": [
+                "Aura Boost de l'Esprit empyréen"
+              ]
+            },
+            {
+              "name": "Bourreau",
+              "cost": 30,
+              "special_rules": [
+                "Aura Combattant imprévisible"
+              ]
+            },
+            {
+              "name": "Contremaitre",
+              "cost": 35,
+              "special_rules": [
+                "Aura Pas de retraite"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Seigneur Sinistre",
+      "type": "hero",
+      "unit_detail": "hero",
+      "size": 1,
+      "base_cost": 45,
+      "quality": 4,
+      "defense": 5,
+      "coriace": 3,
+      "special_rules": [
+        "Esprit empyréen",
+        "Éthéré",
+        "Furieux",
+        "Héros",
+        "Résistance"
+      ],
+      "weapon": [
+        {
+          "name": "Arme à une main lourde",
+          "range": "Mêlée",
+          "attacks": 3,
+          "armor_piercing": 1,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Améliorations de rôle",
+          "type": "role",
+          "description": "Choisissez un rôle spécial pour ce héros (un seul choix possible)",
+          "options": [
+            {
+              "name": "Gardien",
+              "cost": 15,
+              "special_rules": [
+                "Aura Blindé"
+              ]
+            },
+            {
+              "name": "Geôlier",
+              "cost": 20,
+              "special_rules": [
+                "Aura Éclaireur"
+              ]
+            },
+            {
+              "name": "Chevalier",
+              "cost": 25,
+              "special_rules": [
+                "Aura Boost de l'Esprit empyréen"
+              ]
+            },
+            {
+              "name": "Bourreau",
+              "cost": 30,
+              "special_rules": [
+                "Aura Combattant imprévisible"
+              ]
+            },
+            {
+              "name": "Contremaitre",
+              "cost": 35,
+              "special_rules": [
+                "Aura Pas de retraite"
+              ]
+            },
+            {
+              "name": "Gardien des âmes",
+              "cost": 45,
+              "special_rules": [
+                "Lanceur de sorts (2)"
+              ]
+            },
+            {
+              "name": "Maître Gardien des âmes",
+              "cost": 70,
+              "special_rules": [
+                "Lanceur de sorts (3)"
+              ]
+            }
+          ]
+        },
+        {
+          "group": "Remplacement d'arme",
+          "type": "weapon",
+          "description": "Remplacer l'Arme à une main lourde par :",
+          "options": [
+            {
+              "name": "Paire d'armes à une main lourdes",
+              "cost": 5,
+              "weapon": {
+                "name": "Paire d'armes à une main lourdes",
+                "range": "Mêlée",
+                "attacks": 4,
+                "armor_piercing": 1,
+                "special_rules": []
+              }
+            },
+            {
+              "name": "Hallebarde lourde",
+              "cost": 10,
+              "weapon": {
+                "name": "Hallebarde lourde",
+                "range": "Mêlée",
+                "attacks": 3,
+                "armor_piercing": 1,
+                "special_rules": [
+                  "Perforant"
+                ]
+              }
+            },
+            {
+              "name": "Pique lourde",
+              "cost": 10,
+              "weapon": {
+                "name": "Pique lourde",
+                "range": "Mêlée",
+                "attacks": 3,
+                "armor_piercing": 1,
+                "special_rules": [
+                  "Contre-charge"
+                ]
+              }
+            },
+            {
+              "name": "Faux lourde",
+              "cost": 10,
+              "weapon": {
+                "name": "Faux lourde",
+                "range": "Mêlée",
+                "attacks": 3,
+                "armor_piercing": 2,
+                "special_rules": [
+                  "Fauchage"
+                ]
+              }
+            },
+            {
+              "name": "Grande épée lourde",
+              "cost": 15,
+              "weapon": {
+                "name": "Grande épée lourde",
+                "range": "Mêlée",
+                "attacks": 3,
+                "armor_piercing": 2,
+                "special_rules": [
+                  "Perforant"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "group": "Montures",
+          "type": "mount",
+          "description": "Améliorer avec une des options suivantes :",
+          "options": [
+            {
+              "name": "Destrier spectral",
+              "cost": 10,
+              "mount": {
+                "name": "Destrier spectral",
+                "weapon": [],
+                "special_rules": [
+                  "Impact (1)",
+                  "Rapide"
+                ]
+              }
+            },
+            {
+              "name": "Trône du monarque",
+              "cost": 55,
+              "mount": {
+                "name": "Trône du monarque",
+                "coriace_bonus": 3,
+                "weapon": [
+                  {
+                    "name": "Hérault",
+                    "range": "Mêlée",
+                    "attacks": 2,
+                    "armor_piercing": 0,
+                    "special_rules": []
+                  }
+                ],
+                "special_rules": [
+                  "Armure (4)",
+                  "Effrayant (1)"
+                ]
+              }
+            },
+            {
+              "name": "Grand destrier",
+              "cost": 70,
+              "mount": {
+                "name": "Grand destrier",
+                "coriace_bonus": 3,
+                "weapon": [
+                  {
+                    "name": "Cornes",
+                    "range": "Mêlée",
+                    "attacks": 1,
+                    "armor_piercing": 0,
+                    "special_rules": [
+                      "Percée"
+                    ]
+                  }
+                ],
+                "special_rules": [
+                  "Armure (4)",
+                  "Impact (2)",
+                  "Rapide",
+                  "Transversal"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorer avec :",
+          "options": [
+            {
+              "name": "Esprits enchainés",
+              "cost": 10,
+              "special_rules": [
+                "Chasse à l'Embuscade"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Champion",
+      "type": "hero",
+      "unit_detail": "hero",
+      "size": 1,
+      "base_cost": 30,
+      "quality": 5,
+      "defense": 5,
+      "coriace": 3,
+      "special_rules": [
+        "Esprit empyréen",
+        "Éthéré",
+        "Héros"
+      ],
+      "weapon": [
+        {
+          "name": "Arme à une main",
+          "range": "Mêlée",
+          "attacks": 3,
+          "armor_piercing": 0,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Améliorations de rôle",
+          "type": "role",
+          "description": "Choisissez un rôle spécial pour ce héros (un seul choix possible)",
+          "options": [
+            {
+              "name": "Gardien",
+              "cost": 15,
+              "special_rules": [
+                "Aura Blindé"
+              ]
+            },
+            {
+              "name": "Geôlier",
+              "cost": 20,
+              "special_rules": [
+                "Aura Éclaireur"
+              ]
+            },
+            {
+              "name": "Bourreau",
+              "cost": 30,
+              "special_rules": [
+                "Aura Combattant imprévisible"
+              ]
+            },
+            {
+              "name": "Tourmenteur",
+              "cost": 35,
+              "special_rules": [
+                "Aura Implacable"
+              ]
+            },
+            {
+              "name": "Contremaitre",
+              "cost": 35,
+              "special_rules": [
+                "Aura Pas de retraite"
+              ]
+            },
+            {
+              "name": "Gardien des âmes",
+              "cost": 45,
+              "special_rules": [
+                "Lanceur de sorts (2)"
+              ]
+            },
+            {
+              "name": "Maître Gardien des âmes",
+              "cost": 70,
+              "special_rules": [
+                "Lanceur de sorts (3)"
+              ]
+            }
+          ]
+        },
+        {
+          "group": "Remplacement d'arme",
+          "type": "weapon",
+          "description": "Remplacer l'Arme à une main par :",
+          "options": [
+            {
+              "name": "Pique",
+              "cost": 5,
+              "weapon": {
+                "name": "Pique",
+                "range": "Mêlée",
+                "attacks": 3,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Contre-charge"
+                ]
+              }
+            },
+            {
+              "name": "Paire d'armes à une main",
+              "cost": 5,
+              "weapon": {
+                "name": "Paire d'armes à une main",
+                "range": "Mêlée",
+                "attacks": 4,
+                "armor_piercing": 0,
+                "special_rules": []
+              }
+            },
+            {
+              "name": "Hallebarde",
+              "cost": 5,
+              "weapon": {
+                "name": "Hallebarde",
+                "range": "Mêlée",
+                "attacks": 3,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Perforant"
+                ]
+              }
+            },
+            {
+              "name": "Grande épée",
+              "cost": 5,
+              "weapon": {
+                "name": "Grande épée",
+                "range": "Mêlée",
+                "attacks": 3,
+                "armor_piercing": 1,
+                "special_rules": [
+                  "Perforant"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "group": "Ajout d'une arme de tir",
+          "type": "conditional_weapon",
+          "description": "Améliorer avec une des options suivantes (un seul choix possible)",
+          "options": [
+            {
+              "name": "Arbalète des âmes",
+              "cost": 15,
+              "weapon": {
+                "name": "Arbalète des âmes",
+                "range": 18,
+                "attacks": 2,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Indirect",
+                  "Perforant"
+                ]
+              }
+            },
+            {
+              "name": "Arbalète",
+              "cost": 15,
+              "weapon": {
+                "name": "Arbalète",
+                "range": 24,
+                "attacks": 2,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Perforant"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorer avec :",
+          "options": [
+            {
+              "name": "Esprits enchainés",
+              "cost": 10,
+              "special_rules": [
+                "Chasse à l'Embuscade"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Horde Spectrale",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 10,
+      "base_cost": 90,
+      "quality": 5,
+      "defense": 5,
+      "special_rules": [
+        "Esprit empyréen",
+        "Éthéré"
+      ],
+      "weapon": [
+        {
+          "name": "Armes à une main",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 0,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Remplacement d'armes",
+          "type": "weapon",
+          "description": "Remplacer toutes les Armes à une main par :",
+          "options": [
+            {
+              "name": "Hallebarde",
+              "cost": 15,
+              "weapon": {
+                "name": "Hallebarde",
+                "range": "Mêlée",
+                "attacks": 1,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Perforant"
+                ]
+              }
+            },
+            {
+              "name": "Pique",
+              "cost": 20,
+              "weapon": {
+                "name": "Pique",
+                "range": "Mêlée",
+                "attacks": 1,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Contre-charge"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorations disponibles pour l'unité",
+          "options": [
+            {
+              "name": "Dévoreur d'âmes",
+              "cost": 35,
+              "special_rules": [
+                "Aura Précision extraordinaire"
+              ]
+            },
+            {
+              "name": "Bannière",
+              "cost": 5,
+              "special_rules": []
+            },
+            {
+              "name": "Sergent",
+              "cost": 5,
+              "special_rules": []
+            },
+            {
+              "name": "Musicien",
+              "cost": 10,
+              "special_rules": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Faucheurs Spectraux",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 70,
+      "quality": 4,
+      "defense": 5,
+      "special_rules": [
+        "Esprit empyréen",
+        "Éthéré"
+      ],
+      "weapon": [
+        {
+          "name": "Faux",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 1,
+          "special_rules": [
+            "Fauchage"
+          ]
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Remplacement d'arme",
+          "type": "conditional_weapon",
+          "description": "Remplacer une Faux par :",
+          "options": [
+            {
+              "name": "Cloche mortuaire",
+              "cost": 10,
+              "weapon": {
+                "name": "Cloche mortuaire",
+                "range": "Mêlée",
+                "attacks": 1,
+                "armor_piercing": 2,
+                "special_rules": [
+                  "Mortel (3)"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Banshees Endeuillées",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 70,
+      "quality": 4,
+      "defense": 6,
+      "special_rules": [
+        "Esprit empyréen",
+        "Éthéré",
+        "Résistance"
+      ],
+      "weapon": [
+        {
+          "name": "Lame de deuil",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 0,
+          "special_rules": [
+            "Fléau"
+          ]
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorer toutes les figurines avec :",
+          "options": [
+            {
+              "name": "Hurlement",
+              "cost": 30,
+              "weapon": {
+                "name": "Hurlement",
+                "range": 12,
+                "attacks": 1,
+                "armor_piercing": 1,
+                "special_rules": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Fantômes à faucilles",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 80,
+      "quality": 5,
+      "defense": 6,
+      "special_rules": [
+        "Esprit empyréen",
+        "Éthéré",
+        "Résistance"
+      ],
+      "weapon": [
+        {
+          "name": "Paire de griffes-faucilles",
+          "range": "Mêlée",
+          "attacks": 2,
+          "armor_piercing": 1,
+          "special_rules": [
+            "Fauchage"
+          ]
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorer une figurine avec :",
+          "options": [
+            {
+              "name": "Dévoreur d'âmes",
+              "cost": 35,
+              "special_rules": [
+                "Aura Précision extraordinaire"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Revenants Spectraux",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 85,
+      "quality": 4,
+      "defense": 5,
+      "special_rules": [
+        "Esprit empyréen",
+        "Éthéré",
+        "Furieux"
+      ],
+      "weapon": [
+        {
+          "name": "Faux",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 1,
+          "special_rules": [
+            "Fauchage"
+          ]
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Remplacement d'armes",
+          "type": "weapon",
+          "description": "Remplacer toutes les Faux par :",
+          "options": [
+            {
+              "name": "Grande épée",
+              "cost": 5,
+              "weapon": {
+                "name": "Grande épée",
+                "range": "Mêlée",
+                "attacks": 1,
+                "armor_piercing": 1,
+                "special_rules": [
+                  "Perforant"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Spectres",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 105,
+      "quality": 3,
+      "defense": 6,
+      "special_rules": [
+        "Embuscade",
+        "Esprit empyréen",
+        "Éthéré",
+        "Résistance"
+      ],
+      "weapon": [
+        {
+          "name": "Faux",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 1,
+          "special_rules": [
+            "Fauchage"
+          ]
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorer une figurine avec :",
+          "options": [
+            {
+              "name": "Tourmente éternelle",
+              "cost": 60,
+              "special_rules": [
+                "Marque de Fléau"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tireurs Couards",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 80,
+      "quality": 5,
+      "defense": 5,
+      "special_rules": [
+        "Esprit empyréen",
+        "Éthéré"
+      ],
+      "weapon": [
+        {
+          "name": "Arbalète des âmes",
+          "range": 18,
+          "attacks": 1,
+          "armor_piercing": 0,
+          "special_rules": [
+            "Indirect",
+            "Perforant"
+          ]
+        },
+        {
+          "name": "Arme à une main",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 0,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Remplacement d'armes",
+          "type": "weapon",
+          "description": "Remplacer toutes les Arbalètes des âmes par :",
+          "options": [
+            {
+              "name": "Arbalète",
+              "cost": 5,
+              "weapon": {
+                "name": "Arbalète",
+                "range": 24,
+                "attacks": 1,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Perforant"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorations disponibles pour l'unité",
+          "options": [
+            {
+              "name": "Dévoreur d'âmes",
+              "cost": 35,
+              "special_rules": [
+                "Aura Précision extraordinaire"
+              ]
+            },
+            {
+              "name": "Bannière",
+              "cost": 5,
+              "special_rules": []
+            },
+            {
+              "name": "Sergent",
+              "cost": 5,
+              "special_rules": []
+            },
+            {
+              "name": "Musicien",
+              "cost": 10,
+              "special_rules": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Banshees",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 145,
+      "quality": 3,
+      "defense": 6,
+      "special_rules": [
+        "Esprit empyréen",
+        "Éthéré",
+        "Résistance"
+      ],
+      "weapon": [
+        {
+          "name": "Hurlement",
+          "range": 12,
+          "attacks": 2,
+          "armor_piercing": 1,
+          "special_rules": []
+        },
+        {
+          "name": "Griffes",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 0,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorer une figurine avec :",
+          "options": [
+            {
+              "name": "Tourmente éternelle",
+              "cost": 60,
+              "special_rules": [
+                "Marque de Fléau"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Nuées Spectrales",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 3,
+      "base_cost": 120,
+      "quality": 4,
+      "defense": 6,
+      "coriace": 3,
+      "special_rules": [
+        "Esprit empyréen",
+        "Éthéré",
+        "Résistance"
+      ],
+      "weapon": [
+        {
+          "name": "Attaques de nuée",
+          "range": "Mêlée",
+          "attacks": 3,
+          "armor_piercing": 0,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorer une figurine avec :",
+          "options": [
+            {
+              "name": "Tourmente éternelle",
+              "cost": 60,
+              "special_rules": [
+                "Marque de Fléau"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Harceleurs",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 90,
+      "quality": 5,
+      "defense": 5,
+      "special_rules": [
+        "Esprit empyréen",
+        "Éthéré",
+        "Impact (1)",
+        "Rapide"
+      ],
+      "weapon": [
+        {
+          "name": "Vouge",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 1,
+          "special_rules": [
+            "Perforant"
+          ]
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorations disponibles pour l'unité",
+          "options": [
+            {
+              "name": "Dévoreur d'âmes",
+              "cost": 35,
+              "special_rules": [
+                "Aura Précision extraordinaire"
+              ]
+            },
+            {
+              "name": "Bannière",
+              "cost": 5,
+              "special_rules": []
+            },
+            {
+              "name": "Sergent",
+              "cost": 5,
+              "special_rules": []
+            },
+            {
+              "name": "Musicien",
+              "cost": 10,
+              "special_rules": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Chevaliers Maudits",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 85,
+      "quality": 4,
+      "defense": 5,
+      "special_rules": [
+        "Esprit empyréen",
+        "Éthéré",
+        "Rapide",
+        "Transversant"
+      ],
+      "weapon": [
+        {
+          "name": "Faux",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 1,
+          "special_rules": [
+            "Fauchage"
+          ]
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorer toutes les figurines avec :",
+          "options": [
+            {
+              "name": "Toucher spectral",
+              "cost": 10,
+              "special_rules": [
+                "Attaque croisée (1)"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Chevaliers Effroyables",
+      "type": "unit",
+      "unit_detail": "unit",
+      "size": 5,
+      "base_cost": 100,
+      "quality": 4,
+      "defense": 5,
+      "special_rules": [
+        "Esprit empyréen",
+        "Éthéré",
+        "Impact (1)",
+        "Rapide"
+      ],
+      "weapon": [
+        {
+          "name": "Arme à une main lourde",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 1,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorer toutes les figurines avec :",
+          "options": [
+            {
+              "name": "Tourmenteur",
+              "cost": 10,
+              "special_rules": [
+                "Embuscade"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Carrosse Funéraire",
+      "type": "unit",
+      "unit_detail": "light_vehicle",
+      "size": 1,
+      "base_cost": 135,
+      "quality": 4,
+      "defense": 3,
+      "coriace": 6,
+      "special_rules": [
+        "Effrayant (1)",
+        "Esprit empyréen",
+        "Éthéré",
+        "Impact (4)",
+        "Rapide"
+      ],
+      "weapon": [
+        {
+          "name": "Faux lourde de l'équipage",
+          "range": "Mêlée",
+          "attacks": 2,
+          "armor_piercing": 3,
+          "special_rules": [
+            "Fauchage"
+          ]
+        },
+        {
+          "name": "Sabots",
+          "range": "Mêlée",
+          "attacks": 2,
+          "armor_piercing": 0,
+          "special_rules": []
+        }
+      ]
+    },
+    {
+      "name": "Char Spectral",
+      "type": "unit",
+      "unit_detail": "light_vehicle",
+      "size": 1,
+      "base_cost": 210,
+      "quality": 4,
+      "defense": 4,
+      "coriace": 6,
+      "special_rules": [
+        "Esprit empyréen",
+        "Éthéré",
+        "Impact (4)",
+        "Lanceur de sorts (2)",
+        "Rapide",
+        "Résistance"
+      ],
+      "weapon": [
+        {
+          "name": "Hurlement",
+          "range": 12,
+          "attacks": 6,
+          "armor_piercing": 1,
+          "special_rules": []
+        },
+        {
+          "name": "Attaques de l'équipage",
+          "range": "Mêlée",
+          "attacks": 2,
+          "armor_piercing": 0,
+          "special_rules": [
+            "Percée"
+          ]
+        },
+        {
+          "name": "Sabots",
+          "range": "Mêlée",
+          "attacks": 2,
+          "armor_piercing": 0,
+          "special_rules": []
+        }
+      ],
+      "upgrade_groups": [
+        {
+          "group": "Améliorations d'unité",
+          "type": "upgrades",
+          "description": "Améliorer avec :",
+          "options": [
+            {
+              "name": "Chasse éternelle",
+              "cost": 10,
+              "special_rules": [
+                "Marque de Fléau"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
