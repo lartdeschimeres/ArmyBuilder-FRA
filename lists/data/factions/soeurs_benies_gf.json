@@ -450,7 +450,7 @@
             {
               "name": "Épée énergétique",
               "cost": 20,
-              "requires": ["ACC"],
+              "replaces": ["ACC"],
               "weapon": {
                 "name": "Épée énergétique",
                 "range": "Mêlée",
@@ -464,7 +464,7 @@
             {
               "name": "Poing tronçonneur",
               "cost": 30,
-              "requires": ["ACC"],
+              "replaces": ["ACC"],
               "weapon": {
                 "name": "Poing tronçonneur",
                 "range": "Mêlée",
@@ -478,7 +478,7 @@
             {
               "name": "Masse lourde",
               "cost": 30,
-              "requires": ["ACC"],
+              "replaces": ["ACC"],
               "weapon": {
                 "name": "Masse lourde",
                 "range": "Mêlée",
@@ -492,7 +492,7 @@
             {
               "name": "Poing énergétique",
               "cost": 35,
-              "requires": ["ACC"],
+              "replaces": ["ACC"],
               "weapon": {
                 "name": "Poing énergétique",
                 "range": "Mêlée",
