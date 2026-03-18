@@ -421,7 +421,7 @@
               }
             },
             {
-              "name": "Fusil Tempête rapide + ACC",
+              "name": "Fusil Tempête rapide",
               "cost": 80,
               "weapon": {
                 "name": "Fusil Tempête rapide",
@@ -429,6 +429,15 @@
                 "attacks": 6,
                 "armor_piercing": 1,
                 "special_rules": []
+              },
+              {
+                "name": "ACC",
+                "range": "Mêlée",
+                "attacks": 4,
+                "armor_piercing": 0,
+                "special_rules": [
+                  
+                ]
               }
             }
           ]
@@ -441,6 +450,7 @@
             {
               "name": "Épée énergétique",
               "cost": 20,
+              "requires": ["ACC"],
               "weapon": {
                 "name": "Épée énergétique",
                 "range": "Mêlée",
@@ -454,6 +464,7 @@
             {
               "name": "Poing tronçonneur",
               "cost": 30,
+              "requires": ["ACC"],
               "weapon": {
                 "name": "Poing tronçonneur",
                 "range": "Mêlée",
@@ -467,6 +478,7 @@
             {
               "name": "Masse lourde",
               "cost": 30,
+              "requires": ["ACC"],
               "weapon": {
                 "name": "Masse lourde",
                 "range": "Mêlée",
@@ -480,6 +492,7 @@
             {
               "name": "Poing énergétique",
               "cost": 35,
+              "requires": ["ACC"],
               "weapon": {
                 "name": "Poing énergétique",
                 "range": "Mêlée",
@@ -613,6 +626,7 @@
             {
               "name": "Pistolet lance-flamme",
               "cost": 10,
+              "requires": ["Bouclier de combat"],
               "weapon": {
                 "name": "Pistolet lance-flamme",
                 "range": 6,
@@ -626,7 +640,8 @@
             },
             {
               "name": "Pistolet lourd de maître",
-              "cost": 10,
+              "cost": 15,
+              "requires": ["Bouclier de combat"],
               "weapon": {
                 "name": "Pistolet lourd de maître",
                 "range": 12,
@@ -637,7 +652,8 @@
             },
             {
               "name": "Pistolet à fusion",
-              "cost": 10,
+              "cost": 15,
+              "requires": ["Bouclier de combat"],
               "weapon": {
                 "name": "Pistolet à fusion",
                 "range": 6,
@@ -650,7 +666,8 @@
             },
             {
               "name": "Pistolet lacérateur de maître",
-              "cost": 20,
+              "cost": 25,
+              "requires": ["Bouclier de combat"],
               "weapon": {
                 "name": "Pistolet lacérateur de maître",
                 "range": 9,
@@ -663,7 +680,8 @@
             },
             {
               "name": "Fusil à pompe de maître",
-              "cost": 20,
+              "cost": 25,
+              "requires": ["Bouclier de combat"],
               "weapon": {
                 "name": "Fusil à pompe de maître",
                 "range": 12,
@@ -674,7 +692,8 @@
             },
             {
               "name": "Pistolet à plasma de maître",
-              "cost": 20,
+              "cost": 30,
+              "requires": ["Bouclier de combat"],
               "weapon": {
                 "name": "Pistolet à plasma de maître",
                 "range": 12,
@@ -685,7 +704,8 @@
             },
             {
               "name": "Fusil lourd de maître",
-              "cost": 25,
+              "cost": 35,
+              "requires": ["Bouclier de combat"],
               "weapon": {
                 "name": "Fusil lourd de maître",
                 "range": 24,
@@ -696,7 +716,8 @@
             },
             {
               "name": "Fusil à plasma de maître",
-              "cost": 50,
+              "cost": 60,
+              "requires": ["Bouclier de combat"],
               "weapon": {
                 "name": "Fusil à plasma de maître",
                 "range": 24,
@@ -708,6 +729,7 @@
             {
               "name": "Fusil sniper lance-flamme de maître",
               "cost": 65,
+              "requires": ["Bouclier de combat"],
               "weapon": {
                 "name": "Fusil sniper lance-flamme de maître",
                 "range": 18,
@@ -722,7 +744,8 @@
             },
             {
               "name": "Fusil Tempête de maître",
-              "cost": 55,
+              "cost": 70,
+              "requires": ["Bouclier de combat"],
               "weapon": {
                 "name": "Fusil Tempête de maître",
                 "range": 24,
@@ -741,6 +764,7 @@
             {
               "name": "Module lance-flamme",
               "cost": 10,
+              "requires": ["Fusil lourd de maître"],
               "weapon": {
                 "name": "Module lance-flamme",
                 "range": 12,
@@ -756,6 +780,7 @@
             {
               "name": "Module lance-plasma",
               "cost": 10,
+              "requires": ["Fusil lourd de maître"],
               "weapon": {
                 "name": "Module lance-plasma",
                 "range": 24,
@@ -769,6 +794,7 @@
             {
               "name": "Module arbalète",
               "cost": 10,
+              "requires": ["Fusil lourd de maître"],
               "weapon": {
                 "name": "Module arbalète",
                 "range": 24,
@@ -783,7 +809,8 @@
             },
             {
               "name": "Module fusion",
-              "cost": 10,
+              "cost": 15,
+              "requires": ["Fusil lourd de maître"],
               "weapon": {
                 "name": "Module fusion",
                 "range": 12,
@@ -792,6 +819,82 @@
                 "special_rules": [
                   "Limité",
                   "Mortel (3)"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "group": "Remplacement ACC",
+          "type": "conditional_weapon",
+          "description": "Remplacer l'ACC par :",
+          "options": [
+            {
+              "name": "Épée énergétique",
+              "cost": 10,
+              "requires": ["ACC"],
+              "weapon": {
+                "name": "Épée énergétique",
+                "range": "Mêlée",
+                "attacks": 4,
+                "armor_piercing": 1,
+                "special_rules": [
+                  "Perforant"
+                ]
+              }
+            },
+            {
+              "name": "Poing tronçonneur",
+              "cost": 20,
+              "requires": ["ACC"],
+              "weapon": {
+                "name": "Poing tronçonneur",
+                "range": "Mêlée",
+                "attacks": 2,
+                "armor_piercing": 2,
+                "special_rules": [
+                  "Mortel (3)"
+                ]
+              }
+            },
+            {
+              "name": "Masse lourde",
+              "cost": 20,
+              "requires": ["ACC"],
+              "weapon": {
+                "name": "Masse lourde",
+                "range": "Mêlée",
+                "attacks": 2,
+                "armor_piercing": 2,
+                "special_rules": [
+                  "Explosion (3)"
+                ]
+              }
+            },
+            {
+              "name": "Poing énergétique",
+              "cost": 20,
+              "requires": ["ACC"],
+              "weapon": {
+                "name": "Poing énergétique",
+                "range": "Mêlée",
+                "attacks": 4,
+                "armor_piercing": 4,
+                "special_rules": []
+              }
+            },
+            {
+              "name": "Epée de Procession",
+              "cost": 20,
+              "requires": ["ACC"],
+              "weapon": {
+                "name": "Epée de Procession",
+                "range": "Mêlée",
+                "attacks": 2,
+                "armor_piercing": 1,
+                "special_rules": [
+                  "Fiable",
+                  "Perforant"
                 ]
               }
             }
