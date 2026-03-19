@@ -4800,7 +4800,7 @@
               "cost": 55,
               "min_count": 0,
               "max_count": {
-                "type": "size_based",
+                "type": "fixed",
                 "value": 2
               },
               "replaces": [
@@ -4834,7 +4834,7 @@
           "type": "variable_weapon_count",
           "description": "Remplacer n'importe quelle Frappe par :",
           "requires": [
-            "Lance-flamme béni rapide + Frappe"
+            "Frappe"
           ],
           "options": [
             {
@@ -4842,7 +4842,7 @@
               "cost": 10,
               "min_count": 0,
               "max_count": {
-                "type": "size_based",
+                "type": "fixed",
                 "value": 2
               },
               "replaces": [
@@ -4863,7 +4863,7 @@
               "cost": 15,
               "min_count": 0,
               "max_count": {
-                "type": "size_based",
+                "type": "fixed",
                 "value": 2
               },
               "replaces": [
@@ -4884,7 +4884,7 @@
               "cost": 20,
               "min_count": 0,
               "max_count": {
-                "type": "size_based",
+                "type": "fixed",
                 "value": 2
               },
               "replaces": [
@@ -4905,7 +4905,7 @@
               "cost": 20,
               "min_count": 0,
               "max_count": {
-                "type": "size_based",
+                "type": "fixed",
                 "value": 2
               },
               "replaces": [
@@ -4931,7 +4931,7 @@
               "cost": 10,
               "min_count": 0,
               "max_count": {
-                "type": "size_based",
+                "type": "fixed",
                 "value": 2
               },
               "replaces": [
@@ -4952,7 +4952,7 @@
               "cost": 25,
               "min_count": 0,
               "max_count": {
-                "type": "size_based",
+                "type": "fixed",
                 "value": 2
               },
               "replaces": [
@@ -4973,7 +4973,7 @@
               "cost": 35,
               "min_count": 0,
               "max_count": {
-                "type": "size_based",
+                "type": "fixed",
                 "value": 2
               },
               "replaces": [
@@ -5035,7 +5035,7 @@
               "cost": 110,
               "min_count": 0,
               "max_count": {
-                "type": "size_based",
+                "type": "fixed",
                 "value": 2
               },
               "replaces": [
@@ -5065,7 +5065,7 @@
           "type": "variable_weapon_count",
           "description": "Remplacer n'importe quelle Frappe par :",
           "requires": [
-            "Mitrailleuse rapide lourde + Frappe"
+            "Frappe"
           ],
           "options": [
             {
@@ -5073,7 +5073,7 @@
               "cost": 10,
               "min_count": 0,
               "max_count": {
-                "type": "size_based",
+                "type": "fixed",
                 "value": 2
               },
               "replaces": [
@@ -5094,7 +5094,7 @@
               "cost": 20,
               "min_count": 0,
               "max_count": {
-                "type": "size_based",
+                "type": "fixed",
                 "value": 2
               },
               "replaces": [
@@ -5115,7 +5115,7 @@
               "cost": 25,
               "min_count": 0,
               "max_count": {
-                "type": "size_based",
+                "type": "fixed",
                 "value": 2
               },
               "replaces": [
@@ -5136,7 +5136,7 @@
               "cost": 25,
               "min_count": 0,
               "max_count": {
-                "type": "size_based",
+                "type": "fixed",
                 "value": 2
               },
               "replaces": [
@@ -5162,7 +5162,7 @@
               "cost": 20,
               "min_count": 0,
               "max_count": {
-                "type": "size_based",
+                "type": "fixed",
                 "value": 2
               },
               "replaces": [
@@ -5183,7 +5183,7 @@
               "cost": 30,
               "min_count": 0,
               "max_count": {
-                "type": "size_based",
+                "type": "fixed",
                 "value": 2
               },
               "replaces": [
@@ -5204,7 +5204,7 @@
               "cost": 45,
               "min_count": 0,
               "max_count": {
-                "type": "size_based",
+                "type": "fixed",
                 "value": 2
               },
               "replaces": [
