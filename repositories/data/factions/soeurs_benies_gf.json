@@ -82,7 +82,7 @@
       "description": "Cette figurine et son unité gagne un bonus de +1 aux Tests de Moral."
     },
     {
-      "name": "Devout Boost Aura [Aura de Boost de Dévotion]",
+      "name": "Devout Boost Aura [Aura Boost de Dévotion]",
       "description": "Cette figurine et son unité gagne la règle spéciale Boost de Dévotion."
     },
     {
@@ -3281,7 +3281,7 @@
       "quality": 4,
       "defense": 4,
       "special_rules": [
-        "Bonus de Dévotion",
+        "Boost de Dévotion",
         "Dévotion"
       ],
       "weapon": [
@@ -5002,7 +5002,7 @@
       "defense": 2,
       "coriace": 9,
       "special_rules": [
-        "Bonus de Dévotion",
+        "Boost de Dévotion",
         "Dévotion",
         "Effrayant (2)",
         "Régénération",
