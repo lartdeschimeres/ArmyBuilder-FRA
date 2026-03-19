@@ -490,7 +490,7 @@
             }
           ],
           "requires": [
-            "ACC et Bouclier de combat"
+            "Bouclier de combat"
           ]
         }
       ]
@@ -736,7 +736,7 @@
             }
           ],
           "requires": [
-            "ACC et Bouclier de combat"
+            "ACC"
           ]
         },
         {
@@ -1103,7 +1103,7 @@
             }
           ],
           "requires": [
-            "ACC et Bouclier de combat"
+            "ACC"
           ]
         },
         {
@@ -1244,7 +1244,7 @@
             }
           ],
           "requires": [
-            "ACC et Bouclier de combat"
+            "Bouclier de combat"
           ]
         },
         {
@@ -1666,7 +1666,7 @@
             }
           ],
           "requires": [
-            "ACC et Bouclier de combat"
+            "ACC"
           ]
         },
         {
@@ -1807,7 +1807,7 @@
             }
           ],
           "requires": [
-            "ACC et Bouclier de combat"
+            "Bouclier de combat"
           ]
         }
       ]
@@ -2226,7 +2226,7 @@
           "type": "conditional_weapon",
           "description": "Remplacer le Pistolet lourd de sergent par :",
           "requires": [
-            "Pistolet lourd de sergent"
+            "Pistolet lourd de sergent + Épée énergétique"
           ],
           "options": [
             {
@@ -2260,7 +2260,7 @@
           "type": "conditional_weapon",
           "description": "Remplacer l'Épée énergétique par :",
           "requires": [
-            "Épée énergétique"
+            "Pistolet lourd de sergent + Épée énergétique"
           ],
           "options": [
             {
@@ -2455,7 +2455,7 @@
           "type": "conditional_weapon",
           "description": "Remplacer le Pistolet lourd de sergent par :",
           "requires": [
-            "Pistolet lourd de sergent"
+            "Pistolet lourd de sergent + Épée énergétique"
           ],
           "options": [
             {
@@ -2489,7 +2489,7 @@
           "type": "conditional_weapon",
           "description": "Remplacer l'Épée énergétique par :",
           "requires": [
-            "Épée énergétique"
+            "Pistolet lourd de sergent + Épée énergétique"
           ],
           "options": [
             {
@@ -2832,7 +2832,7 @@
           "type": "conditional_weapon",
           "description": "Remplacer le Pistolet lourd de sergent par :",
           "requires": [
-            "Pistolet lourd de sergent"
+            "Pistolet lourd de sergent + Épée énergétique"
           ],
           "options": [
             {
@@ -3159,7 +3159,7 @@
           "type": "conditional_weapon",
           "description": "Remplacer le Pistolet lourd de sergent par :",
           "requires": [
-            "Pistolet lourd de sergent"
+            "Pistolet lourd de sergent + Épée énergétique"
           ],
           "options": [
             {
@@ -3193,7 +3193,7 @@
           "type": "conditional_weapon",
           "description": "Remplacer l'Épée énergétique par :",
           "requires": [
-            "Épée énergétique"
+            "Pistolet lourd de sergent + Épée énergétique"
           ],
           "options": [
             {
@@ -3420,7 +3420,7 @@
             }
           ],
           "requires": [
-            "Fusil Tempête + ACC"
+            "Fusil Tempête"
           ]
         },
         {
@@ -3493,7 +3493,7 @@
             }
           ],
           "requires": [
-            "ACC et Bouclier de combat"
+            "Bouclier de combat"
           ]
         }
       ]
@@ -3681,7 +3681,7 @@
           "type": "conditional_weapon",
           "description": "Remplacer le Pistolet lourd de sergent par :",
           "requires": [
-            "Pistolet lourd de sergent"
+            "Pistolet lourd de sergent + Épée énergétique"
           ],
           "options": [
             {
@@ -3715,7 +3715,7 @@
           "type": "conditional_weapon",
           "description": "Remplacer l'Épée énergétique par :",
           "requires": [
-            "Épée énergétique"
+            "Pistolet lourd de sergent + Épée énergétique"
           ],
           "options": [
             {
