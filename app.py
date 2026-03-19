@@ -639,7 +639,6 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
     html += f'<div style="text-align:center;margin-top:16px;font-size:11px;color:var(--muted);">Généré par OPR ArmyBuilder FRA — {datetime.now().strftime("%d/%m/%Y %H:%M")}</div></div></body></html>'
     return html
 
-@st.cache_data
 def load_factions():
     try:
         repository = JsonFactionRepository(Path(__file__).resolve().parent)
