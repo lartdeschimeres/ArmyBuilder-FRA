@@ -6,7 +6,6 @@ from datetime import datetime
 import re
 import math
 import base64
-from repositories import JsonFactionRepository
 
 st.set_page_config(page_title="OPR ArmyBuilder FR", layout="wide", initial_sidebar_state="auto")
 
@@ -639,14 +638,26 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
     html += f'<div style="text-align:center;margin-top:16px;font-size:11px;color:var(--muted);">Généré par OPR ArmyBuilder FRA — {datetime.now().strftime("%d/%m/%Y %H:%M")}</div></div></body></html>'
     return html
 
+@st.cache_data
 def load_factions():
+    factions = {}; games = set()
     try:
-        repository = JsonFactionRepository(Path(__file__).resolve().parent)
-        factions, games = repository.load_catalog()
+        FACTIONS_DIR = Path(__file__).resolve().parent / "frontend" / "public" / "factions"
+        if not FACTIONS_DIR.exists():
+            FACTIONS_DIR = Path(__file__).resolve().parent / "lists" / "data" / "factions"
+        for fp in FACTIONS_DIR.glob("*.json"):
+            try:
+                with open(fp, encoding="utf-8") as f:
+                    data = json.load(f)
+                game = data.get("game"); faction = data.get("faction")
+                if game and faction:
+                    if game not in factions: factions[game] = {}
+                    data.setdefault("faction_special_rules", []); data.setdefault("spells", {}); data.setdefault("units", [])
+                    factions[game][faction] = data; games.add(game)
+            except Exception as e:
+                st.warning(f"Erreur chargement {fp.name}: {e}")
     except Exception as e:
         st.error(f"Erreur chargement des factions: {e}"); return {}, []
-    if not factions:
-        st.error("Aucune faction chargee depuis repositories/data/factions.")
     return factions, sorted(games) if games else list(GAME_CONFIG.keys())
 
 if st.session_state.page == "setup":
@@ -1089,7 +1100,8 @@ if st.session_state.page == "army":
                     mc=min(mc_cfg.get("value", unit.get("size",1)), unit.get("size",1))
                 elif mc_type == "count_in_weapons":
                     wn=mc_cfg.get("weapon_name","")
-                    mc=sum(1 for w in weapons if isinstance(w,dict) and w.get("name")==wn)
+                    # Tenir compte du champ "count" sur l'arme de base (ex: 2x Fléaux lourds)
+                    mc=sum(w.get("count",1) for w in weapons if isinstance(w,dict) and w.get("name")==wn)
                 else:
                     mc=unit.get("size",1)
                 cnt=st.number_input(f"Nombre de {option['name']} (0 – {mc})",min_value=0,max_value=max(mc,0),value=min(st.session_state.unit_selections[unit_key].get(f"cnt_{g_idx}_{oi}",0),mc),step=1,key=f"{unit_key}_{g_key}_cnt_{oi}")
