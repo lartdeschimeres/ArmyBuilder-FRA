@@ -669,6 +669,23 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
     return html
 
 @st.cache_data
+def load_generic_rules():
+    """Charge le dictionnaire des règles génériques OPR depuis repositories/data/generic_rules.json."""
+    try:
+        _BASE = Path(__file__).resolve().parent
+        for _p in [
+            _BASE / "repositories" / "data" / "generic_rules.json",
+            _BASE / "generic_rules.json",
+        ]:
+            if _p.exists():
+                with open(_p, encoding="utf-8") as f:
+                    data = json.load(f)
+                return {r["name"]: r["description"] for r in data.get("rules", []) if "name" in r}
+    except Exception:
+        pass
+    return {}
+
+@st.cache_data
 def load_factions():
     factions = {}; games = set()
     try:
@@ -1090,25 +1107,22 @@ if st.session_state.page == "army":
     _unit_sr = unit.get("special_rules", [])
     if _unit_sr:
         _generic_rules = load_generic_rules()
-        st.markdown("<div style='margin-bottom:6px;font-size:12px;color:#6c757d;'>Règles spéciales :</div>", unsafe_allow_html=True)
-        _sr_cols = st.columns(min(len(_unit_sr), 4))
-        for _si, _sr in enumerate(_unit_sr):
+        _faction_rules_dict = {
+            r["name"]: r["description"]
+            for r in st.session_state.get("faction_special_rules", [])
+            if isinstance(r, dict)
+        }
+        st.markdown("<div style='margin-bottom:4px;font-size:12px;color:#6c757d;'>Règles spéciales :</div>", unsafe_allow_html=True)
+        for _sr in _unit_sr:
             _sr_name = _sr if isinstance(_sr, str) else _sr.get("name", "")
-            _sr_desc = "" if isinstance(_sr, str) else _sr.get("description", "")
-            # Chercher la description : règles faction d'abord, puis génériques
-            if not _sr_desc:
-                for _fr in st.session_state.get("faction_special_rules", []):
-                    if isinstance(_fr, dict) and _fr.get("name","") == _sr_name:
-                        _sr_desc = _fr.get("description", ""); break
-            if not _sr_desc:
-                _sr_desc = _generic_rules.get(_sr_name, "")
-            with _sr_cols[_si % min(len(_unit_sr), 4)]:
-                if _sr_desc:
-                    with st.popover(_sr_name, use_container_width=True):
-                        st.markdown(f"**{_sr_name}**")
-                        st.caption(_sr_desc)
-                else:
-                    st.markdown(f"`{_sr_name}`")
+            _sr_desc = (_faction_rules_dict.get(_sr_name)
+                        or _generic_rules.get(_sr_name, ""))
+            if _sr_desc:
+                with st.popover(f"📖 {_sr_name}"):
+                    st.markdown(f"**{_sr_name}**")
+                    st.write(_sr_desc)
+            else:
+                st.markdown(f"• `{_sr_name}`")
 
     weapons = copy.deepcopy(list(unit.get("weapon",[]))); selected_options = {}; mount = None
     weapon_cost = 0; mount_cost = 0; upgrades_cost = 0
