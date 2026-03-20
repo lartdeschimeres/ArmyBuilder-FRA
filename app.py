@@ -589,7 +589,7 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
             # chaque colonne avant d'en créer une nouvelle → s'adapte à n'importe quel volume.
             html += """<div class="legend-page"><div class="faction-rules">"""
             html += """<div class="legend-title">📜 Règles spéciales &amp; Sorts</div>"""
-            html += """<div style="columns:3;column-gap:12px;column-rule:1px solid #dee2e6;font-size:9px;">"""
+            html += """<div style="columns:3;column-gap:8px;column-rule:1px solid #dee2e6;font-size:7.5px;">"""
 
             if all_rules:
                 if faction_spells:
