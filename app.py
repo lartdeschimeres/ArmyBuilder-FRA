@@ -1074,6 +1074,13 @@ if st.session_state.page == "army":
                 cur=st.session_state.unit_selections[unit_key].get(g_key,choices[0])
                 ch=st.radio("Sélection de l'arme",choices,index=choices.index(cur) if cur in choices else 0,key=f"{unit_key}_{g_key}_weapon")
                 st.session_state.unit_selections[unit_key][g_key]=ch
+                if ch != choices[0] and ch in opt_map:
+                    _ow = opt_map[ch].get("weapon", {})
+                    if isinstance(_ow, list):
+                        for _w in _ow:
+                            if isinstance(_w, dict): st.caption(f"⚔️ {_w.get('name','')} — {weapon_profile_md(_w)}")
+                    elif isinstance(_ow, dict) and _ow:
+                        st.caption(f"⚔️ {_ow.get('name','')} — {weapon_profile_md(_ow)}")
                 if ch!=choices[0]:
                     for ol,o in opt_map.items():
                         if ol==ch: weapon_cost+=o["cost"]; weapons=copy.deepcopy(o["weapon"] if isinstance(o["weapon"],list) else [o["weapon"]]); break
@@ -1093,6 +1100,13 @@ if st.session_state.page == "army":
                 cur=st.session_state.unit_selections[unit_key].get(g_key,choices[0])
                 ch=st.radio(group.get("description","Sélectionnez une amélioration"),choices,index=choices.index(cur) if cur in choices else 0,key=f"{unit_key}_{g_key}_cond")
                 st.session_state.unit_selections[unit_key][g_key]=ch
+                if ch != choices[0] and ch in opt_map:
+                    _ow = opt_map[ch].get("weapon", {})
+                    if isinstance(_ow, list):
+                        for _w in _ow:
+                            if isinstance(_w, dict): st.caption(f"⚔️ {_w.get('name','')} — {weapon_profile_md(_w)}")
+                    elif isinstance(_ow, dict) and _ow:
+                        st.caption(f"⚔️ {_ow.get('name','')} — {weapon_profile_md(_ow)}")
                 if ch!=choices[0]:
                     opt=opt_map[ch]; upgrades_cost+=opt.get("cost",0)
                     if "weapon" in opt:
