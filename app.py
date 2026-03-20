@@ -100,6 +100,10 @@ if not st.session_state.get("_qr_loaded"):
             if _data.get("game"):    st.session_state["game"]    = _data["game"]
             if _data.get("faction"): st.session_state["faction"] = _data["faction"]
             if _data.get("pts"):     st.session_state["points"]  = _data["pts"]
+            # Stocker army_list complète si présente
+            if _data.get("army_list"):
+                st.session_state["_qr_army_list"] = _data["army_list"]
+                st.session_state["_qr_army_cost"] = _data.get("army_cost", 0)
             # Stocker pour le bandeau info
             st.session_state["_qr_game"]    = _data.get("game", "")
             st.session_state["_qr_faction"] = _data.get("faction", "")
@@ -626,6 +630,9 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
     _list_data = json.dumps({
         "game": st.session_state.get("game",""),
         "faction": army_name, "pts": army_limit,
+        "list_name": army_name,
+        "army_list": army_list,
+        "army_cost": sum(u.get("cost",0) for u in army_list),
         "units": [{"n": u.get("name",""), "c": u.get("cost",0)} for u in army_list]
     }, ensure_ascii=False, separators=(',',':'))
     _compressed = _zlib.compress(_list_data.encode(), level=9)
@@ -834,6 +841,11 @@ if st.session_state.page == "setup":
             # Réinitialiser l'armée seulement si jeu ou faction a changé
             if _game_changed or _faction_changed:
                 st.session_state.army_list = []; st.session_state.army_cost = 0; st.session_state.unit_selections = {}
+            # Si une liste QR est en attente, l'injecter
+            if st.session_state.get("_qr_army_list"):
+                st.session_state.army_list = st.session_state.pop("_qr_army_list")
+                st.session_state.army_cost = st.session_state.pop("_qr_army_cost", 0)
+                st.session_state.unit_selections = {}
             st.session_state.page = "army"; st.rerun()
 
 if st.session_state.page == "army":
