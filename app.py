@@ -88,22 +88,26 @@ if "draft_counter" not in st.session_state: st.session_state.draft_counter = 0
 if "draft_unit_name" not in st.session_state: st.session_state.draft_unit_name = ""
 
 # ── Lecture du paramètre ?list= (QR code de partage) ────────────────────────
-# Déclenché une seule fois par session via "_qr_loaded"
 if not st.session_state.get("_qr_loaded"):
     st.session_state["_qr_loaded"] = True
     try:
         _qp = st.query_params.get("list", "")
         if _qp:
             import zlib as _z, base64 as _b64q, urllib.parse as _uq
-            _raw   = _b64q.urlsafe_b64decode(_uq.unquote(_qp).encode() + b"==")
-            _data  = json.loads(_z.decompress(_raw).decode())
-            # Pré-remplir la session avec les infos de la liste partagée
+            _raw  = _b64q.urlsafe_b64decode(_uq.unquote(_qp).encode() + b"==")
+            _data = json.loads(_z.decompress(_raw).decode())
+            # Pré-remplir jeu, faction et points directement dans session_state
+            if _data.get("game"):    st.session_state["game"]    = _data["game"]
+            if _data.get("faction"): st.session_state["faction"] = _data["faction"]
+            if _data.get("pts"):     st.session_state["points"]  = _data["pts"]
+            # Stocker pour le bandeau info
+            st.session_state["_qr_game"]    = _data.get("game", "")
             st.session_state["_qr_faction"] = _data.get("faction", "")
             st.session_state["_qr_pts"]     = _data.get("pts", 1000)
             st.session_state["_qr_units"]   = _data.get("units", [])
             st.session_state["_qr_pending"] = True
-            # Effacer le paramètre de l'URL pour éviter une boucle
             st.query_params.clear()
+            st.rerun()
     except Exception:
         pass  # paramètre invalide → ignorer silencieusement
 if "game" not in st.session_state: st.session_state.game = None
@@ -620,6 +624,7 @@ body{{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;margi
     # Le téléphone ouvre directement l'app au scan
     import zlib as _zlib
     _list_data = json.dumps({
+        "game": st.session_state.get("game",""),
         "faction": army_name, "pts": army_limit,
         "units": [{"n": u.get("name",""), "c": u.get("cost",0)} for u in army_list]
     }, ensure_ascii=False, separators=(',',':'))
@@ -677,17 +682,16 @@ if st.session_state.page == "setup":
 
     # ── Bandeau liste partagée reçue via QR ──────────────────────────────────
     if st.session_state.get("_qr_pending"):
-        _qf = st.session_state["_qr_faction"]
-        _qu = st.session_state["_qr_units"]
-        _qp = st.session_state["_qr_pts"]
+        _qf = st.session_state.get("_qr_faction", "")
+        _qg = st.session_state.get("_qr_game", "")
+        _qu = st.session_state.get("_qr_units", [])
+        _qp = st.session_state.get("_qr_pts", 0)
         _unit_lines = " · ".join(f"{u['n']} ({u['c']} pts)" for u in _qu)
         st.info(
-            f"📲 **Liste reçue via QR code** — {_qf} / {_qp} pts\n\n"
+            f"📲 **Liste reçue via QR code** — {_qg} / {_qf} / {_qp} pts\n\n"
             f"{_unit_lines}\n\n"
-            f"Sélectionnez le jeu et la faction correspondants, puis cliquez **Construire l'armée**."
+            f"Vérifiez le jeu et la faction puis cliquez **Construire l'armée**."
         )
-        # Pré-remplir le format de points
-        if _qp: st.session_state.setdefault("points", _qp)
         del st.session_state["_qr_pending"]
 
     # Jeu courant
