@@ -153,7 +153,7 @@
               "weapon": {"name": "Paire de griffes énergétiques", "range": "Mêlée", "attacks": 8, "armor_piercing": 0, "special_rules": ["Perforant"]}
             },
             {
-              "name": "Fusil Tempête rapide + ACC",
+              "name": "Fusil Tempête rapide et ACC",
               "cost": 70,
               "replaces": ["Bouclier de combat"],
               "weapon": [
@@ -167,7 +167,7 @@
           "group": "Remplacement ACC",
           "type": "conditional_weapon",
           "description": "Remplacer l'ACC par :",
-          "requires": ["Bouclier de combat"],
+          "requires": ["ACC"],
           "options": [
             {"name": "Marteau énergétique", "cost": 5, "weapon": {"name": "Marteau énergétique", "range": "Mêlée", "attacks": 2, "armor_piercing": 0, "special_rules": ["Explosion (3)"]}},
             {"name": "Épée énergétique", "cost": 15, "weapon": {"name": "Épée énergétique", "range": "Mêlée", "attacks": 4, "armor_piercing": 1, "special_rules": ["Perforant"]}},
@@ -228,16 +228,16 @@
           "description": "Remplacer le Bouclier de combat et l'ACC par :",
           "options": [
             {
-              "name": "Pistolet antigrav + ACC",
+              "name": "Pistolet antigrav et ACC",
               "cost": 5,
-              "replaces": ["Bouclier de combat"],
+              "replaces": ["ACC", "Bouclier de combat"],
               "weapon": [
                 {"name": "Pistolet antigrav", "range": 9, "attacks": 1, "armor_piercing": 1, "special_rules": ["Fracas"]},
                 {"name": "ACC", "range": "Mêlée", "attacks": 2, "armor_piercing": 0, "special_rules": []}
               ]
             },
             {
-              "name": "Pistolet antigrav + Bouclier de combat",
+              "name": "Pistolet antigrav et Bouclier de combat",
               "cost": 5,
               "replaces": ["ACC"],
               "weapon": [
