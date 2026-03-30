@@ -206,29 +206,7 @@ def check_weapon_conditions(unit_key, requires, unit=None):
 
 def format_unit_option(u):
     name_part = u["name"] + (" [1]" if u.get("type") == "hero" else f" [{u.get('size', 10)}]")
-    weapons = u.get("weapon", [])
-    if isinstance(weapons, dict): weapons = [weapons]
-    profiles = []
-    for w in weapons:
-        if isinstance(w, dict):
-            sr = w.get("special_rules", [])
-            # Formatage de la portée : entier → 'Xpouces', Mêlée → 'Mêlée'
-            rng = w.get("range", "Mêlée")
-            if rng in (None, "-", "mêlée", "Mêlée") or str(rng).lower() == "mêlée":
-                rng_str = "Mêlée"
-            elif isinstance(rng, (int, float)):
-                rng_str = f'{int(rng)}"'
-            else:
-                s = str(rng).strip()
-                rng_str = s if s.endswith('"') else f'{s}"'
-            p = f"{w.get('name','Arme')} ({rng_str}/A{w.get('attacks','?')}/PA{w.get('armor_piercing','?')}"
-            p += (f", {', '.join(sr)})" if sr else ")")
-            profiles.append(p)
-    weapon_text = ", ".join(profiles) if profiles else "Aucune"
-    rules_text = ", ".join([r if isinstance(r, str) else r.get("name","") for r in u.get("special_rules", [])]) or "Aucune"
-    # Ajout de Qual X+ devant Déf X+
-    return f"{name_part} | Qual {u.get('quality','?')}+ | Déf {u.get('defense','?')}+ | {weapon_text} | {rules_text} | {u.get('base_cost',0)}pts"
-
+    return f"{name_part} | Qual {u.get('quality','?')}+ | Déf {u.get('defense','?')}+ | {u.get('base_cost',0)} pts"
 def weapon_profile_md(weapon):
     """Retourne une ligne de profil lisible pour l'UI : Mêlée | A2 | PA1 | Règles"""
     if not weapon or not isinstance(weapon, dict): return ""
@@ -1160,19 +1138,20 @@ if st.session_state.page == "army":
     if not unit: st.error("Aucune unité sélectionnée."); st.stop()
     if "upgrade_groups" not in unit: unit["upgrade_groups"] = []
 
-    # ── Profil des armes de base de l'unité ───────────────────────────────
+    # ── Armes de base + règles spéciales en texte simple ────────────────────
     _base_weapons = unit.get("weapon", [])
     if isinstance(_base_weapons, dict): _base_weapons = [_base_weapons]
     if _base_weapons:
-        _wp_lines = [f"⚔️ **{w.get('name','')}** — {weapon_profile_md(w)}"
-                     for w in _base_weapons if isinstance(w, dict)]
-        if _wp_lines:
-            st.markdown(
-                "<div style='font-size:13px;color:#444;margin-bottom:8px;'>"
-                + " &nbsp;|&nbsp; ".join(_wp_lines)
-                + "</div>",
-                unsafe_allow_html=True
-            )
+        for _bw in _base_weapons:
+            if isinstance(_bw, dict):
+                st.markdown(f"⚔️ **{_bw.get('name','')}** — {weapon_profile_md(_bw)}")
+    _unit_sr_names = [r if isinstance(r, str) else r.get("name","") for r in unit.get("special_rules", [])]
+    if _unit_sr_names:
+        st.markdown(
+            f"<div style='font-size:12px;color:#555;margin-bottom:8px;'>"
+            f"Règles spéciales : {', '.join(_unit_sr_names)}</div>",
+            unsafe_allow_html=True
+        )
 
     # Chaque configuration d'unité a un key unique basé sur un compteur.
     # Quand l'unité change, on incrémente → pas de collision entre deux unités du même nom.
@@ -1182,28 +1161,7 @@ if st.session_state.page == "army":
     unit_key = f"draft_{st.session_state.draft_counter}"
     st.session_state.unit_selections.setdefault(unit_key, {})
 
-    # ── Règles spéciales de l'unité avec popover ──────────────────────────────
-    _unit_sr = unit.get("special_rules", [])
-    if _unit_sr:
-        _generic_rules = load_generic_rules()
-        _faction_rules_dict = load_faction_rules_dict()
-        st.markdown("<div style='margin-bottom:4px;font-size:12px;color:#6c757d;'>Règles spéciales :</div>", unsafe_allow_html=True)
-        for _si, _sr in enumerate(_unit_sr):
-            _sr_name = _sr if isinstance(_sr, str) else _sr.get("name", "")
-            # Lookup exact d'abord, puis matching partiel (pour Coriace (9) → Coriace)
-            _sr_desc = (_faction_rules_dict.get(_sr_name)
-                        or _generic_rules.get(_sr_name, ""))
-            if not _sr_desc:
-                for _k, _d in {**_generic_rules, **_faction_rules_dict}.items():
-                    if _sr_name.startswith(_k + " ") or _sr_name.startswith(_k + "("):
-                        _sr_desc = _d; break
-            if _sr_desc:
-                with st.popover(f"📖 {_sr_name}", use_container_width=False):
-                    st.markdown(f"**{_sr_name}**")
-                    st.caption(_sr_desc)
-            else:
-                st.markdown(f"• `{_sr_name}`")
-
+    
     weapons = copy.deepcopy(list(unit.get("weapon",[]))); selected_options = {}; mount = None
     weapon_cost = 0; mount_cost = 0; upgrades_cost = 0
 
