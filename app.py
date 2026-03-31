@@ -335,7 +335,7 @@ def export_html(army_list, army_name, army_limit):
         # La passe _replaces sert uniquement aux sliders (seuls cas avec _count).
         wmap = {}
         for w in weapons:
-            if not isinstance(w, dict) or w.get("_mount_weapon"): continue
+            if not isinstance(w, dict): continue
             wc = w.copy(); wc.setdefault("range","Mêlée")
             key = (wc.get("name",""), wc.get("range",""), wc.get("attacks",""),
                    wc.get("armor_piercing",""), tuple(sorted(wc.get("special_rules",[]))))
@@ -345,7 +345,7 @@ def export_html(army_list, army_name, army_limit):
         # Soustraire les _replaces UNIQUEMENT pour les sliders (armes avec _count).
         # Les conditional_weapon (sans _count) n'affectent pas le count des armes de base.
         for w in weapons:
-            if not isinstance(w, dict) or w.get("_mount_weapon"): continue
+            if not isinstance(w, dict): continue
             if "_count" not in w: continue          # seulement les sliders
             replaces = w.get("_replaces", [])
             if not replaces: continue
@@ -1141,15 +1141,18 @@ if st.session_state.page == "army":
     # ── Armes de base + règles spéciales en texte simple ────────────────────
     _base_weapons = unit.get("weapon", [])
     if isinstance(_base_weapons, dict): _base_weapons = [_base_weapons]
-    if _base_weapons:
-        for _bw in _base_weapons:
-            if isinstance(_bw, dict):
-                st.markdown(f"⚔️ **{_bw.get('name','')}** — {weapon_profile_md(_bw)}")
+    _wp_html = "".join(
+        f"<div style='margin-bottom:2px;'>⚔️ <b>{_bw.get('name','')}</b> — {weapon_profile_md(_bw)}</div>"
+        for _bw in _base_weapons if isinstance(_bw, dict)
+    )
     _unit_sr_names = [r if isinstance(r, str) else r.get("name","") for r in unit.get("special_rules", [])]
-    if _unit_sr_names:
+    _sr_html = (
+        f"<div style='margin-top:6px;'><b>Règles spéciales :</b> {', '.join(_unit_sr_names)}</div>"
+        if _unit_sr_names else ""
+    )
+    if _wp_html or _sr_html:
         st.markdown(
-            f"<div style='font-size:12px;color:#555;margin-bottom:8px;'>"
-            f"Règles spéciales : {', '.join(_unit_sr_names)}</div>",
+            f"<div style='font-size:13px;margin-bottom:10px;line-height:1.6;'>{_wp_html}{_sr_html}</div>",
             unsafe_allow_html=True
         )
 
