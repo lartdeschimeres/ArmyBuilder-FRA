@@ -172,32 +172,39 @@ def check_weapon_conditions(unit_key, requires, unit=None):
     """
     Vérifie si les conditions d'une option sont remplies.
     Prend en compte :
-    - Les sélections explicites dans session_state (armes de remplacement choisies)
-    - Les armes de BASE de l'unité, actives quand aucun groupe type=weapon
-      n'a de sélection explicite (= le joueur garde choices[0])
+    - Les sélections explicites dans session_state (armes choisies, options nommées)
+    - Les armes de BASE de l'unité, actives sauf si remplacées par un groupe type=weapon
     """
     if not requires:
         return True
     current_weapons = []
     selections = st.session_state.unit_selections.get(unit_key, {})
 
-    # 1. Sélections explicites (armes remplacées, conditionnelles choisies)
+    # 1. Sélections explicites (armes choisies dans les groupes conditional/weapon)
     for v in selections.values():
-        if isinstance(v, str) and v not in ("Aucune amélioration", "Aucune arme", "Aucun rôle"):
+        if isinstance(v, str) and v not in ("Aucune amélioration", "Aucune arme", "Aucun rôle",
+                                             "Aucune monture", "Aucune option de mobilité"):
             current_weapons.append({"name": v.split(" (")[0]})
 
-    # 2. Armes de BASE — actives pour chaque groupe type=weapon
-    #    où aucune sélection explicite n'est stockée (= choices[0] implicite)
+    # 2. Armes de BASE — toujours actives, SAUF si un groupe type=weapon
+    #    a une sélection explicite (= l'utilisateur a remplacé les armes de base)
     if unit is not None:
+        # Trouver les groupes type=weapon qui ont une sélection active
+        replaced_by_weapon_group = False
         for gi, g in enumerate(unit.get("upgrade_groups", [])):
             if g.get("type") != "weapon":
                 continue
             g_key = f"group_{gi}"
-            if g_key not in selections:
-                # Aucune sélection explicite → les armes de base sont actives
-                for w in unit.get("weapon", []):
-                    if isinstance(w, dict):
-                        current_weapons.append(w)
+            if g_key in selections:
+                # Une sélection explicite → les armes de base sont remplacées
+                replaced_by_weapon_group = True
+                break
+
+        if not replaced_by_weapon_group:
+            # Aucun groupe type=weapon actif → les armes de base sont toutes actives
+            for w in unit.get("weapon", []):
+                if isinstance(w, dict):
+                    current_weapons.append(w)
 
     for req in requires:
         if not any(w.get("name") == req or req in w.get("tags", []) for w in current_weapons):
