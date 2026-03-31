@@ -1,13 +1,13 @@
 {
   "faction": "Gardiens Éternels",
   "game": "Age of Fantasy",
-  "version": "FR-3.5.2",
+  "version": "FR-3.5.3",
   "status": "complete",
   "description": "Les Gardiens Éternels sont d'énormes soldats imprégnés de magie, équipés de lourdes armures de combat et d'armes mortelles. Peu nombreux, ils comptent sur leur cuirasse et leurs compétences au combat pour vaincre des ennemis plus nombreux. Originaires de la Cité d'Albâtre, ils voyagent à travers les plans pour capturer des âmes et les offrir à leur Dieu Gardien, afin de maintenir scellée la Grande Porte du Néant.",
   "faction_special_rules": [
     {
       "name": "Warden [Gardien]",
-      "description": "Lorsque des unités dont toutes les figurines possèdent cette règle spéciale subissent des tirs ou sont Chargées d’une distance supérieure à 9\" et subissent des blessures, ces blessures comptent comme ayant une PA (-1), jusqu'à un minimum de PA (0)."
+      "description": "Lorsque des unités dont toutes les figurines possèdent cette règle spéciale subissent des tirs ou sont Chargées d'une distance supérieure à 9\" et subissent des blessures, ces blessures comptent comme ayant une PA (-1), jusqu'à un minimum de PA (0)."
     },
     {
       "name": "Armor (X+) [Armure (X+)]",
@@ -30,15 +30,15 @@
       "description": "Une fois par partie, lors de l'activation de cette figurine, choisissez une unité ennemie à 36\" ou moins dans sa ligne de vue, et placez X marqueurs dessus. Les unités amies obtiennent +PA (X) lorsqu'elles l'attaquent."
     },
     {
-      "name" :"Re-Deployment [Redéploiement]",
-      "description": "Une fois toutes les autres unités déployées (à l'exception des unités mises de côté), vous pouvez retirer jusqu'à deux unités amies de la table et les redéployer. Les joueurs placent les unités de redéploiement à tour de rôle, en commençant par le joueur qui s’active ensuite."
+      "name": "Re-Deployment [Redéploiement]",
+      "description": "Une fois toutes les autres unités déployées (à l'exception des unités mises de côté), vous pouvez retirer jusqu'à deux unités amies de la table et les redéployer. Les joueurs placent les unités de redéploiement à tour de rôle, en commençant par le joueur qui s'active ensuite."
     },
     {
       "name": "Re-Position Artillery [Repositionnement de l'artillerie]",
       "description": "Une fois par activation, choisissez une figurine amie à 6\" ou moins avec la règle spéciale Artillerie, qui peut immédiatement se déplacer jusqu'à 9\"."
     },
     {
-      "name": "Repel Ambushers [Chasse à l’Embuscade]",
+      "name": "Repel Ambushers [Chasse à l'Embuscade]",
       "description": "Les unités ennemies utilisant la règle spéciale Embuscade doivent être placées à plus de 12\" de l'unité de cette figurine."
     },
     {
@@ -59,7 +59,7 @@
     },
     {
       "name": "Warden Boost [Bosst de Gardien]",
-      "description": "Si toutes les figurines de cette unité possèdent la règle spéciale Gardien, les tirs ennemis comptent toujours comme ayant PA (-1) grâce à la règle spéciale Gardien (au lieu de seulement lorsqu'ils sont chargés ou qu’on leur tire dessus à plus de 9\")."
+      "description": "Si toutes les figurines de cette unité possèdent la règle spéciale Gardien, les tirs ennemis comptent toujours comme ayant PA (-1) grâce à la règle spéciale Gardien (au lieu de seulement lorsqu'ils sont chargés ou qu'on leur tire dessus à plus de 9\")."
     },
     {
       "name": "Bane when Shooting Aura [Aura Fléau au tir]",
@@ -1068,13 +1068,25 @@
               "tags": [
                 "has_javelot"
               ],
-              "weapon": {
-                "name": "Javelot",
-                "range": 12,
-                "attacks": 2,
-                "armor_piercing": 1,
-                "special_rules": []
-              }
+              "replaces": [
+                "Arme à une main lourde"
+              ],
+              "weapon": [
+                {
+                  "name": "Javelot",
+                  "range": 12,
+                  "attacks": 2,
+                  "armor_piercing": 1,
+                  "special_rules": []
+                },
+                {
+                  "name": "Dague",
+                  "range": "Mêlée",
+                  "attacks": 1,
+                  "armor_piercing": 0,
+                  "special_rules": []
+                }
+              ]
             },
             {
               "name": "Paire d'arme à une main Lourdes",
@@ -1680,13 +1692,6 @@
       ],
       "weapon": [
         {
-          "name": "Arc",
-          "range": 24,
-          "attacks": 2,
-          "armor_piercing": 1,
-          "special_rules": []
-        },
-        {
           "name": "Arme à une main",
           "range": "Mêlée",
           "attacks": 2,
@@ -1733,7 +1738,10 @@
                 "special_rules": [
                   "Percée"
                 ]
-              }
+              },
+              "replaces": [
+                "Arme à une main"
+              ]
             },
             {
               "name": "Pistolet arbalète",
@@ -1746,11 +1754,17 @@
                 "special_rules": [
                   "Perforant"
                 ]
-              }
+              },
+              "replaces": [
+                "Arme à une main"
+              ]
             },
             {
               "name": "Javelot",
               "cost": 20,
+              "replaces": [
+                "Arme à une main"
+              ],
               "weapon": {
                 "name": "Javelot",
                 "range": 12,
@@ -1903,7 +1917,10 @@
                 "special_rules": [
                   "Perforant"
                 ]
-              }
+              },
+              "replaces": [
+                "Masse-tonnerre"
+              ]
             },
             {
               "name": "Grande hache",
@@ -1916,7 +1933,10 @@
                 "special_rules": [
                   "Fiable"
                 ]
-              }
+              },
+              "replaces": [
+                "Masse-tonnerre"
+              ]
             },
             {
               "name": "Grand marteau",
@@ -1927,7 +1947,10 @@
                 "attacks": 3,
                 "armor_piercing": 3,
                 "special_rules": []
-              }
+              },
+              "replaces": [
+                "Masse-tonnerre"
+              ]
             },
             {
               "name": "Arbalète à répétition",
@@ -1940,7 +1963,10 @@
                 "special_rules": [
                   "Perforant"
                 ]
-              }
+              },
+              "replaces": [
+                "Masse-tonnerre"
+              ]
             }
           ]
         }
@@ -1995,7 +2021,10 @@
                 "attacks": 3,
                 "armor_piercing": 3,
                 "special_rules": []
-              }
+              },
+              "replaces": [
+                "Lance lourde"
+              ]
             },
             {
               "name": "Grande Masse-tonnerre",
@@ -2008,7 +2037,10 @@
                 "special_rules": [
                   "Fracas"
                 ]
-              }
+              },
+              "replaces": [
+                "Lance lourde"
+              ]
             }
           ]
         },
@@ -2076,7 +2108,10 @@
                 "attacks": 9,
                 "armor_piercing": 1,
                 "special_rules": []
-              }
+              },
+              "replaces": [
+                "Lance de l'équipage"
+              ]
             }
           ]
         }
@@ -2129,7 +2164,10 @@
                 "attacks": 6,
                 "armor_piercing": 1,
                 "special_rules": []
-              }
+              },
+              "replaces": [
+                "Traits Célestes"
+              ]
             },
             {
               "name": "Trait-tonnerre",
@@ -2142,7 +2180,10 @@
                 "special_rules": [
                   "Fracas"
                 ]
-              }
+              },
+              "replaces": [
+                "Traits Célestes"
+              ]
             }
           ]
         },
