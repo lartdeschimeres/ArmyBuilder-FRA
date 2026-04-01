@@ -307,24 +307,25 @@ def export_html(army_list, army_name, army_limit):
 
     def collect_weapons(unit):
         # unit["weapon"] contient DEJA toutes les armes consolidees par la page army
-        # (armes de base, remplacements, armes de role). Ne PAS relire unit["options"]
-        # pour eviter les doublons sur les roles avec weapon.
         result = []
         bw = unit.get("weapon", [])
         if isinstance(bw, dict): bw = [bw]
+        
         for w in bw:
             if isinstance(w, dict):
                 wc = w.copy(); wc.setdefault("range", "Mêlée")
-                # Purger _count sur les armes de base (not _upgraded) :
-                # _count ne doit exister que sur les armes ajoutées via slider.
-                # Un résidu de cache ou de JSON corrompu sur une arme de base
-                # fausserait le calcul de replaced_count dans group_weapons.
-                # Purger _count uniquement si = 1 (arme simple sans exemplaires multiples)
-                # Garder _count > 1 (ex: Griffes lourdes x3 des Paladins sur Drake-Lion)
-                if not wc.get("_upgraded") and "_count" in wc and wc["_count"] <= 1:
-                    del wc["_count"]
+                
+                # MARQUAGE EXPLICITE DES ARMES DE BASE
+                # Si l'arme n'a PAS le flag _upgraded, c'est une arme de base (ou de monture)
+                if not wc.get("_upgraded") and not wc.get("_mount_weapon"):
+                    wc["_is_base"] = True
+                    # Nettoyage : on garde _count seulement si > 1 pour les armes de base
+                    # Si _count est 1 ou inexistant, on le laisse tel quel (implicite)
+                    if "_count" in wc and wc["_count"] <= 1:
+                        del wc["_count"] 
                 result.append(wc)
-        # Armes de monture uniquement
+        
+        # Armes de monture
         if unit.get("mount"):
             m = unit["mount"]
             if isinstance(m, dict):
@@ -339,63 +340,49 @@ def export_html(army_list, army_name, army_limit):
 
     def group_weapons(weapons, unit_size=1):
         # Agrège les armes par clé (même profil).
-        # _count (slider) → utiliser _count comme quantité
-        # Tout le reste → cnt=1 (arme de base, conditional, remplacement total)
-        # La passe _replaces sert uniquement aux sliders (seuls cas avec _count).
         wmap = {}
         for w in weapons:
             if not isinstance(w, dict): continue
             wc = w.copy(); wc.setdefault("range","Mêlée")
             key = (wc.get("name",""), wc.get("range",""), wc.get("attacks",""),
                    wc.get("armor_piercing",""), tuple(sorted(wc.get("special_rules",[]))))
+            
+            # On récupère le count (défaut 1)
             cnt = wc.get("_count", 1) or 1
-            if key not in wmap: wmap[key] = wc; wmap[key]["_display_count"] = cnt
-            else: wmap[key]["_display_count"] += cnt
-        # Soustraire les _replaces UNIQUEMENT pour les sliders (armes avec _count).
-        # Les conditional_weapon (sans _count) n'affectent pas le count des armes de base.
+            
+            if key not in wmap: 
+                wmap[key] = wc
+                wmap[key]["_display_count"] = cnt
+            else: 
+                wmap[key]["_display_count"] += cnt
+        
+        # Soustraire les _replaces UNIQUEMENT pour les armes avec _count (sliders)
         for w in weapons:
             if not isinstance(w, dict): continue
             if "_count" not in w: continue          # seulement les sliders
             replaces = w.get("_replaces", [])
             if not replaces: continue
             rc = w.get("_count", 1) or 1
+            
             for replaced_name in replaces:
                 for key, entry in wmap.items():
                     if entry.get("name") == replaced_name:
                         wmap[key]["_display_count"] -= rc
                         break
+        
+        # On retourne TOUTES les armes avec count > 0
         return [v for v in wmap.values() if v.get("_display_count", 1) > 0]
-
-    def get_rules(unit):
-        rules = set()
-        for r in unit.get("special_rules", []):
-            if isinstance(r, str): rules.add(r)
-        if "options" in unit and isinstance(unit["options"], dict):
-            for group in unit["options"].values():
-                opts = group if isinstance(group, list) else [group]
-                for opt in opts:
-                    if isinstance(opt, dict):
-                        for r in opt.get("special_rules", []):
-                            if isinstance(r, str): rules.add(r)
-        if unit.get("mount"):
-            m = unit["mount"]
-            if isinstance(m, dict):
-                md = m.get("mount", {})
-                if isinstance(md, dict):
-                    for r in md.get("special_rules", []):
-                        if isinstance(r, str) and not r.startswith(("Griffes","Sabots")): rules.add(r)
-        return sorted(rules)
 
     def render_weapon_rows(final_weapons, unit_size=1):
         rows = ""
         for w in final_weapons:
             name      = esc(w.get("name","Arme"))
             cnt       = w.get("_display_count", 1) or 1
+            is_base   = w.get("_is_base", False)
             upgraded  = w.get("_upgraded", False)
-            unique    = w.get("_unique", False)
             is_mount  = w.get("_mount_weapon", False)
 
-            # LOGIQUE D'AFFICHAGE ULTIME
+            # LOGIQUE D'AFFICHAGE CORRIGÉE
             if cnt > 1:
                 # Cas 1 : Plusieurs exemplaires (ex: 3x Griffes, 2x Épées)
                 nd = f"{cnt}x {name}"
@@ -407,18 +394,17 @@ def export_html(army_list, army_name, army_limit):
                     nd = name
                 elif unit_size > 1:
                     # CAS CRITIQUE : Unité multiple avec une seule arme de ce type.
-                    # Qu'elle soit de base ou améliorée, on affiche "1x" pour être clair.
-                    # Ex: "1x Épée et sceptre" (reste) ou "1x Grand sceptre" (option).
+                    # On affiche TOUJOURS "1x" pour être clair, que ce soit une arme de base restante
+                    # ou une amélioration unique.
                     nd = f"1x {name}"
-                elif upgraded and unique:
-                    # Cas historique : Héros avec amélioration unique marquée
+                elif upgraded:
+                    # Héros avec amélioration
                     nd = f"1x {name}"
                 else:
-                    # Cas par défaut (Héros standard ou arme unique sans flag)
+                    # Héros avec arme de base standard
                     nd = name
             
             else:
-                # Fallback (ne devrait pas arriver grâce au filtrage > 0)
                 nd = name
 
             rng = fmt_range(w.get("range","Mêlée"))
