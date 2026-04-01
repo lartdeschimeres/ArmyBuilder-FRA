@@ -1054,6 +1054,13 @@
           "attacks": 2,
           "armor_piercing": 1,
           "special_rules": []
+        },
+        {
+          "name": "Dague de combat",
+          "range": "Mêlée",
+          "attacks": 2,
+          "armor_piercing": 0,
+          "special_rules": []
         }
       ],
       "upgrade_groups": [
@@ -1071,22 +1078,13 @@
               "replaces": [
                 "Arme à une main lourde"
               ],
-              "weapon": [
-                {
-                  "name": "Javelot",
-                  "range": 12,
-                  "attacks": 2,
-                  "armor_piercing": 1,
-                  "special_rules": []
-                },
-                {
-                  "name": "Dague",
-                  "range": "Mêlée",
-                  "attacks": 1,
-                  "armor_piercing": 0,
-                  "special_rules": []
-                }
-              ]
+              "weapon": {
+                "name": "Javelot",
+                "range": 12,
+                "attacks": 2,
+                "armor_piercing": 1,
+                "special_rules": []
+              }
             },
             {
               "name": "Paire d'arme à une main Lourdes",
@@ -1097,7 +1095,11 @@
                 "attacks": 4,
                 "armor_piercing": 1,
                 "special_rules": []
-              }
+              },
+              "replaces": [
+                "Arme à une main lourde",
+                "Dague de combat"
+              ]
             }
           ]
         },
@@ -1147,7 +1149,7 @@
               "name": "Javelot des Tempêtes",
               "cost": 5,
               "requires": [
-                "Javelot", "Dague"
+                "Javelot"
               ],
               "weapon": {
                 "name": "Javelot des Tempêtes",
@@ -1697,6 +1699,13 @@
           "attacks": 2,
           "armor_piercing": 0,
           "special_rules": []
+        },
+        {
+          "name": "Dague",
+          "range": "Mêlée",
+          "attacks": 1,
+          "armor_piercing": 0,
+          "special_rules": []
         }
       ],
       "upgrade_groups": [
@@ -1746,24 +1755,15 @@
             {
               "name": "Pistolet arbalète",
               "cost": 20,
-              "weapon": [
-                {
-                  "name": "Pistolet arbalète",
-                  "range": 12,
-                  "attacks": 2,
-                  "armor_piercing": 0,
-                  "special_rules": [
-                    "Perforant"
-                  ]
-                },
-                {
-                  "name": "Dague",
-                  "range": "Mêlée",
-                  "attacks": 1,
-                  "armor_piercing": 0,
-                  "special_rules": []
-                }
-              ],
+              "weapon": {
+                "name": "Pistolet arbalète",
+                "range": 12,
+                "attacks": 2,
+                "armor_piercing": 0,
+                "special_rules": [
+                  "Perforant"
+                ]
+              },
               "replaces": [
                 "Armes à une main"
               ]
@@ -1774,22 +1774,13 @@
               "replaces": [
                 "Armes à une main"
               ],
-              "weapon": [
-                {
-                  "name": "Javelot",
-                  "range": 12,
-                  "attacks": 2,
-                  "armor_piercing": 1,
-                  "special_rules": []
-                },
-                {
-                  "name": "Dague",
-                  "range": "Mêlée",
-                  "attacks": 1,
-                  "armor_piercing": 0,
-                  "special_rules": []
-                }
-              ]
+              "weapon": {
+                "name": "Javelot",
+                "range": 12,
+                "attacks": 2,
+                "armor_piercing": 1,
+                "special_rules": []
+              }
             }
           ]
         }
