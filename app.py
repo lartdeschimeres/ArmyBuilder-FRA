@@ -1256,14 +1256,29 @@ if st.session_state.page == "army":
                         nw=opt["weapon"]
                         extra={"_upgraded":True}
                         if opt.get("requires"): extra["_unique"]=True
-                        # Si "replaces" → retirer les armes remplacées avant d'ajouter
+                        # Si "replaces" → décrémenter ou retirer les armes remplacées
                         _cond_replaces = opt.get("replaces", [])
+                        _unit_sz = unit.get("size", 1)
                         if _cond_replaces:
                             _replaced_names = set()
                             _kept_weapons = []
                             for _w in weapons:
                                 if isinstance(_w,dict) and _w.get("name") in _cond_replaces and _w.get("name") not in _replaced_names:
                                     _replaced_names.add(_w.get("name"))
+                                    # Si arme sans _count → count implicite = unit_size
+                                    # Décrémenter de 1 plutôt que retirer entièrement
+                                    _implicit = "_count" not in _w and "count" not in _w
+                                    if _implicit and _unit_sz > 1:
+                                        _wc = _w.copy()
+                                        _wc["_count"] = _unit_sz - 1
+                                        _kept_weapons.append(_wc)
+                                    elif "_count" in _w and _w["_count"] > 1:
+                                        _wc = _w.copy(); _wc["_count"] -= 1
+                                        _kept_weapons.append(_wc)
+                                    elif "count" in _w and _w["count"] > 1:
+                                        _wc = _w.copy(); _wc["count"] -= 1
+                                        _kept_weapons.append(_wc)
+                                    # sinon count=1 → retirer complètement
                                 else:
                                     _kept_weapons.append(_w)
                             weapons = _kept_weapons
