@@ -1,4 +1,3 @@
-
 import json
 import copy
 import streamlit as st
@@ -390,36 +389,24 @@ def export_html(army_list, army_name, army_limit):
     def render_weapon_rows(final_weapons, unit_size=1):
         rows = ""
         for w in final_weapons:
-            name      = esc(w.get("name","Arme"))
-            cnt       = w.get("_display_count", 1) or 1
-            upgraded  = w.get("_upgraded", False)
-            unique    = w.get("_unique", False)
-            is_mount  = w.get("_mount_weapon", False)
+            name     = esc(w.get("name","Arme"))
+            cnt      = w.get("_display_count", 1) or 1
+            is_base  = w.get("_is_base", False)
+            upgraded = w.get("_upgraded", False)
+            is_mount = w.get("_mount_weapon", False)
 
-            # LOGIQUE D'AFFICHAGE ULTIME
             if cnt > 1:
-                # Cas 1 : Plusieurs exemplaires (ex: 3x Griffes, 2x Épées)
                 nd = f"{cnt}x {name}"
-            
             elif cnt == 1:
-                # Cas 2 : Un seul exemplaire
                 if is_mount:
-                    # Une monture est toujours unique, pas de "1x"
                     nd = name
                 elif unit_size > 1:
-                    # CAS CRITIQUE : Unité multiple avec une seule arme de ce type.
-                    # Qu'elle soit de base ou améliorée, on affiche "1x" pour être clair.
-                    # Ex: "1x Épée et sceptre" (reste) ou "1x Grand sceptre" (option).
                     nd = f"1x {name}"
-                elif upgraded and unique:
-                    # Cas historique : Héros avec amélioration unique marquée
+                elif upgraded:
                     nd = f"1x {name}"
                 else:
-                    # Cas par défaut (Héros standard ou arme unique sans flag)
                     nd = name
-            
             else:
-                # Fallback (ne devrait pas arriver grâce au filtrage > 0)
                 nd = name
 
             rng = fmt_range(w.get("range","Mêlée"))
