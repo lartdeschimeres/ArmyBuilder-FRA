@@ -307,24 +307,23 @@ def export_html(army_list, army_name, army_limit):
 
     def collect_weapons(unit):
         # unit["weapon"] contient DEJA toutes les armes consolidees par la page army
-        # (armes de base, remplacements, armes de role). Ne PAS relire unit["options"]
-        # pour eviter les doublons sur les roles avec weapon.
         result = []
         bw = unit.get("weapon", [])
         if isinstance(bw, dict): bw = [bw]
+        _unit_size = unit.get("size", 1)
         for w in bw:
             if isinstance(w, dict):
                 wc = w.copy(); wc.setdefault("range", "Mêlée")
-                # Purger _count sur les armes de base (not _upgraded) :
-                # _count ne doit exister que sur les armes ajoutées via slider.
-                # Un résidu de cache ou de JSON corrompu sur une arme de base
-                # fausserait le calcul de replaced_count dans group_weapons.
-                # Purger _count uniquement si = 1 (arme simple sans exemplaires multiples)
-                # Garder _count > 1 (ex: Griffes lourdes x3 des Paladins sur Drake-Lion)
-                if not wc.get("_upgraded") and "_count" in wc and wc["_count"] <= 1:
-                    del wc["_count"]
+                if not wc.get("_upgraded") and not wc.get("_mount_weapon"):
+                    wc["_is_base"] = True
+                    if "_count" in wc and wc["_count"] <= 1:
+                        del wc["_count"]
+                    # Arme de base sans count explicite → count implicite = unit_size
+                    # (si _count déjà défini = décrément par conditional_weapon → respecter)
+                    if "_count" not in wc and "count" not in wc and _unit_size > 1:
+                        wc["_count"] = _unit_size
                 result.append(wc)
-        # Armes de monture uniquement
+        # Armes de monture
         if unit.get("mount"):
             m = unit["mount"]
             if isinstance(m, dict):
@@ -338,32 +337,21 @@ def export_html(army_list, army_name, army_limit):
         return result
 
     def group_weapons(weapons, unit_size=1):
-        # Agrège les armes par clé (même profil).
-        # _count (slider) → utiliser _count comme quantité
-        # Tout le reste → cnt=1 (arme de base, conditional, remplacement total)
-        # La passe _replaces sert uniquement aux sliders (seuls cas avec _count).
+        # Agrège les armes par profil.
+        # _count ou count → quantité ; sinon 1 par défaut.
+        # Le décrément des armes remplacées (variable_weapon_count) est déjà
+        # géré dans la boucle principale → pas de passe _replaces ici.
         wmap = {}
         for w in weapons:
             if not isinstance(w, dict): continue
             wc = w.copy(); wc.setdefault("range","Mêlée")
             key = (wc.get("name",""), wc.get("range",""), wc.get("attacks",""),
                    wc.get("armor_piercing",""), tuple(sorted(wc.get("special_rules",[]))))
-            cnt = wc.get("_count", 1) or 1
-            if key not in wmap: wmap[key] = wc; wmap[key]["_display_count"] = cnt
-            else: wmap[key]["_display_count"] += cnt
-        # Soustraire les _replaces UNIQUEMENT pour les sliders (armes avec _count).
-        # Les conditional_weapon (sans _count) n'affectent pas le count des armes de base.
-        for w in weapons:
-            if not isinstance(w, dict): continue
-            if "_count" not in w: continue          # seulement les sliders
-            replaces = w.get("_replaces", [])
-            if not replaces: continue
-            rc = w.get("_count", 1) or 1
-            for replaced_name in replaces:
-                for key, entry in wmap.items():
-                    if entry.get("name") == replaced_name:
-                        wmap[key]["_display_count"] -= rc
-                        break
+            cnt = wc.get("_count", wc.get("count", 1)) or 1
+            if key not in wmap:
+                wmap[key] = wc; wmap[key]["_display_count"] = cnt
+            else:
+                wmap[key]["_display_count"] += cnt
         return [v for v in wmap.values() if v.get("_display_count", 1) > 0]
 
     def get_rules(unit):
