@@ -195,7 +195,20 @@ def check_weapon_conditions(unit_key, requires, unit=None):
             if g.get("type") != "weapon":
                 continue
             g_key = f"group_{gi}"
-            if g_key in selections:
+            sel = selections.get(g_key, "")
+            if not sel:
+                continue
+            # Reconstruire choices[0] = label de l'armement de base (= pas de remplacement)
+            bw = unit.get("weapon", [])
+            if isinstance(bw, list) and bw:
+                lbls = [w.get("name", "Arme") for w in bw if isinstance(w, dict)]
+                default_lbl = lbls[0] if len(lbls) == 1 else " et ".join(lbls)
+            elif isinstance(bw, dict):
+                default_lbl = bw.get("name", "Arme")
+            else:
+                default_lbl = ""
+            # Remplacement actif seulement si l'utilisateur a choisi autre chose que le défaut
+            if sel != default_lbl:
                 replaced_by_weapon_group = True
                 break
 
