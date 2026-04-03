@@ -213,30 +213,11 @@ def check_weapon_conditions(unit_key, requires, unit=None):
                 break
 
         if not replaced_by_weapon_group:
-            # b) Reconstruire les armes retirées par les conditional_weapon actifs
-            removed_by_conditional = set()
-            for gi, g in enumerate(unit.get("upgrade_groups", [])):
-                if g.get("type") != "conditional_weapon":
-                    continue
-                g_key = f"group_{gi}"
-                sel_label = selections.get(g_key, "")
-                if not sel_label or sel_label in ("Aucune amélioration",):
-                    continue
-                # Retrouver l'option sélectionnée
-                for o in g.get("options", []):
-                    w = o.get("weapon", {})
-                    if isinstance(w, dict) and w:
-                        lbl = format_weapon_option(w, o.get("cost", 0))
-                    else:
-                        lbl = f"{o.get('name','Amélioration')} (+{o.get('cost',0)} pts)"
-                    if lbl == sel_label:
-                        for rname in o.get("replaces", []):
-                            removed_by_conditional.add(rname)
-                        break
-
-            # Ajouter les armes de base NON retirées
+            # Les requires vérifient l'armement de BASE de l'unité.
+            # Les retraits par d'autres conditional_weapon ne bloquent PAS les requires
+            # (ex: remplacer le Bouclier ne doit pas empêcher de remplacer l'ACC ensuite).
             for w in unit.get("weapon", []):
-                if isinstance(w, dict) and w.get("name") not in removed_by_conditional:
+                if isinstance(w, dict):
                     current_weapons.append(w)
 
     for req in requires:
