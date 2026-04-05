@@ -1805,6 +1805,9 @@
                 ]
               }
             }
+          ],
+          "requires": [
+            "Fusil lourd"
           ]
         },
         {
@@ -2363,6 +2366,9 @@
                 "special_rules": []
               }
             }
+          ],
+          "requires": [
+            "Pistolets lourds"
           ]
         },
         {
@@ -3312,6 +3318,9 @@
                 ]
               }
             }
+          ],
+          "requires": [
+            "Fusils lourds"
           ]
         },
         {
