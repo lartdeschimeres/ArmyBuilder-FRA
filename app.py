@@ -4,6 +4,13 @@ import streamlit as st
 from pathlib import Path
 from datetime import datetime
 import re
+import sys, os, tempfile
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from generate_faction_pdf import generate_faction_pdf as _gen_faction_pdf
+    _PDF_AVAILABLE = True
+except ImportError:
+    _PDF_AVAILABLE = False
 import math
 import base64
 
@@ -78,6 +85,30 @@ with st.sidebar:
             heroes_now = len([u for u in st.session_state.army_list if u.get("type") == "hero"])
             st.markdown(f"**Unités :** {units_now} / {units_cap}")
             st.markdown(f"**Héros :** {heroes_now} / {heroes_cap}")
+    # ── Export PDF de faction ──────────────────────────────────────────────
+    if st.session_state.get("faction_data") and _PDF_AVAILABLE:
+        st.subheader("📘 Fiche de faction")
+        if st.button("📄 Générer PDF de faction", use_container_width=True, key="gen_faction_pdf"):
+            _fdata = st.session_state.faction_data
+            _history = _fdata.get("history", "")
+            with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as _tmp:
+                _tmp_path = _tmp.name
+            try:
+                _gen_faction_pdf(_fdata, _tmp_path, history=_history)
+                with open(_tmp_path, "rb") as _f:
+                    _pdf_bytes = _f.read()
+                os.unlink(_tmp_path)
+                _faction_slug = re.sub(r'[^a-z0-9]', '_', _fdata.get("faction","faction").lower()).strip('_')
+                st.download_button(
+                    "⬇️ Télécharger le PDF",
+                    data=_pdf_bytes,
+                    file_name=f"{_faction_slug}_fiche.pdf",
+                    mime="application/pdf",
+                    use_container_width=True,
+                    key="dl_faction_pdf"
+                )
+            except Exception as _e:
+                st.error(f"Erreur PDF : {_e}")
     st.divider()
 
 if "page" not in st.session_state: st.session_state.page = "setup"
@@ -916,7 +947,7 @@ if st.session_state.page == "setup":
             st.session_state.game = game; st.session_state.faction = faction; st.session_state.points = points
             st.session_state.list_name = list_name.strip() or f"Liste_{datetime.now().strftime('%Y%m%d')}"
             fd = factions_by_game[game][faction]
-            st.session_state.units = fd.get("units",[]); st.session_state.faction_special_rules = fd.get("faction_special_rules",[]); st.session_state.faction_spells = fd.get("spells",{})
+            st.session_state.units = fd.get("units",[]); st.session_state.faction_special_rules = fd.get("faction_special_rules",[]); st.session_state.faction_spells = fd.get("spells",{}); st.session_state.faction_data = fd
             # Réinitialiser l'armée seulement si jeu ou faction a changé
             if _game_changed or _faction_changed:
                 st.session_state.army_list = []; st.session_state.army_cost = 0; st.session_state.unit_selections = {}
@@ -1180,11 +1211,34 @@ if st.session_state.page == "army":
 
     
     weapons = copy.deepcopy(list(unit.get("weapon",[]))); selected_options = {}; mount = None
-    weapon_cost = 0; mount_cost = 0; upgrades_cost = 0
+    weapon_cost = 0; mount_cost = 0; upgrades_cost_multi = 0; upgrades_cost_unique = 0
+
+
+    def _is_unique_upgrade(g):
+        """True si cette amélioration reste x1 même pour une unité combinée."""
+        _gtype = g.get("type","")
+        _gname = g.get("group","")
+        _desc  = g.get("description","").lower()
+        _req   = g.get("requires",[])
+        # Sergent et ses cascades → toujours unique
+        if _gname == "Sergent": return True
+        if any("+" in r for r in _req): return True  # cascade sergent
+        # Rôles et mobilité (héros) → unique
+        if _gtype in ("role","mobility"): return True
+        # Upgrades : "toutes les figurines" → multiplié, sinon unique
+        if _gtype == "upgrades":
+            return "toutes" not in _desc
+        # conditional_weapon non-sergent → multiplié
+        if _gtype == "conditional_weapon":
+            return False
+        # variable_weapon_count → multiplié
+        return False
 
     for g_idx, group in enumerate(unit.get("upgrade_groups",[])):
         g_key = f"group_{g_idx}"
         gtype = group.get("type","")
+        _multiplier_eff = 2 if st.session_state.get(f"{unit_key}_combined") else 1
+        _g_mult = 1 if _is_unique_upgrade(group) else _multiplier_eff
         # requires au niveau du groupe
         group_requires = group.get("requires", [])
         if group_requires and not check_weapon_conditions(unit_key, group_requires, unit): continue
@@ -1254,7 +1308,9 @@ if st.session_state.page == "army":
                 ch=st.radio(group.get("description","Sélectionnez une amélioration"),choices,index=choices.index(cur) if cur in choices else 0,key=f"{unit_key}_{g_key}_cond")
                 st.session_state.unit_selections[unit_key][g_key]=ch
                 if ch!=choices[0]:
-                    opt=opt_map[ch]; upgrades_cost+=opt.get("cost",0)
+                    opt=opt_map[ch]
+                    if _g_mult==1: upgrades_cost_unique+=opt.get("cost",0)
+                    else: upgrades_cost_multi+=opt.get("cost",0)
                     if "weapon" in opt:
                         nw=opt["weapon"]
                         extra={"_upgraded":True}
@@ -1331,7 +1387,9 @@ if st.session_state.page == "army":
                 prev = min(st.session_state.unit_selections[unit_key].get(cnt_key, option.get("min_count",0)), mc)
                 cnt = st.number_input(f"Nombre de {option['name']} (0 – {mc})", min_value=option.get("min_count",0), max_value=max(mc, option.get("min_count",0)), value=prev, step=1, key=cnt_key)
                 st.session_state.unit_selections[unit_key][cnt_key] = cnt
-                tc=cnt*option["cost"]; upgrades_cost+=tc
+                tc=cnt*option["cost"]
+                if _g_mult==1: upgrades_cost_unique+=tc
+                else: upgrades_cost_multi+=tc
                 if cnt > 0 or tc > 0:
                     st.markdown(f"<div style='margin:10px 0;padding:8px;background:#f8f9fa;border-radius:4px;'><strong>{option['name']}</strong> × {cnt} = <strong style='color:#e74c3c;'>{tc} pts</strong></div>",unsafe_allow_html=True)
                 if cnt > 0:
@@ -1373,7 +1431,10 @@ if st.session_state.page == "army":
             ch=st.radio(group.get("group","Rôle"),choices,index=choices.index(cur) if cur in choices else 0,key=f"{unit_key}_{g_key}_role",horizontal=len(choices)<=4)
             st.session_state.unit_selections[unit_key][g_key]=ch
             if ch!=choices[0]:
-                opt=opt_map[ch]; upgrades_cost+=opt.get("cost",0); selected_options[group.get("group","Rôle")]=[opt]
+                opt=opt_map[ch]
+                if _g_mult==1: upgrades_cost_unique+=opt.get("cost",0)
+                else: upgrades_cost_multi+=opt.get("cost",0)
+                selected_options[group.get("group","Rôle")]=[opt]
                 rw=opt.get("weapon",[])
                 if isinstance(rw,list): weapons.extend(copy.deepcopy(rw))
                 elif isinstance(rw,dict): weapons.append(copy.deepcopy(rw))
@@ -1386,7 +1447,10 @@ if st.session_state.page == "army":
                 sr_str = f" ({', '.join(sr_label)})" if sr_label else ""
                 chk=st.checkbox(f"{o['name']}{sr_str} (+{o['cost']} pts)",value=st.session_state.unit_selections[unit_key].get(ok,False),key=ok)
                 st.session_state.unit_selections[unit_key][ok]=chk
-                if chk: upgrades_cost+=o["cost"]; selected_options.setdefault(group.get("group","Options"),[]).append(o)
+                if chk:
+                    if _g_mult==1: upgrades_cost_unique+=o["cost"]
+                    else: upgrades_cost_multi+=o["cost"]
+                    selected_options.setdefault(group.get("group","Options"),[]).append(o)
 
         elif gtype == "mobility":
             # Mobilité GDF : comme une monture mais données à la racine de l'option
@@ -1415,7 +1479,7 @@ if st.session_state.page == "army":
     if unit.get("type")!="hero" and unit.get("size",1)>1:
         if st.checkbox("Unité combinée",key=f"{unit_key}_combined"): multiplier=2
 
-    final_cost=(unit.get("base_cost",0)+weapon_cost)*multiplier+upgrades_cost+mount_cost
+    final_cost=(unit.get("base_cost",0)+weapon_cost+upgrades_cost_multi)*multiplier+upgrades_cost_unique+mount_cost
     st.subheader("Coût de l'unité sélectionnée"); st.markdown(f"**Coût total :** {final_cost} pts"); st.divider()
 
     if st.button("➕ Ajouter à l'armée",key=f"{unit_key}_add"):
