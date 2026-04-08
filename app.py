@@ -14,7 +14,7 @@ except ImportError:
 import math
 import base64
 
-st.set_page_config(page_title="OPR ArmyBuilder FR", layout="wide", initial_sidebar_state="auto")
+st.set_page_config(page_title="OPR ArmyBuilder FRA", layout="wide", initial_sidebar_state="auto")
 
 # URL de l'app (pour le QR code de partage)
 APP_URL = "https://armybuilder-fra.streamlit.app/"
@@ -138,7 +138,7 @@ if not st.session_state.get("_qr_loaded"):
             # Stocker pour le bandeau info
             st.session_state["_qr_game"]    = _data.get("game", "")
             st.session_state["_qr_faction"] = _data.get("faction", "")
-            st.session_state["_qr_pts"]     = _data.get("pts", 1000)
+            st.session_state["_qr_pts"]     = _data.get("pts", 2000)
             st.session_state["_qr_units"]   = _data.get("units", [])
             st.session_state["_qr_pending"] = True
             st.query_params.clear()
@@ -154,9 +154,9 @@ if "faction_special_rules" not in st.session_state: st.session_state.faction_spe
 if "faction_spells" not in st.session_state: st.session_state.faction_spells = {}
 
 GAME_CONFIG = {
-    "Age of Fantasy": {"min_points": 250, "max_points": 10000, "default_points": 1000, "hero_limit": 375, "unit_copy_rule": 750, "unit_max_cost_ratio": 0.35, "unit_per_points": 150},
+    "Age of Fantasy": {"min_points": 250, "max_points": 20000, "default_points": 2000, "hero_limit": 500, "unit_copy_rule": 1000, "unit_max_cost_ratio": 0.4, "unit_per_points": 200},
     "Age of Fantasy Regiments": {"min_points": 500, "max_points": 20000, "default_points": 2000, "hero_limit": 500, "unit_copy_rule": 1000, "unit_max_cost_ratio": 0.4, "unit_per_points": 200},
-    "Grimdark Future": {"min_points": 250, "max_points": 10000, "default_points": 1000, "hero_limit": 375, "unit_copy_rule": 750, "unit_max_cost_ratio": 0.35, "unit_per_points": 150},
+    "Grimdark Future": {"min_points": 250, "max_points": 20000, "default_points": 2000, "hero_limit": 500, "unit_copy_rule": 1000, "unit_max_cost_ratio": 0.4, "unit_per_points": 200},
     "Grimdark Future Firefight": {"min_points": 150, "max_points": 1000, "default_points": 300, "hero_limit": 300, "unit_copy_rule": 300, "unit_max_cost_ratio": 0.6, "unit_per_points": 100},
     "Age of Fantasy Skirmish": {"min_points": 150, "max_points": 1000, "default_points": 300, "hero_limit": 300, "unit_copy_rule": 300, "unit_max_cost_ratio": 0.6, "unit_per_points": 100}
 }
