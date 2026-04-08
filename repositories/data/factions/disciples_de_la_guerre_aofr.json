@@ -3,98 +3,123 @@
   "game": "Age of Fantasy Regiments",
   "version": "FR-3.5.2",
   "status": "complete",
-  "description": "Les Disciples de la Guerre sont une faction brutale et impitoyable, composée de guerriers fanatiques et de monstres déchaînés.",
+  "description": "Les Disciples du Ravage sont des guerriers qui ont embrassé un Dieu du Ravage en particulier. Chaque dieu confère à ses disciples des avantages et des pouvoirs uniques. En conséquence, leurs troupes sont spécialisées, et sont façonnées pour refléter les caprices de leur dieu. Abandonnées par l'Empire, les tribus du Nord furent approchées par différents dieux qui leur offrirent une chance de survie en échange d'un culte. Chaque dieu donna ainsi des pouvoirs à ses disciples respectifs, les transformant selon leur volonté. Après leur défaite dans les Guerre du Ravage, les Disciples ont été séparés de leurs anciens protecteurs, mais avec l'ouverture de la Faille, ils sont désireux de renouer leurs pactes après de nombreuses années passées dans un amer exil.",
+  "history" : "L'arrivée des Dieux du Ravage sur Tyria provoqua une grande instabilité, car certains commencèrent à vénérer ces nouvelles divinités. L'Empire rappela une grande partie de ses troupes pour défendre sa capitale et les régions avoisinantes, dans l'espoir de mater les rébellions qui s'y produisaient, tandis que les tribus du Nord étaient abandonnées à leur compte pour faire face aux dangers par leurs propres moyens. Les yeux des Dieux du Ravage se tournèrent rapidement vers cette province abandonnée, à la recherche de peuples à convertir et de champions potentiels. Chaque Dieu du Ravage chercha à rallier à son influence des individus prometteurs et les plus puissantes tribus, accordant à leurs favoris divers bienfaits en échange de leur dévotion. Le Dieu de la Guerre offre la force, permettant à ses disciples de triompher de leurs ennemis. Le Dieu du Changement confère la connaissance et une magie puissante. Le Dieu de la Peste octroie un regain de vitalité aux victimes de maladies. Le Dieu de la Luxure accorde la rédemption et le pouvoir à ceux qui furent chassés par l'Empire. Ces présents redonnèrent l’espoir d’une meilleure vie aux tribus désespérées que l'Empire avait abandonnées. Ceux qui acceptèrent ces pactes reçurent de puissants dons de leurs bienfaiteurs, qui les reforgèrent à leur image. Les Disciples du Ravage répondirent à ces faveurs par une loyauté fanatique, prêts à dévouer leur vie au dieu qui les choisit. Chaque tribu se définit en fonction de son culte, s'établissant par leur dévotion envers leur protecteur. Lorsque les Guerres du Ravage éclatèrent, les tribus nordiques survivantes avaient indubitablement changé, chacune d'entre elles s'étant ralliée à un ou plusieurs Dieux du Ravage. Lorsque les Dieux du Ravage furent capturés, leurs adeptes les plus fanatiques perdirent soudain le but de leur vie. Certains se battirent jusqu'à la mort, désireux de donner leur vie pour venger leur dieu. D'autres fuirent vers le Nord, dispersés et affaiblis, mais vivant. Ils se maintinrent en veille, infligeant ce qu'ils pouvaient pour se venger en attendant le retour de leur dieu tutélaire. Sans maître ni espoir, beaucoup tombèrent dans le désespoir. Des conflits mineurs commencèrent à éclater entre bandes adeptes de dieux différents, cherchant à se rejeter mutuellement la responsabilité de la défaite. C'est alors que la Grande Faille s'ouvrit et libéra leurs dieux sur Tyria. Les Disciples du Ravage retrouvèrent alors l'espoir, désireux de prouver à nouveau leur loyauté envers leurs anciens maîtres. Pourtant, l'amertume de la défaite et les rivalités demeurent, car beaucoup se souviennent de leurs années de clandestinité, et ils ne sont plus la force unifiée qui sévissait autrefois à travers tout le pays. Sur quel chemin votre dévotion vous guidera-t-elle ?",
+  
   "faction_special_rules": [
     {
       "name": "Warbound [Guerrier-né]",
+      "detail": "Règle spéciale de l'armée",
       "description": "Les ennemis qui lancent les dés pour bloquer les touches infligées par les armes de cette figurine subissent une blessure supplémentaire pour chaque résultat non modifié de 1 obtenu."
     },
     {
       "name": "Bloodthirsty Fighter [Combattant sanguinaire]",
+      "detail": "Règles spéciales",
       "description": "Pour chaque résultat de 1 non modifié obtenu par les ennemis lorsqu'ils bloquent les touches portées par les armes de cette figurine en mêlée, cette figurine peut effectuer un jet d'attaque supplémentaire avec cette arme. Cette règle ne s'applique pas aux nouvelles attaques générées."
     },
     {
       "name": "Break [Dislocation]",
+      "detail": "Règles spéciales",
       "description": "Ignore la Régénération, et sur les résultats non modifiés de 6 pour toucher, ces coups obtiennent PA (+2)."
     },
     {
       "name": "Breath Attack [Attaque de souffle]",
+      "detail": "Règles spéciales",
       "description": "Une fois par activation de cette figurine, avant d'attaquer, lancez 1D6 : sur un résultat de 2+, une unité ennemie dans un rayon de 6\" en ligne de mire subit une touche avec Explosion (3) et PA (1)."
     },
     {
       "name": "Melee Evasion [Esquive en mêlée]",
+      "detail": "Règles spéciales",
       "description": "Les ennemis subissent un malus de -1 aux jets d'attaque en mêlée lorsqu'ils attaquent des unités dont toutes les figurines possèdent cette règle."
     },
     {
       "name": "Piercing Assault [Assaut tranchant]",
+      "detail": "Règles spéciales",
       "description": "Cette figurine gagne PA (+1) lorsqu'elle charge."
     },
     {
       "name": "Precision Fighter Buff [Bonus de combattant précis]",
+      "detail": "Règles spéciales",
       "description": "Une fois par activation, avant d'attaquer, choisissez une unité amie à 12\" ou moins, qui obtient un bonus de +1 aux jets pour toucher en mêlée une seule fois (la prochaine fois que l'effet s'appliquerait)."
     },
     {
       "name": "Ranger Shrouding [Voile fluctuant]",
+      "detail": "Règles spéciales",
       "description": "Les ennemis ont une portée réduite de 6\" lorsqu'ils tentent de tirer sur des unités dont toutes les figurines possèdent cette règle."
     },
     {
       "name": "Shred [Lacération]",
+      "detail": "Règles spéciales",
       "description": "Sur les résultats non modifiés de 1 pour bloquer les touches, cette arme inflige une blessure supplémentaire."
     },
     {
       "name": "Slam [Eclatement]",
+      "detail": "Règles spéciales",
       "description": "Ignore les Couverts, et sur les résultats non modifiés de 1 pour bloquer les touches, cette arme inflige une blessure supplémentaire."
     },
     {
       "name": "Steadfast [Inébranlable]",
+      "detail": "Règles spéciales",
       "description": "Si une unité dont toutes les figurines possèdent cette règle est Ébranlée au début du round, lancez un dé. Sur un résultat de 4+, elle cesse d'être Ébranlée."
     },
     {
-      "name": "Steadfast Buff [Bonus d'Inébranlable]",
+      "name": "Steadfast Buff [Bonus Inébranlable]",
+      "detail": "Règles spéciales",
       "description": "Une fois par activation, avant d'attaquer, choisissez une unité amie à 12\" ou moins qui obtient Inébranlable une fois (la prochaine fois que l'effet s'appliquerait)."
     },
     {
       "name": "Unpredictable [Imprévisible]",
+      "detail": "Règles spéciales",
       "description": "Lors d'une attaque, lancez un dé et appliquez un effet à toutes les figurines dotées de cette règle : sur un résultat de 1 à 3, elles obtiennent PA (+1), et sur un résultat de 4 à 6, elles obtiennent +1 aux jets d'attaque."
     },
     {
       "name": "Unpredictable Fighter [Combattant imprévisible]",
+      "detail": "Règles spéciales",
       "description": "En mêlée, lancez un dé et appliquez un effet à toutes les figurines dotées de cette règle : sur un résultat de 1 à 3, elles obtiennent PA (+1), et sur un résultat de 4 à 6, elles obtiennent +1 aux jets d'attaque."
     },
     {
       "name": "Versatile Attack [Attaque versatile]",
+      "detail": "Règles spéciales",
       "description": "Lorsque cette unité est activée, choisissez un effet : jusqu'à la fin de l'activation, toutes les figurines bénéficiant de cette règle obtiennent soit PA (+1) lorsqu'elles attaquent, soit +1 aux jets pour toucher lorsque elles attaquent."
     },
     {
       "name": "Versatile Defense [Défense versatile]",
+      "detail": "Règles spéciales",
       "description": "Lorsqu'une unité dont toutes les figurines possèdent cette règle est déployée ou activée, choisissez un effet : lorsqu'on lui tire dessus ou lorsqu'elle est chargée à plus de 9\", l'unité gagne +1 aux jets de Défense, ou les unités ennemies subissent -1 aux jets pour la toucher. Cet effet dure jusqu'à la prochaine activation de l'unité."
     },
     {
       "name": "Warbound Boost [Boost de Guerrier-né]",
+      "detail": "Règles spéciales",
       "description": "Si cette figurine dispose de la règle spéciale Guerrier-né, les ennemis qui subissent des blessures de sa part subissent des blessures supplémentaires sur les jets de Défense ratés de 1-2 issues de Guerrier-né (au lieu de seulement sur 1)."
     },
     {
       "name": "Ranged Shrouding Aura [Aura Voile fluctuant]",
+      "detail": "Règle spéciale d'Aura",
       "description": "Cette figurine et son unité obtiennent la règle spéciale Voile fluctuant."
     },
     {
       "name": "Scout Aura [Aura Eclaireur]",
+      "detail": "Règle spéciale d'Aura",
       "description": "Cette figurine et son unité obtiennent la règle spéciale Eclaireur."
     },
     {
       "name": "Shred when Shooting Aura [Aura Lacération au tir]",
+      "detail": "Règle spéciale d'Aura",
       "description": "Cette figurine et son unité obtiennent la règle spéciale Lacération lorsqu'elles tirent."
     },
     {
       "name": "Unpredictable Fighter Aura [Aura Combattant imprévisible]",
+      "detail": "Règle spéciale d'Aura",
       "description": "Cette figurine et son unité obtiennent la règle spéciale Combattant imprévisible."
     },
     {
       "name": "Versatile Defense Aura [Aura Défense Versatile]",
+      "detail": "Règle spéciale d'Aura",
       "description": "Cette figurine et son unité obtiennent la règle spéciale Défense versatile."
     },
     {
       "name": "Warbound Boost Aura [Aura Boost de Guerrier-né]",
+      "detail": "Règle spéciale d'Aura",
       "description": "Cette figurine et son unité obtiennent la règle spéciale Boost de Guerrier-né."
     }
   ],
