@@ -86,32 +86,38 @@
       "description": "Lorsqu'une unité dont toutes les figurines possèdent cette règle est déployée ou activée, choisissez un effet : lorsqu'on lui tire dessus ou lorsqu'elle est chargée à plus de 9\", l'unité gagne +1 aux jets de Défense, ou les unités ennemies subissent -1 aux jets pour la toucher. Cet effet dure jusqu'à la prochaine activation de l'unité."
     },
     {
-      "name": "Warbound Boost [Boost Guerrier-né]",
+      "name": "Warbound Boost [Boost de Guerrier-né]",
       "detail": "Règles spéciales",
       "description": "Si cette figurine dispose de la règle spéciale Guerrier-né, les ennemis qui subissent des blessures de sa part subissent des blessures supplémentaires sur les jets de Défense ratés de 1-2 issues de Guerrier-né (au lieu de seulement sur 1)."
     },
     {
       "name": "Ranged Shrouding Aura [Aura Voile fluctuant]",
+      "detail": "Règle spéciale d'Aura",
       "description": "Cette figurine et son unité obtiennent la règle spéciale Voile fluctuant."
     },
     {
       "name": "Scout Aura [Aura Eclaireur]",
+      "detail": "Règle spéciale d'Aura",
       "description": "Cette figurine et son unité obtiennent la règle spéciale Eclaireur."
     },
     {
       "name": "Shred when Shooting Aura [Aura Lacération au tir]",
+      "detail": "Règle spéciale d'Aura",
       "description": "Cette figurine et son unité obtiennent la règle spéciale Lacération lorsqu'elles tirent."
     },
     {
       "name": "Unpredictable Fighter Aura [Aura Combattant imprévisible]",
+      "detail": "Règle spéciale d'Aura",
       "description": "Cette figurine et son unité obtiennent la règle spéciale Combattant imprévisible."
     },
     {
       "name": "Versatile Defense Aura [Aura Défense Versatile]",
+      "detail": "Règle spéciale d'Aura",
       "description": "Cette figurine et son unité obtiennent la règle spéciale Défense versatile."
     },
     {
       "name": "Warbound Boost Aura [Aura Boost de Guerrier-né]",
+      "detail": "Règle spéciale d'Aura",
       "description": "Cette figurine et son unité obtiennent la règle spéciale Boost de Guerrier-né."
     }
   ],
