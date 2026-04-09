@@ -14,300 +14,6 @@ except ImportError:
 import math
 import base64
 
-@st.cache_data
-def export_faction_html(data):
-    """Génère un HTML complet de la fiche de faction (toutes unités, règles, sorts)."""
-    def esc(t):
-        if t is None: return ""
-        return str(t).replace("&","&amp;").replace("<","&lt;").replace(">","&gt;").replace('"',"&quot;")
-
-    faction = data.get("faction","Faction")
-    game    = data.get("game","")
-    version = data.get("version","")
-    desc    = data.get("description","")
-
-    def fmt_r(r):
-        s = str(r) if r is not None else "-"
-        return s if s in ("Mêlée","-") else f'{s}"'
-
-    def weapon_rows(weapons):
-        if not weapons: return ""
-        bw = weapons if isinstance(weapons, list) else [weapons]
-        rows = ""
-        for w in bw:
-            if not isinstance(w, dict): continue
-            cnt  = w.get("count","")
-            cn   = f"{cnt}x " if cnt and cnt > 1 else ""
-            rng  = fmt_r(w.get("range"))
-            att  = w.get("attacks","-")
-            pa   = w.get("armor_piercing",0) or "-"
-            sr   = ", ".join(w.get("special_rules",[])) or "-"
-            rows += (f"<tr><td class='wn'><b>{esc(cn+w.get('name',''))}</b></td>"
-                     f"<td>{esc(rng)}</td><td>A{att}</td><td>{pa}</td>"
-                     f"<td class='ws'>{esc(sr)}</td></tr>\n")
-        return rows
-
-    def unit_card(u):
-        name   = esc(u["name"])
-        cost   = u.get("base_cost","?")
-        size   = u.get("size",1)
-        qual   = u.get("quality","?")
-        defe   = u.get("defense","?")
-        cor    = u.get("coriace","")
-        sr     = ", ".join(u.get("special_rules",[]))
-        named  = u.get("unit_detail") == "named_hero" or "Unique" in u.get("special_rules",[])
-        star   = "★ " if named else ""
-        cor_s  = f" | Coriace {cor}" if cor else ""
-        html   = f"""<div class='uc'>
-<div class='uh'><span><b>{star}{name} [{size}]</b></span><span class='uc-cost'>{cost} pts</span></div>
-<div class='us'>Qual {qual}+&nbsp;|&nbsp;Déf {defe}+{esc(cor_s)}</div>"""
-        if sr: html += f"<div class='ur'>{esc(sr)}</div>"
-        # Armes de base
-        wr = weapon_rows(u.get("weapon",[]))
-        if wr:
-            html += """<table class='wt'><thead><tr>
-<th>Arme</th><th>Portée</th><th>Att</th><th>PA</th><th>Règles spé.</th>
-</tr></thead><tbody>""" + wr + "</tbody></table>"
-        # Options
-        for g in u.get("upgrade_groups",[]):
-            gtype = g.get("type","")
-            desc_g = esc(g.get("description",""))
-            req   = g.get("requires",[])
-            req_s = f" <i>[{esc(', '.join(req))}]</i>" if req else ""
-            html += f"<div class='og'><b>{desc_g}</b>{req_s}</div>"
-            for o in g.get("options",[]):
-                oname = esc(o.get("name",""))
-                ocost = o.get("cost",0)
-                cost_s = f"+{ocost} pts" if ocost > 0 else "Gratuit"
-                osr   = ", ".join(o.get("special_rules",[]))
-                ow    = o.get("weapon")
-                det   = ""
-                if ow:
-                    ws = ow if isinstance(ow,list) else [ow]
-                    parts = []
-                    for w in ws:
-                        if isinstance(w,dict):
-                            rng = fmt_r(w.get("range"))
-                            att = w.get("attacks","?")
-                            pa  = w.get("armor_piercing",0) or 0
-                            sr2 = ", ".join(w.get("special_rules",[])) or ""
-                            p   = f"{w.get('name','')} ({rng}, A{att}"
-                            if pa: p += f", PA({pa})"
-                            if sr2: p += f", {sr2}"
-                            p += ")"
-                            parts.append(esc(p))
-                    det = ", ".join(parts)
-                elif osr:
-                    det = esc(osr)
-                label = oname if not det else f"{oname} ({det})"
-                html += (f"<div class='ol'>{label}"
-                         f"<span class='oc'>{esc(cost_s)}</span></div>")
-        html += "</div>"
-        return html
-
-    # Groupes d'unités
-    CATS = [
-        ("Héros",               ["hero"]),
-        ("Unités de base",      ["unit"]),
-        ("Véhicules légers",    ["light_vehicle"]),
-        ("Véhicules / Monstres",["vehicle"]),
-        ("Titans",              ["titan"]),
-        ("Personnages nommés",  ["named_hero"]),
-    ]
-
-    # Règles spéciales — catégorisation
-    rules = data.get("faction_special_rules",[])
-    spells = data.get("spells",{})
-
-    # Détecter la règle d'armée (première, ou celle marquée army_rule)
-    army_rules = []
-    aura_rules = []
-    other_rules = []
-    for r in rules:
-        n = r.get("name","").lower()
-        if r.get("army_rule") or (len(rules) > 0 and rules.index(r) == 0 and r.get("army_rule") is not False and "aura" not in n):
-            # Heuristique : première règle non-aura = règle d'armée
-            if not army_rules and "aura" not in n:
-                army_rules.append(r)
-                continue
-        if "aura" in n:
-            aura_rules.append(r)
-        else:
-            other_rules.append(r)
-
-    def rules_section(title, rule_list, color="#1a1a2e"):
-        if not rule_list: return ""
-        items = ""
-        for r in rule_list:
-            items += f"<p class='ri'><b>{esc(r.get('name',''))}</b> : {esc(r.get('description',''))}</p>"
-        return f"<div class='rs'><div class='rsh' style='background:{color}'>{esc(title)}</div>{items}</div>"
-
-    spells_html = ""
-    if spells:
-        items = ""
-        for sname, sdata in spells.items():
-            sdesc = sdata.get("description",sdata) if isinstance(sdata,dict) else sdata
-            items += f"<p class='ri'><b>{esc(sname)}</b> : {esc(sdesc)}</p>"
-        spells_html = f"<div class='rs'><div class='rsh' style='background:#2c3e7a'>Sorts</div>{items}</div>"
-
-    units_html = ""
-    for cat_name, types in CATS:
-        cat_units = [u for u in data["units"] if u.get("unit_detail",u.get("type")) in types]
-        if not cat_units: continue
-        cards = "".join(unit_card(u) for u in cat_units)
-        units_html += f"<div class='cat-banner'>{esc(cat_name)}</div><div class='grid'>{cards}</div>"
-
-    css = """
-body{font-family:'Segoe UI',Helvetica,sans-serif;margin:0;padding:12px;background:#fff;color:#212529;font-size:11px;}
-.page{max-width:210mm;margin:0 auto;}
-.main-title{background:#1a1a2e;color:#fff;text-align:center;padding:14px 8px 8px;font-size:20px;font-weight:700;letter-spacing:1px;}
-.main-sub{background:#16213e;color:#aab4d4;text-align:center;padding:3px;font-size:9px;}
-.intro{padding:8px 4px;font-size:10px;color:#444;border-bottom:1px solid #dee2e6;margin-bottom:8px;}
-/* Règles */
-.rules-wrap{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;}
-.rs{border:1px solid #dee2e6;border-radius:4px;overflow:hidden;}
-.rsh{color:#fff;font-weight:700;font-size:9px;padding:3px 6px;text-transform:uppercase;letter-spacing:.5px;}
-.ri{margin:4px 6px;font-size:8px;line-height:1.35;}
-/* Récap */
-.recap-wrap{margin-bottom:8px;}
-.recap-banner{background:#2c3e7a;color:#fff;font-weight:700;font-size:9px;padding:3px 6px;margin-top:4px;}
-.recap-table{width:100%;border-collapse:collapse;font-size:8.5px;}
-.recap-table th{background:#eef1f8;padding:2px 4px;border:1px solid #dee2e6;font-weight:700;color:#6c757d;font-size:8px;}
-.recap-table td{padding:2px 4px;border:1px solid #dee2e6;vertical-align:top;}
-.recap-table tr:nth-child(even)td{background:#f8f9fa;}
-/* Catégories et cartes */
-.cat-banner{background:#1a1a2e;color:#fff;font-weight:700;font-size:11px;padding:4px 8px;margin:10px 0 4px;letter-spacing:.5px;}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px;}
-.uc{border:1px solid #dee2e6;border-radius:3px;overflow:hidden;}
-.uh{background:#eef1f8;display:flex;justify-content:space-between;align-items:center;padding:3px 5px;border-bottom:1px solid #dee2e6;}
-.uh b{font-size:9px;}
-.uc-cost{font-size:8.5px;font-weight:700;color:#c0392b;}
-.us{background:#eef1f8;font-size:7.5px;color:#6c757d;font-weight:700;padding:2px 5px;border-bottom:1px solid #dee2e6;}
-.ur{background:#eef1f8;font-size:7px;padding:2px 5px;border-bottom:1px solid #dee2e6;}
-.wt{width:100%;border-collapse:collapse;font-size:8px;}
-.wt th{background:#eef1f8;padding:1px 3px;border-bottom:1px solid #dee2e6;color:#6c757d;font-size:7px;}
-.wt td{padding:1px 3px;border-bottom:1px solid #dee2e6;vertical-align:top;}
-.wt tr:last-child td{border-bottom:none;}
-.wn{font-size:8px;font-weight:700;}
-.ws{font-size:7px;color:#444;}
-.og{font-size:7.5px;font-weight:700;padding:2px 5px 1px;background:#f8f9fa;border-top:1px solid #dee2e6;margin-top:1px;}
-.ol{font-size:7px;padding:1px 5px 1px 12px;display:flex;justify-content:space-between;border-bottom:1px solid #f0f0f0;}
-.oc{color:#c0392b;font-weight:700;white-space:nowrap;margin-left:4px;}
-@media print{body{margin:0;padding:6px;}.cat-banner{page-break-before:auto;}}
-"""
-
-    # Tableau récapitulatif
-    def recap_row(u):
-        bw = u.get("weapon",[])
-        if isinstance(bw,dict): bw=[bw]
-        sz = u.get("size",1)
-        eq = []
-        for w in bw:
-            if isinstance(w,dict):
-                cnt = w.get("count","")
-                cs  = f"{cnt}x " if cnt and cnt>1 else (f"{sz}x " if sz>1 else "1x ")
-                rng = fmt_r(w.get("range"))
-                att = w.get("attacks","?")
-                pa  = w.get("armor_piercing",0) or 0
-                sr2 = ", ".join(w.get("special_rules",[])) or ""
-                p   = f"{cs}{w['name']} ({rng}, A{att}"
-                if pa: p += f", PA({pa})"
-                if sr2: p += f", {sr2}"
-                p += ")"
-                eq.append(esc(p))
-        return (f"<tr><td><b>{esc(u['name'])} [{sz}]</b></td>"
-                f"<td>{u.get('quality','?')}</td>"
-                f"<td>{u.get('defense','?')}</td>"
-                f"<td>{' | '.join(eq)}</td>"
-                f"<td>{esc(', '.join(u.get('special_rules',[]))[:80])}</td>"
-                f"<td><b>{u.get('base_cost','?')}</b></td></tr>")
-
-    recap_html = "<div class='recap-wrap'>"
-    for cat_name, types in [("Héros",["hero","named_hero"]),("Unités",["unit"]),("Véhicules",["light_vehicle","vehicle","titan"])]:
-        cu = [u for u in data["units"] if u.get("unit_detail",u.get("type")) in types]
-        if not cu: continue
-        rows = "".join(recap_row(u) for u in cu)
-        recap_html += (f"<div class='recap-banner'>{esc(cat_name)}</div>"
-                       f"<table class='recap-table'><thead><tr>"
-                       f"<th>Nom [taille]</th><th>Qua</th><th>Déf</th>"
-                       f"<th>Équipement</th><th>Règles spéciales</th><th>Coût</th>"
-                       f"</tr></thead><tbody>{rows}</tbody></table>")
-    recap_html += "</div>"
-
-    return f"""<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">
-<title>{esc(faction)} — {esc(game)}</title>
-<style>{css}</style></head><body><div class="page">
-<div class="main-title">{esc(faction.upper())}</div>
-<div class="main-sub">{esc(game)} — v{esc(version)}</div>
-{f'<div class="intro">{esc(desc)}</div>' if desc else ""}
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0;">
-{rules_section("Règle spéciale de l'armée", army_rules)}
-{rules_section("Règles spéciales", other_rules, "#2c3e7a")}
-{rules_section("Règles spéciales d'aura", aura_rules, "#555")}
-</div>
-{spells_html}
-{recap_html}
-{units_html}
-</div></body></html>"""
-
-
-def load_generic_rules():
-    """Charge les règles génériques OPR indexées par le champ 'key' (ou 'name' si absent)."""
-    try:
-        _BASE = Path(__file__).resolve().parent
-        for _p in [
-            _BASE / "repositories" / "data" / "generic_rules.json",
-            _BASE / "generic_rules.json",
-        ]:
-            if _p.exists():
-                with open(_p, encoding="utf-8") as f:
-                    data = json.load(f)
-                result = {}
-                for r in data.get("rules", []):
-                    if "name" not in r: continue
-                    desc = r.get("description", "")
-                    for k in r.get("key", [r["name"]]):
-                        result[k] = desc
-                return result
-    except Exception:
-        pass
-    return {}
-
-def load_faction_rules_dict():
-    """Retourne un dict {clé VF: description} depuis les règles de la faction courante.
-    Utilise le champ 'key' si présent, sinon 'name'."""
-    result = {}
-    for r in st.session_state.get("faction_special_rules", []):
-        if not isinstance(r, dict): continue
-        desc = r.get("description", "")
-        for k in r.get("key", [r.get("name", "")]):
-            if k: result[k] = desc
-    return result
-
-@st.cache_data
-def load_factions():
-    factions = {}; games = set()
-    try:
-        FACTIONS_DIR = Path(__file__).resolve().parent / "repositories" / "data" / "factions"
-        for fp in FACTIONS_DIR.glob("*.json"):
-            try:
-                with open(fp, encoding="utf-8") as f:
-                    data = json.load(f)
-                game = data.get("game"); faction = data.get("faction")
-                if game and faction:
-                    if game not in factions: factions[game] = {}
-                    data.setdefault("faction_special_rules", []); data.setdefault("spells", {}); data.setdefault("units", [])
-                    factions[game][faction] = data; games.add(game)
-            except Exception as e:
-                st.warning(f"Erreur chargement {fp.name}: {e}")
-    except Exception as e:
-        st.error(f"Erreur chargement des factions: {e}"); return {}, []
-    return factions, sorted(games) if games else list(GAME_CONFIG.keys())
-
-if st.session_state.page == "setup":
-    factions_by_game, games = load_factions()
-    if not games: st.error("Aucun jeu trouvé"); st.stop()
-
 st.set_page_config(page_title="OPR ArmyBuilder FR", layout="wide", initial_sidebar_state="auto")
 
 # URL de l'app (pour le QR code de partage)
@@ -358,7 +64,7 @@ button[kind="primary"] {{background: var(--acc) !important; color: white !import
 with st.sidebar:
     st.markdown("<div style='height:1px;'></div>", unsafe_allow_html=True)
 with st.sidebar:
-    st.title("OPR ArmyBuilder FRA")
+    st.title("🛡️ OPR ArmyBuilder FR")
     st.subheader("📋 Armée")
     game = st.session_state.get("game", "—")
     faction = st.session_state.get("faction", "—")
@@ -438,9 +144,9 @@ if "faction_special_rules" not in st.session_state: st.session_state.faction_spe
 if "faction_spells" not in st.session_state: st.session_state.faction_spells = {}
 
 GAME_CONFIG = {
-    "Age of Fantasy": {"min_points": 500, "max_points": 20000, "default_points": 2000, "hero_limit": 500, "unit_copy_rule": 1000, "unit_max_cost_ratio": 0.4, "unit_per_points": 200},
+    "Age of Fantasy": {"min_points": 250, "max_points": 10000, "default_points": 1000, "hero_limit": 375, "unit_copy_rule": 750, "unit_max_cost_ratio": 0.35, "unit_per_points": 150},
     "Age of Fantasy Regiments": {"min_points": 500, "max_points": 20000, "default_points": 2000, "hero_limit": 500, "unit_copy_rule": 1000, "unit_max_cost_ratio": 0.4, "unit_per_points": 200},
-    "Grimdark Future": {"min_points": 500, "max_points": 20000, "default_points": 2000, "hero_limit": 500, "unit_copy_rule": 1000, "unit_max_cost_ratio": 0.4, "unit_per_points": 200},
+    "Grimdark Future": {"min_points": 250, "max_points": 10000, "default_points": 1000, "hero_limit": 375, "unit_copy_rule": 750, "unit_max_cost_ratio": 0.35, "unit_per_points": 150},
     "Grimdark Future Firefight": {"min_points": 150, "max_points": 1000, "default_points": 300, "hero_limit": 300, "unit_copy_rule": 300, "unit_max_cost_ratio": 0.6, "unit_per_points": 100},
     "Age of Fantasy Skirmish": {"min_points": 150, "max_points": 1000, "default_points": 300, "hero_limit": 300, "unit_copy_rule": 300, "unit_max_cost_ratio": 0.6, "unit_per_points": 100}
 }
@@ -1022,6 +728,300 @@ function hideTip(){
 </script>'''
     html += f'<div style="text-align:center;margin-top:16px;font-size:11px;color:var(--muted);">Généré par OPR ArmyBuilder FRA — {datetime.now().strftime("%d/%m/%Y %H:%M")}</div></div></body></html>'
     return html
+
+@st.cache_data
+def export_faction_html(data):
+    """Génère un HTML complet de la fiche de faction (toutes unités, règles, sorts)."""
+    def esc(t):
+        if t is None: return ""
+        return str(t).replace("&","&amp;").replace("<","&lt;").replace(">","&gt;").replace('"',"&quot;")
+
+    faction = data.get("faction","Faction")
+    game    = data.get("game","")
+    version = data.get("version","")
+    desc    = data.get("description","")
+
+    def fmt_r(r):
+        s = str(r) if r is not None else "-"
+        return s if s in ("Mêlée","-") else f'{s}"'
+
+    def weapon_rows(weapons):
+        if not weapons: return ""
+        bw = weapons if isinstance(weapons, list) else [weapons]
+        rows = ""
+        for w in bw:
+            if not isinstance(w, dict): continue
+            cnt  = w.get("count","")
+            cn   = f"{cnt}x " if cnt and cnt > 1 else ""
+            rng  = fmt_r(w.get("range"))
+            att  = w.get("attacks","-")
+            pa   = w.get("armor_piercing",0) or "-"
+            sr   = ", ".join(w.get("special_rules",[])) or "-"
+            rows += (f"<tr><td class='wn'><b>{esc(cn+w.get('name',''))}</b></td>"
+                     f"<td>{esc(rng)}</td><td>A{att}</td><td>{pa}</td>"
+                     f"<td class='ws'>{esc(sr)}</td></tr>\n")
+        return rows
+
+    def unit_card(u):
+        name   = esc(u["name"])
+        cost   = u.get("base_cost","?")
+        size   = u.get("size",1)
+        qual   = u.get("quality","?")
+        defe   = u.get("defense","?")
+        cor    = u.get("coriace","")
+        sr     = ", ".join(u.get("special_rules",[]))
+        named  = u.get("unit_detail") == "named_hero" or "Unique" in u.get("special_rules",[])
+        star   = "★ " if named else ""
+        cor_s  = f" | Coriace {cor}" if cor else ""
+        html   = f"""<div class='uc'>
+<div class='uh'><span><b>{star}{name} [{size}]</b></span><span class='uc-cost'>{cost} pts</span></div>
+<div class='us'>Qual {qual}+&nbsp;|&nbsp;Déf {defe}+{esc(cor_s)}</div>"""
+        if sr: html += f"<div class='ur'>{esc(sr)}</div>"
+        # Armes de base
+        wr = weapon_rows(u.get("weapon",[]))
+        if wr:
+            html += """<table class='wt'><thead><tr>
+<th>Arme</th><th>Portée</th><th>Att</th><th>PA</th><th>Règles spé.</th>
+</tr></thead><tbody>""" + wr + "</tbody></table>"
+        # Options
+        for g in u.get("upgrade_groups",[]):
+            gtype = g.get("type","")
+            desc_g = esc(g.get("description",""))
+            req   = g.get("requires",[])
+            req_s = f" <i>[{esc(', '.join(req))}]</i>" if req else ""
+            html += f"<div class='og'><b>{desc_g}</b>{req_s}</div>"
+            for o in g.get("options",[]):
+                oname = esc(o.get("name",""))
+                ocost = o.get("cost",0)
+                cost_s = f"+{ocost} pts" if ocost > 0 else "Gratuit"
+                osr   = ", ".join(o.get("special_rules",[]))
+                ow    = o.get("weapon")
+                det   = ""
+                if ow:
+                    ws = ow if isinstance(ow,list) else [ow]
+                    parts = []
+                    for w in ws:
+                        if isinstance(w,dict):
+                            rng = fmt_r(w.get("range"))
+                            att = w.get("attacks","?")
+                            pa  = w.get("armor_piercing",0) or 0
+                            sr2 = ", ".join(w.get("special_rules",[])) or ""
+                            p   = f"{w.get('name','')} ({rng}, A{att}"
+                            if pa: p += f", PA({pa})"
+                            if sr2: p += f", {sr2}"
+                            p += ")"
+                            parts.append(esc(p))
+                    det = ", ".join(parts)
+                elif osr:
+                    det = esc(osr)
+                label = oname if not det else f"{oname} ({det})"
+                html += (f"<div class='ol'>{label}"
+                         f"<span class='oc'>{esc(cost_s)}</span></div>")
+        html += "</div>"
+        return html
+
+    # Groupes d'unités
+    CATS = [
+        ("Héros",               ["hero"]),
+        ("Unités de base",      ["unit"]),
+        ("Véhicules légers",    ["light_vehicle"]),
+        ("Véhicules / Monstres",["vehicle"]),
+        ("Titans",              ["titan"]),
+        ("Personnages nommés",  ["named_hero"]),
+    ]
+
+    # Règles spéciales — catégorisation
+    rules = data.get("faction_special_rules",[])
+    spells = data.get("spells",{})
+
+    # Détecter la règle d'armée (première, ou celle marquée army_rule)
+    army_rules = []
+    aura_rules = []
+    other_rules = []
+    for r in rules:
+        n = r.get("name","").lower()
+        if r.get("army_rule") or (len(rules) > 0 and rules.index(r) == 0 and r.get("army_rule") is not False and "aura" not in n):
+            # Heuristique : première règle non-aura = règle d'armée
+            if not army_rules and "aura" not in n:
+                army_rules.append(r)
+                continue
+        if "aura" in n:
+            aura_rules.append(r)
+        else:
+            other_rules.append(r)
+
+    def rules_section(title, rule_list, color="#1a1a2e"):
+        if not rule_list: return ""
+        items = ""
+        for r in rule_list:
+            items += f"<p class='ri'><b>{esc(r.get('name',''))}</b> : {esc(r.get('description',''))}</p>"
+        return f"<div class='rs'><div class='rsh' style='background:{color}'>{esc(title)}</div>{items}</div>"
+
+    spells_html = ""
+    if spells:
+        items = ""
+        for sname, sdata in spells.items():
+            sdesc = sdata.get("description",sdata) if isinstance(sdata,dict) else sdata
+            items += f"<p class='ri'><b>{esc(sname)}</b> : {esc(sdesc)}</p>"
+        spells_html = f"<div class='rs'><div class='rsh' style='background:#2c3e7a'>Sorts</div>{items}</div>"
+
+    units_html = ""
+    for cat_name, types in CATS:
+        cat_units = [u for u in data["units"] if u.get("unit_detail",u.get("type")) in types]
+        if not cat_units: continue
+        cards = "".join(unit_card(u) for u in cat_units)
+        units_html += f"<div class='cat-banner'>{esc(cat_name)}</div><div class='grid'>{cards}</div>"
+
+    css = """
+body{font-family:'Segoe UI',Helvetica,sans-serif;margin:0;padding:12px;background:#fff;color:#212529;font-size:11px;}
+.page{max-width:210mm;margin:0 auto;}
+.main-title{background:#1a1a2e;color:#fff;text-align:center;padding:14px 8px 8px;font-size:20px;font-weight:700;letter-spacing:1px;}
+.main-sub{background:#16213e;color:#aab4d4;text-align:center;padding:3px;font-size:9px;}
+.intro{padding:8px 4px;font-size:10px;color:#444;border-bottom:1px solid #dee2e6;margin-bottom:8px;}
+/* Règles */
+.rules-wrap{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;}
+.rs{border:1px solid #dee2e6;border-radius:4px;overflow:hidden;}
+.rsh{color:#fff;font-weight:700;font-size:9px;padding:3px 6px;text-transform:uppercase;letter-spacing:.5px;}
+.ri{margin:4px 6px;font-size:8px;line-height:1.35;}
+/* Récap */
+.recap-wrap{margin-bottom:8px;}
+.recap-banner{background:#2c3e7a;color:#fff;font-weight:700;font-size:9px;padding:3px 6px;margin-top:4px;}
+.recap-table{width:100%;border-collapse:collapse;font-size:8.5px;}
+.recap-table th{background:#eef1f8;padding:2px 4px;border:1px solid #dee2e6;font-weight:700;color:#6c757d;font-size:8px;}
+.recap-table td{padding:2px 4px;border:1px solid #dee2e6;vertical-align:top;}
+.recap-table tr:nth-child(even)td{background:#f8f9fa;}
+/* Catégories et cartes */
+.cat-banner{background:#1a1a2e;color:#fff;font-weight:700;font-size:11px;padding:4px 8px;margin:10px 0 4px;letter-spacing:.5px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px;}
+.uc{border:1px solid #dee2e6;border-radius:3px;overflow:hidden;}
+.uh{background:#eef1f8;display:flex;justify-content:space-between;align-items:center;padding:3px 5px;border-bottom:1px solid #dee2e6;}
+.uh b{font-size:9px;}
+.uc-cost{font-size:8.5px;font-weight:700;color:#c0392b;}
+.us{background:#eef1f8;font-size:7.5px;color:#6c757d;font-weight:700;padding:2px 5px;border-bottom:1px solid #dee2e6;}
+.ur{background:#eef1f8;font-size:7px;padding:2px 5px;border-bottom:1px solid #dee2e6;}
+.wt{width:100%;border-collapse:collapse;font-size:8px;}
+.wt th{background:#eef1f8;padding:1px 3px;border-bottom:1px solid #dee2e6;color:#6c757d;font-size:7px;}
+.wt td{padding:1px 3px;border-bottom:1px solid #dee2e6;vertical-align:top;}
+.wt tr:last-child td{border-bottom:none;}
+.wn{font-size:8px;font-weight:700;}
+.ws{font-size:7px;color:#444;}
+.og{font-size:7.5px;font-weight:700;padding:2px 5px 1px;background:#f8f9fa;border-top:1px solid #dee2e6;margin-top:1px;}
+.ol{font-size:7px;padding:1px 5px 1px 12px;display:flex;justify-content:space-between;border-bottom:1px solid #f0f0f0;}
+.oc{color:#c0392b;font-weight:700;white-space:nowrap;margin-left:4px;}
+@media print{body{margin:0;padding:6px;}.cat-banner{page-break-before:auto;}}
+"""
+
+    # Tableau récapitulatif
+    def recap_row(u):
+        bw = u.get("weapon",[])
+        if isinstance(bw,dict): bw=[bw]
+        sz = u.get("size",1)
+        eq = []
+        for w in bw:
+            if isinstance(w,dict):
+                cnt = w.get("count","")
+                cs  = f"{cnt}x " if cnt and cnt>1 else (f"{sz}x " if sz>1 else "1x ")
+                rng = fmt_r(w.get("range"))
+                att = w.get("attacks","?")
+                pa  = w.get("armor_piercing",0) or 0
+                sr2 = ", ".join(w.get("special_rules",[])) or ""
+                p   = f"{cs}{w['name']} ({rng}, A{att}"
+                if pa: p += f", PA({pa})"
+                if sr2: p += f", {sr2}"
+                p += ")"
+                eq.append(esc(p))
+        return (f"<tr><td><b>{esc(u['name'])} [{sz}]</b></td>"
+                f"<td>{u.get('quality','?')}</td>"
+                f"<td>{u.get('defense','?')}</td>"
+                f"<td>{' | '.join(eq)}</td>"
+                f"<td>{esc(', '.join(u.get('special_rules',[]))[:80])}</td>"
+                f"<td><b>{u.get('base_cost','?')}</b></td></tr>")
+
+    recap_html = "<div class='recap-wrap'>"
+    for cat_name, types in [("Héros",["hero","named_hero"]),("Unités",["unit"]),("Véhicules",["light_vehicle","vehicle","titan"])]:
+        cu = [u for u in data["units"] if u.get("unit_detail",u.get("type")) in types]
+        if not cu: continue
+        rows = "".join(recap_row(u) for u in cu)
+        recap_html += (f"<div class='recap-banner'>{esc(cat_name)}</div>"
+                       f"<table class='recap-table'><thead><tr>"
+                       f"<th>Nom [taille]</th><th>Qua</th><th>Déf</th>"
+                       f"<th>Équipement</th><th>Règles spéciales</th><th>Coût</th>"
+                       f"</tr></thead><tbody>{rows}</tbody></table>")
+    recap_html += "</div>"
+
+    return f"""<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">
+<title>{esc(faction)} — {esc(game)}</title>
+<style>{css}</style></head><body><div class="page">
+<div class="main-title">{esc(faction.upper())}</div>
+<div class="main-sub">{esc(game)} — v{esc(version)}</div>
+{f'<div class="intro">{esc(desc)}</div>' if desc else ""}
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0;">
+{rules_section("Règle spéciale de l'armée", army_rules)}
+{rules_section("Règles spéciales", other_rules, "#2c3e7a")}
+{rules_section("Règles spéciales d'aura", aura_rules, "#555")}
+</div>
+{spells_html}
+{recap_html}
+{units_html}
+</div></body></html>"""
+
+
+def load_generic_rules():
+    """Charge les règles génériques OPR indexées par le champ 'key' (ou 'name' si absent)."""
+    try:
+        _BASE = Path(__file__).resolve().parent
+        for _p in [
+            _BASE / "repositories" / "data" / "generic_rules.json",
+            _BASE / "generic_rules.json",
+        ]:
+            if _p.exists():
+                with open(_p, encoding="utf-8") as f:
+                    data = json.load(f)
+                result = {}
+                for r in data.get("rules", []):
+                    if "name" not in r: continue
+                    desc = r.get("description", "")
+                    for k in r.get("key", [r["name"]]):
+                        result[k] = desc
+                return result
+    except Exception:
+        pass
+    return {}
+
+def load_faction_rules_dict():
+    """Retourne un dict {clé VF: description} depuis les règles de la faction courante.
+    Utilise le champ 'key' si présent, sinon 'name'."""
+    result = {}
+    for r in st.session_state.get("faction_special_rules", []):
+        if not isinstance(r, dict): continue
+        desc = r.get("description", "")
+        for k in r.get("key", [r.get("name", "")]):
+            if k: result[k] = desc
+    return result
+
+@st.cache_data
+def load_factions():
+    factions = {}; games = set()
+    try:
+        FACTIONS_DIR = Path(__file__).resolve().parent / "repositories" / "data" / "factions"
+        for fp in FACTIONS_DIR.glob("*.json"):
+            try:
+                with open(fp, encoding="utf-8") as f:
+                    data = json.load(f)
+                game = data.get("game"); faction = data.get("faction")
+                if game and faction:
+                    if game not in factions: factions[game] = {}
+                    data.setdefault("faction_special_rules", []); data.setdefault("spells", {}); data.setdefault("units", [])
+                    factions[game][faction] = data; games.add(game)
+            except Exception as e:
+                st.warning(f"Erreur chargement {fp.name}: {e}")
+    except Exception as e:
+        st.error(f"Erreur chargement des factions: {e}"); return {}, []
+    return factions, sorted(games) if games else list(GAME_CONFIG.keys())
+
+if st.session_state.page == "setup":
+    factions_by_game, games = load_factions()
+    if not games: st.error("Aucun jeu trouvé"); st.stop()
 
     # ── Bandeau liste partagée reçue via QR ──────────────────────────────────
     if st.session_state.get("_qr_pending"):
