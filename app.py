@@ -173,8 +173,26 @@ def export_faction_html(data):
                 oname = esc(o.get("name",""))
                 ocost = o.get("cost",0)
                 cost_s = f"+{ocost} pts" if ocost > 0 else "Gratuit"
-                osr   = ", ".join(o.get("special_rules",[]))
-                ow    = o.get("weapon")
+                # Pour les montures, lire les SR depuis o["mount"] si présent
+                _mdata = o.get("mount",{})
+                if _mdata and gtype == "mount":
+                    _msr = list(_mdata.get("special_rules",[]))
+                    _mws = _mdata.get("weapon",[])
+                    if isinstance(_mws,dict): _mws=[_mws]
+                    _mw_parts=[]
+                    for _mw in _mws:
+                        if isinstance(_mw,dict) and _mw.get('name'):
+                            _mp=f"{_mw['name']} (A{_mw.get('attacks','?')}"
+                            if _mw.get('armor_piercing'): _mp+=f", PA({_mw['armor_piercing']})"
+                            _msr2=', '.join(_mw.get('special_rules',[]))
+                            if _msr2: _mp+=f", {_msr2}"
+                            _mp+=")"; _mw_parts.append(esc(_mp))
+                    _mcor=_mdata.get('coriace_bonus',0)
+                    _mcor_s=[f"Coriace (+{_mcor})"] if _mcor else []
+                    osr = ", ".join(_mw_parts + _mcor_s + [esc(r) for r in _msr])
+                else:
+                    osr   = ", ".join(o.get("special_rules",[]))
+                ow    = o.get("weapon") if gtype != "mount" else None
                 det   = ""
                 if ow:
                     ws = ow if isinstance(ow,list) else [ow]
@@ -185,10 +203,12 @@ def export_faction_html(data):
                             att = w.get("attacks","?")
                             pa  = w.get("armor_piercing",0) or 0
                             sr2 = ", ".join(w.get("special_rules",[])) or ""
-                            p   = f"{w.get('name','')} ({rng}, A{att}"
-                            if pa: p += f", PA({pa})"
-                            if sr2: p += f", {sr2}"
-                            p += ")"
+                            # Ne pas répéter le nom de l'arme si identique à oname
+                            _wname = w.get('name','')
+                            _inner = f"{rng}, A{att}"
+                            if pa: _inner += f", PA({pa})"
+                            if sr2: _inner += f", {sr2}"
+                            p = f"{_wname} ({_inner})" if _wname != o.get('name','') else f"({_inner})"
                             parts.append(esc(p))
                     det = ", ".join(parts)
                 elif osr:
@@ -201,12 +221,12 @@ def export_faction_html(data):
 
     # Groupes d'unités
     CATS = [
-        ("Héros",               ["hero"]),
-        ("Unités de base",      ["unit"]),
-        ("Véhicules légers",    ["light_vehicle"]),
-        ("Véhicules / Monstres",["vehicle"]),
-        ("Titans",              ["titan"]),
-        ("Personnages nommés",  ["named_hero"]),
+        ("Héros",                              ["hero"]),
+        ("Unités de base",                    ["unit"]),
+        ("Véhicules légers / Petits monstres", ["light_vehicle"]),
+        ("Véhicules / Monstres",               ["vehicle"]),
+        ("Titans",                             ["titan"]),
+        ("Personnages nommés",                 ["named_hero"]),
     ]
 
     # Règles spéciales — catégorisation
@@ -245,8 +265,8 @@ def export_faction_html(data):
         items = ""
         for sname, sdata in spells.items():
             sdesc = sdata.get("description",sdata) if isinstance(sdata,dict) else sdata
-            items += f"<p class='ri'><b>{esc(sname)}</b> : {esc(sdesc)}</p>"
-        spells_html = f"<div class='rs'><div class='rsh' style='background:#2c3e7a'>Sorts</div>{items}</div>"
+            items += f"<div class='ri-blk'><b>{esc(sname)}</b> : {esc(sdesc)}</div>"
+        spells_html = f"<div class='rules-cols spells-section'><div class='rs-hdr spells-hdr' style='color:#fff;border-color:#2c3e7a;'>Sorts</div>{items}</div>"
 
     units_html = ""
     for cat_name, types in CATS:
@@ -269,6 +289,8 @@ body{font-family:'Segoe UI',Helvetica,sans-serif;margin:0;padding:12px;backgroun
 .rules-wrap{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;}
 /* Zone règles spéciales en 3 colonnes CSS */
 .rules-cols{column-count:3;column-gap:10px;column-rule:1px solid #dee2e6;margin:8px 0 10px;font-size:7.5px;}
+.spells-section{column-count:1;margin-top:6px;border-top:2px solid #2c3e7a;padding-top:4px;}
+.spells-hdr{background:#2c3e7a;padding:2px 6px;font-weight:700;font-size:8px;text-transform:uppercase;letter-spacing:.5px;display:inline-block;width:100%;box-sizing:border-box;margin-bottom:4px;}
 .rs-hdr{font-weight:700;font-size:8px;text-transform:uppercase;letter-spacing:.6px;
   border-bottom:2px solid currentColor;padding-bottom:2px;margin:8px 0 4px;
   break-after:avoid;column-span:none;}
@@ -329,7 +351,7 @@ body{font-family:'Segoe UI',Helvetica,sans-serif;margin:0;padding:12px;backgroun
                 f"<td><b>{u.get('base_cost','?')}</b></td></tr>")
 
     recap_html = "<div class='recap-wrap'>"
-    for cat_name, types in [("Héros",["hero","named_hero"]),("Unités",["unit"]),("Véhicules",["light_vehicle","vehicle","titan"])]:
+    for cat_name, types in [("Héros",["hero","named_hero"]),("Unités de base",["unit"]),("Véhicules légers / Monstres / Titans",["light_vehicle","vehicle","titan"])]:
         cu = [u for u in data["units"] if u.get("unit_detail",u.get("type")) in types]
         if not cu: continue
         rows = "".join(recap_row(u) for u in cu)
