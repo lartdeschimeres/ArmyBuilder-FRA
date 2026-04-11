@@ -391,6 +391,8 @@ body{font-family:'Segoe UI',Helvetica,sans-serif;margin:0;padding:12px;backgroun
   <div>
     <div class="section-hdr">Introduction</div>
     <div class="intro-txt">{esc(desc)}</div>
+    <div class="section-hdr" style="margin-top:8px;">Au sujet d'OPR</div>
+    <div class="intro-txt">OPR (www.onepagerules.com) héberge de nombreux jeux gratuits conçus pour être rapides à apprendre et faciles à jouer. Ce projet a été réalisé par des joueurs, pour des joueurs, et ne peut exister que grâce au généreux soutien de notre formidable communauté ! Si vous souhaitez soutenir le développement de nos jeux, vous pouvez faire un don sur : www.patreon.com/onepagerules. Merci de jouer à OPR !</div>
   </div>
   <div>
     <div class="section-hdr">Histoire de la faction</div>
