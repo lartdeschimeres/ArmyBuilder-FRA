@@ -44,9 +44,11 @@
       "defense": 3,
       "base_cost": 130,
       "special_rules": ["Blindé","Coriace (6)","Embuscade","Guerrier né","Héros","Sans peur"],
-      "weapon": [{"name": "ACC","range": "Mêlée","attacks": 4,"armor_piercing": 0,"special_rules": []}],
+      "weapon": [
+        {"name": "ACC","range": "Mêlée","attacks": 4,"armor_piercing": 0,"special_rules": []},
+        {"name": "Bouclier de combat","range": "Mêlée","attacks": 0,"armor_piercing": 0,"special_rules": ["Blindé"]}
+      ],
       "upgrade_groups": [
-        {"group": "Équipement de base","type": "upgrades","description": "Équipement inclus :","options": [{"name": "Bouclier de combat","cost": 0,"special_rules": ["Blindé"]}]},
         {"group": "Rôle","type": "upgrades","description": "Améliorer avec une des options suivantes :","options": [{"name": "Gardien","cost": 10,"special_rules": ["Aura Voile en mêlée"]},{"name": "Prêcheur","cost": 30,"special_rules": ["Aura Fléau en mêlée"]},{"name": "Archiviste","cost": 35,"special_rules": ["Lanceur de sorts (2)"]},{"name": "Capitaine","cost": 40,"special_rules": ["Aura Fléau au tir"]},{"name": "Lieutenant","cost": 45,"special_rules": ["Redéploiement"]},{"name": "Maître archiviste","cost": 55,"special_rules": ["Lanceur de sorts (3)"]}]},
         {"group": "Remplacement Bouclier de combat et ACC","type": "weapon","description": "Remplacer le Bouclier de combat et l'ACC par :","options": [{"name": "Paire de griffes énergétiques","cost": 20,"replaces": ["ACC","Bouclier de combat"],"weapon": {"name": "Paire de griffes énergétiques","range": "Mêlée","attacks": 8,"armor_piercing": 0,"special_rules": ["Perforant"]}},{"name": "Fusil Tempête rapide + ACC","cost": 70,"replaces": ["Bouclier de combat"],"weapon": [{"name": "Fusil Tempête rapide","range": 24,"attacks": 6,"armor_piercing": 1,"special_rules": []},{"name": "ACC","range": "Mêlée","attacks": 4,"armor_piercing": 0,"special_rules": []}]}]},
         {"group": "Remplacement ACC","type": "conditional_weapon","description": "Remplacer l'ACC par :","requires": ["Bouclier de combat"],"options": [{"name": "Marteau énergétique","cost": 5,"replaces": ["ACC"],"weapon": {"name": "Marteau énergétique","range": "Mêlée","attacks": 2,"armor_piercing": 0,"special_rules": ["Explosion (3)"]}},{"name": "Épée énergétique","cost": 15,"replaces": ["ACC"],"weapon": {"name": "Épée énergétique","range": "Mêlée","attacks": 4,"armor_piercing": 1,"special_rules": ["Perforant"]}},{"name": "Poing tronçonneur","cost": 30,"replaces": ["ACC"],"weapon": {"name": "Poing tronçonneur","range": "Mêlée","attacks": 2,"armor_piercing": 2,"special_rules": ["Mortel (3)"]}},{"name": "Poing énergétique","cost": 35,"replaces": ["ACC"],"weapon": {"name": "Poing énergétique","range": "Mêlée","attacks": 4,"armor_piercing": 4,"special_rules": []}}]}
@@ -63,15 +65,10 @@
       "special_rules": ["Attaque versatile","Blindé","Coriace (3)","Guerrier né","Héros","Sans peur"],
       "weapon": [
         {"name": "Pistolet antigrav","range": 9,"attacks": 1,"armor_piercing": 1,"special_rules": ["Fracas"]},
-        {"name": "ACC","range": "Mêlée","attacks": 2,"armor_piercing": 0,"special_rules": []}
+        {"name": "ACC","range": "Mêlée","attacks": 2,"armor_piercing": 0,"special_rules": []},
+        {"name": "Bouclier de combat","range": "Mêlée","attacks": 0,"armor_piercing": 0,"special_rules": ["Blindé"]}
       ],
       "upgrade_groups": [
-        {
-          "group": "Équipement de base",
-          "type": "upgrades",
-          "description": "Équipement inclus :",
-          "options": [{"name": "Bouclier de combat","cost": 0,"special_rules": ["Blindé"]}]
-        },
         {
           "group": "Rôle",
           "type": "upgrades",
@@ -322,15 +319,10 @@
       "special_rules": ["Attaque versatile","Blindé","Guerrier né","Sans peur"],
       "weapon": [
         {"name": "Pistolets lourds","range": 12,"attacks": 1,"armor_piercing": 1,"special_rules": []},
-        {"name": "Frappes","range": "Mêlée","attacks": 1,"armor_piercing": 0,"special_rules": []}
+        {"name": "Frappes","range": "Mêlée","attacks": 1,"armor_piercing": 0,"special_rules": []},
+        {"name": "Bouclier de combat","range": "Mêlée","attacks": 0,"armor_piercing": 0,"special_rules": ["Blindé"]}
       ],
       "upgrade_groups": [
-        {
-          "group": "Équipement de base",
-          "type": "upgrades",
-          "description": "Équipement inclus :",
-          "options": [{"name": "Boucliers de combat","cost": 0,"special_rules": ["Blindé"]}]
-        },
         {
           "group": "Améliorations d'unité",
           "type": "upgrades",
