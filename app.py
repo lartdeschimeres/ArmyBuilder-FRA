@@ -701,10 +701,9 @@ def export_html(army_list, army_name, army_limit):
                 wc = w.copy(); wc.setdefault("range", "Mêlée")
                 if not wc.get("_upgraded") and not wc.get("_mount_weapon"):
                     wc["_is_base"] = True
-                    if "_count" in wc and wc["_count"] <= 1:
-                        del wc["_count"]
-                    # Arme de base sans count explicite → count implicite = unit_size
-                    # (si _count déjà défini = décrément par conditional_weapon → respecter)
+                    # _count explicite = décrément partiel (ex: 1 Épée restante sur 3 après remplacement)
+                    # → on le respecte tel quel, on ne le supprime plus.
+                    # Seulement si pas de count du tout → count implicite = unit_size
                     if "_count" not in wc and "count" not in wc and _unit_size > 1:
                         wc["_count"] = _unit_size
                 result.append(wc)
