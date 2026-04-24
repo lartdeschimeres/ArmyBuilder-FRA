@@ -34,7 +34,7 @@ _Auteur : Simon Joinville Fouquet_
 1. Clonez ce dépôt :
 
 ```bash
-git clone https://github.com/votre-utilisateur/opr-army-forge-fr.git
+git clone https://github.com/votre-nom-utilisateur/ArmyBuilder-FRA.git
 ```
 
 ```bash
