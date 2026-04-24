@@ -1312,6 +1312,9 @@
               "requires": [
                 "Armes à une main lourdes"
               ],
+              "replaces":  [
+                 "Armes à une main lourdes"
+              ],
               "weapon": {
                 "name": "Grande arme lourde",
                 "range": "Mêlée",
